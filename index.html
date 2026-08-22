@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menú Digital - Restaurante</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,200..700,0..1,-50..200" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+:root{--ink:#0f0f0f;--paper:#fcfaf7;--line:#ece6dc;--gold:#c5a880}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui}
+.material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;vertical-align:middle}
+body{background:var(--paper);color:var(--ink)}
+.top{position:sticky;top:0;z-index:20;background:rgba(15,15,15,.97);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.top h1{font-size:13px;font-weight:900;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.nav{display:flex;gap:8px;background:#fff;border-bottom:1px solid var(--line);padding:10px 12px;overflow-x:auto;position:sticky;top:54px;z-index:15}
+.nav::-webkit-scrollbar{display:none}
+.n-btn{white-space:nowrap;padding:10px 16px;border-radius:100px;border:1.5px solid var(--line);background:#fff;font-weight:800;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.n-btn.active{background:var(--ink);color:#fff}
+.main{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:16px}
+.card{background:#fff;border:1px solid #eee;border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.04)}
+.label{font-size:10px;font-weight:800;color:#888;letter-spacing:1px;text-transform:uppercase}
+.input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fcfaf7;margin-top:6px}
+.btn{width:100%;padding:13px;border:none;border-radius:12px;font-weight:900;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-dark{background:var(--ink);color:#fff}.btn-gold{background:var(--gold);color:#111}.btn-line{background:#fff;border:1.5px solid var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dish{display:flex;gap:12px;padding:12px;border:1px solid #f0ece3;border-radius:14px;background:#fff}
+.d-img{width:72px;height:72px;border-radius:12px;object-fit:cover;background:#f5f1ea}
+.d-name{font-weight:900;font-size:14px}.d-desc{font-size:11px;color:#666;margin-top:2px}.d-price{font-weight:900;margin-top:6px}
+.cat{font-size:11px;font-weight:800;background:var(--ink);color:#fff;padding:4px 10px;border-radius:100px;display:inline-block;margin-bottom:8px}
+.cart-bar{position:fixed;bottom:16px;left:16px;right:16px;background:var(--ink);color:#fff;border-radius:16px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:30}
+@media(min-width:900px){.main{grid-template-columns:1.1fr.9fr}.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cart-bar{max-width:400px;left:auto;right:28px;bottom:28px}}
+</style>
+</head>
+<body>
+<div class="top">
+<h1><span class="material-symbols-rounded">restaurant_menu</span> MENÚ DIGITAL PRO</h1>
+<button onclick="go('admin')" class="btn btn-gold" style="width:auto;padding:8px 14px;font-size:10px"><span class="material-symbols-rounded" style="font-size:16px">settings</span> ADMIN</button>
+</div>
+<div class="nav" id="catNav"></div>
+<div class="main">
+  <div id="vMenu">
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><div class="label">Restaurante</div><h2 id="restName" style="font-size:18px;font-weight:900;margin-top:4px">Mi Restaurante</h2><div id="restDesc" style="font-size:11px;color:#666">Dolores Hidalgo • Servicio a mesa</div></div>
+<div style="text-align:right"><div class="label">Mesa</div><input id="mesaNum" class="input" style="width:70px;text-align:center" value="1"></div>
+</div>
+</div>
+<div id="menuList" class="menu-grid"></div>
+</div>
+
+<div id="vAdmin" style="display:none">
+<div class="card">
+<div style="font-weight:900;display:flex;align-items:center;gap:6px"><span class="material-symbols-rounded">storefront</span> DATOS RESTAURANTE</div>
+<div class="grid2" style="margin-top:12px">
+<div><div class="label">Nombre</div><input id="aRestName" class="input" placeholder="La Casona"></div>
+<div><div class="label">WhatsApp para pedidos (con 52)</div><input id="aWsp" class="input" placeholder="524121234567"></div>
+</div>
+<div style="margin-top:10px"><div class="label">Descripción corta</div><input id="aRestDesc" class="input" placeholder="Cocina tradicional de Guanajuato"></div>
+<button onclick="guardarRest()" class="btn btn-dark" style="margin-top:12px"><span class="material-symbols-rounded">save</span> GUARDAR RESTAURANTE</button>
+</div>
+
+<div class="card">
+<div style="font-weight:900;display:flex;align-items:center;gap:6px"><span class="material-symbols-rounded">add_circle</span> AGREGAR PLATO</div>
+<div style="margin-top:12px"><div class="label">Nombre plato</div><input id="aName" class="input" placeholder="Enchiladas Mineras"></div>
+<div style="margin-top:10px"><div class="label">Descripción</div><input id="aDesc" class="input" placeholder="Con queso, salsa verde, papas..."></div>
+<div class="grid2" style="margin-top:10px">
+<div><div class="label">Precio $</div><input id="aPrice" type="number" class="input" placeholder="95"></div>
+<div><div class="label">Categoría</div><select id="aCat" class="input"><option>Desayunos</option><option>Comida</option><option>Cena</option><option>Bebidas</option><option>Postres</option><option>Nieves</option></select></div>
+</div>
+<div style="margin-top:10px"><div class="label">Foto desde celular</div><input type="file" id="aFile" accept="image/*" class="input" onchange="previewDish(this)"><img id="aPreview" style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-top:8px;display:none"><div id="aBase64" style="display:none"></div></div>
+<div style="display:flex;gap:8px;margin-top:12px"><button onclick="guardarPlato()" class="btn btn-gold" style="flex:1"><span class="material-symbols-rounded">save</span> GUARDAR</button><button onclick="limpiarPlato()" class="btn btn-line" style="width:100px">Limpiar</button></div>
+<div id="editDishId" style="display:none"></div>
+</div>
+<div class="card"><div class="label">Platos actuales</div><div id="adminList" style="margin-top:12px"></div></div>
+</div>
+</div>
+
+<div class="cart-bar" id="cartBar" style="display:none">
+<div><div style="font-size:11px;color:#a8a29e" id="cartCount">0 productos</div><div style="font-weight:900" id="cartTotal">$0</div></div>
+<button onclick="enviarWsp()" class="btn btn-gold" style="width:auto;padding:10px 16px"><span class="material-symbols-rounded">send</span> PEDIR</button>
+</div>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDvetl-4f68ykb5GpGSZtCAvOeetKmnh-4",
+  authDomain: "menu-digital-12e66.firebaseapp.com",
+  databaseURL: "https://menu-digital-12e66-default-rtdb.firebaseio.com",
+  projectId: "menu-digital-12e66",
+  storageBucket: "menu-digital-12e66.firebasestorage.app",
+  messagingSenderId: "388372771516",
+  appId: "1:388372771516:web:516a80aeeecc1ab8f756b9"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let platos=[]; let carrito=[]; let rest={name:'Mi Restaurante',desc:'Dolores Hidalgo',wsp:'524121234567'}; let catAct='Todos';
+
+db.ref('menu_platos').on('value', s=>{ platos=s.val()?Object.values(s.val()):[]; renderMenu(); });
+db.ref('menu_rest').on('value', s=>{ if(s.val()){ rest=s.val(); document.getElementById('restName').innerText=rest.name; document.getElementById('restDesc').innerText=rest.desc; document.getElementById('aRestName').value=rest.name; document.getElementById('aRestDesc').value=rest.desc; document.getElementById('aWsp').value=rest.wsp; } });
+
+function previewDish(input){
+ if(input.files && input.files[0]){
+  const r=new FileReader(); r.onload=e=>{ document.getElementById('aPreview').src=e.target.result; document.getElementById('aPreview').style.display='block'; document.getElementById('aBase64').innerText=e.target.result; }; r.readAsDataURL(input.files[0]);
+ }
+}
+function go(v){
+ document.getElementById('vMenu').style.display= v==='menu'?'block':'none';
+ document.getElementById('vAdmin').style.display= v==='admin'?'grid':'none';
+ document.getElementById('catNav').style.display= v==='menu'?'flex':'none';
+ document.getElementById('cartBar').style.display= v==='menu' && carrito.length>0?'flex':'none';
+}
+function guardarRest(){
+ const name=document.getElementById('aRestName').value||'Mi Restaurante';
+ const desc=document.getElementById('aRestDesc').value||'Dolores Hidalgo';
+ const wsp=document.getElementById('aWsp').value||'524121234567';
+ rest={name,desc,wsp}; db.ref('menu_rest').set(rest); alert('Restaurante guardado ✓');
+}
+function guardarPlato(){
+ const name=document.getElementById('aName').value.trim();
+ const desc=document.getElementById('aDesc').value.trim();
+ const price=parseFloat(document.getElementById('aPrice').value)||0;
+ const cat=document.getElementById('aCat').value;
+ const img=document.getElementById('aBase64').innerText.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';
+ const editId=document.getElementById('editDishId').innerText;
+ if(!name||!price){ alert('Nombre y precio obligatorios'); return; }
+ const obj={id:editId||'d_'+Date.now(),name,desc,price,cat,img,activo:true};
+ if(editId){ const i=platos.findIndex(p=>p.id===editId); platos[i]=obj; }else{ platos.push(obj); }
+ db.ref('menu_platos').set(platos); limpiarPlato(); alert('Plato guardado ✓');
+}
+function limpiarPlato(){ ['aName','aDesc','aPrice'].forEach(id=>document.getElementById(id).value=''); document.getElementById('aBase64').innerText=''; document.getElementById('aPreview').style.display='none'; document.getElementById('editDishId').innerText=''; }
+function editarPlato(id){ const p=platos.find(x=>x.id===id); document.getElementById('editDishId').innerText=p.id; document.getElementById('aName').value=p.name; document.getElementById('aDesc').value=p.desc; document.getElementById('aPrice').value=p.price; document.getElementById('aCat').value=p.cat; document.getElementById('aBase64').innerText=p.img; document.getElementById('aPreview').src=p.img; document.getElementById('aPreview').style.display='block'; window.scrollTo(0,0); }
+function eliminarPlato(id){ if(!confirm('¿Eliminar plato?')) return; platos=platos.filter(p=>p.id!==id); db.ref('menu_platos').set(platos); }
+  <script>
+function renderMenu(){
+ const cats=['Todos',...new Set(platos.map(p=>p.cat))];
+ document.getElementById('catNav').innerHTML=cats.map(c=>`<button class="n-btn ${catAct===c?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+ let lista= catAct==='Todos'? platos : platos.filter(p=>p.cat===catAct);
+ document.getElementById('menuList').innerHTML=lista.map(p=>`
+ <div class="dish">
+  <img src="${p.img}" class="d-img">
+  <div style="flex:1">
+   <div class="cat">${p.cat}</div>
+   <div class="d-name">${p.name}</div>
+   <div class="d-desc">${p.desc}</div>
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+    <div class="d-price">$${p.price}</div>
+    <button onclick="addCart('${p.id}')" class="btn btn-dark" style="width:auto;padding:8px 14px;font-size:11px"><span class="material-symbols-rounded" style="font-size:16px">add</span> AGREGAR</button>
+   </div>
+  </div>
+ </div>`).join('') || '<div style="padding:20px;text-align:center;color:#888;font-size:12px">No hay platos en esta categoría</div>';
+ document.getElementById('adminList').innerHTML=platos.map(p=>`
+ <div class="dish" style="padding:10px"><img src="${p.img}" class="d-img" style="width:48px;height:48px"><div style="flex:1"><div class="d-name">${p.name}</div><div class="d-desc">$${p.price} • ${p.cat}</div></div>
+ <button onclick="editarPlato('${p.id}')" style="padding:8px;border-radius:8px;border:1px solid #e0e7ff;background:#eef2ff"><span class="material-symbols-rounded" style="font-size:16px">edit</span></button>
+ <button onclick="eliminarPlato('${p.id}')" style="padding:8px;border-radius:8px;border:1px solid #fecaca;background:#ffe8e8;margin-left:6px"><span class="material-symbols-rounded" style="font-size:16px">delete</span></button>
+ </div>`).join('');
+ renderCart();
+}
+function setCat(c){ catAct=c; renderMenu(); }
+function addCart(id){
+ const p=platos.find(x=>x.id===id); const ex=carrito.find(c=>c.id===id);
+ if(ex) ex.cant++; else carrito.push({id:p.id,name:p.name,price:p.price,cant:1});
+ renderCart();
+}
+function renderCart(){
+ if(carrito.length===0){ document.getElementById('cartBar').style.display='none'; return; }
+ document.getElementById('cartBar').style.display='flex';
+ let cant=carrito.reduce((a,b)=>a+b.cant,0); let total=carrito.reduce((a,b)=>a+b.price*b.cant,0);
+ document.getElementById('cartCount').innerText=cant+' productos'; document.getElementById('cartTotal').innerText='$'+total;
+}
+function enviarWsp(){
+ const mesa=document.getElementById('mesaNum').value||'1';
+ let total=carrito.reduce((a,b)=>a+b.price*b.cant,0);
+ let texto=`Hola ${rest.name}%0A%0APedido Mesa ${mesa}:%0A${carrito.map(c=>`- ${c.name} x${c.cant} = $${c.price*c.cant}`).join('%0A')}%0A%0ATotal: $${total}%0A%0AEnviado desde Menú QR`;
+ window.open(`https://wa.me/${rest.wsp}?text=${texto}`,'_blank');
+}
+go('menu');
+</script>
+</body>
+</html>

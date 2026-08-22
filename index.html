@@ -526,6 +526,104 @@ let config={
   logo:'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
   portada:'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800',
   color:'#ffcc00',
+<!-- INICIO PARTE 3 -->
+<div class="admin-modal" id="adminModal">
+  <div class="admin-header">
+    <h2>👤 Panel Admin</h2>
+    <div style="display:flex;gap:8px">
+      <button onclick="cerrarSesion()" style="background:#2a2a2a;color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer">Salir</button>
+      <button class="cart-close" onclick="cerrarAdmin()" style="background:#2a2a2a;color:#fff">✕</button>
+    </div>
+  </div>
+  <div class="admin-tabs">
+    <div class="admin-tab active" id="tabProd" onclick="switchTab('prod')">📦 PRODUCTOS</div>
+    <div class="admin-tab" id="tabAjust" onclick="switchTab('ajust')">🔧 AJUSTES</div>
+    <div class="admin-tab" id="tabPed" onclick="switchTab('ped')">🧾 PEDIDOS</div>
+    <div class="admin-tab" id="tabStats" onclick="switchTab('stats')">📊 ESTADÍSTICAS</div>
+    <div class="admin-tab" id="tabDev" onclick="switchTab('dev')">⚙️ DESARROLLADOR</div>
+  </div>
+  <div class="admin-body">
+    <div id="adminProductos">
+      <div class="admin-card">
+        <div style="font-weight:900;font-size:13px;margin-bottom:10px">➕ AGREGAR / EDITAR PRODUCTO</div>
+        <input type="hidden" id="editIndex">
+        <label class="admin-label">CATEGORÍA</label>
+        <div style="display:flex;gap:8px">
+          <input id="prodCat" class="admin-input" placeholder="Ej: Bebidas" style="flex:1">
+          <select id="catSelect" class="admin-input" style="flex:1" onchange="if(this.value)document.getElementById('prodCat').value=this.value">
+            <option value="">-- Categorías --</option>
+          </select>
+        </div>
+        <label class="admin-label">NOMBRE</label>
+        <input id="prodName" class="admin-input">
+        <label class="admin-label">DESCRIPCIÓN</label>
+        <input id="prodDesc" class="admin-input">
+        <label class="admin-label">PRECIO $</label>
+        <input id="prodPrice" type="number" class="admin-input">
+        <label class="admin-label">📎 FOTO</label>
+        <div class="clip-box" id="boxProd" onclick="document.getElementById('fileProd').click()">
+          <input type="file" id="fileProd" accept="image/*" onchange="handleImg(this,'prod')">
+          <div class="clip-text" id="txtProd">📎 Toca para elegir foto</div>
+          <img id="prevProd" class="clip-preview">
+        </div>
+        <button class="admin-btn btn-yellow" onclick="guardarProducto()">💾 Guardar Producto</button>
+        <button class="admin-btn btn-dark" onclick="limpiarFormProd()" style="margin-top:8px">Limpiar</button>
+      </div>
+      <div id="listaProductosAdmin"></div>
+    </div>
+    <div id="adminAjustes" style="display:none">...</div>
+    <div id="adminPedidos" style="display:none"><div id="listaPedidosAdmin"></div></div>
+    <div id="adminStats" style="display:none">...</div>
+    <div id="adminDev" style="display:none">...</div>
+  </div>
+</div>
+
+<script>
+// INICIO FIREBASE SANTILLOS INDEPENDIENTE - santillos-1ac6d
+const firebaseConfig = {
+  apiKey: "AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
+  authDomain: "santillos-1ac6d.firebaseapp.com",
+  databaseURL: "https://santillos-1ac6d-default-rtdb.firebaseio.com",
+  projectId: "santillos-1ac6d",
+  storageBucket: "santillos-1ac6d.firebasestorage.app",
+  messagingSenderId: "285600299102",
+  appId: "1:285600299102:web:9590597c2b3d8888821ccf",
+  measurementId: "G-TJH35VDGJ9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let defaultMenu={
+  "Hamburguesas":[{name:"Clásica Sencilla",desc:"Carne 100% res",price:65,img:"https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=300",disp:true}],
+  "Hot Dogs":[{name:"Hot Dog Clásico",desc:"Salchicha jumbo",price:35,img:"https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=300",disp:true}],
+  "Papas":[{name:"Papas Francesa",desc:"Orden grande",price:45,img:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300",disp:true}],
+  "Bebidas":[{name:"Refresco 600ml",desc:"Coca, Sprite",price:25,img:"https://images.unsplash.com/photo-1553456558-aff63285bdd1?w=300",disp:true}]
+};
+
+let defaultHorario={
+  lunes:{activo:true,apertura:"10:00",cierre:"22:00"},
+  martes:{activo:true,apertura:"10:00",cierre:"22:00"},
+  miercoles:{activo:true,apertura:"10:00",cierre:"22:00"},
+  jueves:{activo:true,apertura:"10:00",cierre:"22:00"},
+  viernes:{activo:true,apertura:"10:00",cierre:"23:00"},
+  sabado:{activo:true,apertura:"10:00",cierre:"23:00"},
+  domingo:{activo:true,apertura:"11:00",cierre:"22:00"}
+};
+
+let menuData=defaultMenu;
+let categoriaActiva=Object.keys(menuData)[0];
+let cantidades={};
+let carrito={};
+let restauranteCoords={lat:21.1556,lng:-100.9348};
+
+let config={
+  abierto:true,
+  whatsapp:'573242827963',
+  nombre:'SANTILLOS',
+  logo:'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',
+  portada:'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800',
+  color:'#ffcc00',
   direccionRest:'Calle Principal, Dolores Hidalgo',
   horario:defaultHorario,
   autoHorario:true,
@@ -542,14 +640,19 @@ let tempLogo="";
 let tempPortada="";
 let isLogged=false;
 
+// CORRECCION: si la base nueva esta vacia, mostramos los productos por defecto
 db.ref('menu').on('value',snap=>{
   if(snap.val()){
     menuData=snap.val();
     categoriaActiva=Object.keys(menuData)[0];
-    renderCategorias();
-    renderProductos();
-    renderListaAdmin();
+  }else{
+    menuData=defaultMenu;
+    categoriaActiva=Object.keys(menuData)[0];
+    db.ref('menu').set(menuData);
   }
+  renderCategorias();
+  renderProductos();
+  renderListaAdmin();
 });
 
 db.ref('config').on('value',snap=>{
@@ -559,8 +662,8 @@ db.ref('config').on('value',snap=>{
     if(config.envioBase===undefined)config.envioBase=35;
     if(config.envioKm===undefined)config.envioKm=5;
     if(config.envioBloque===undefined)config.envioBloque=0.75;
-    aplicarConfig();
   }
+  aplicarConfig();
 });
 
 db.ref('coords').on('value',snap=>{

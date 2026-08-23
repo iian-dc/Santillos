@@ -300,7 +300,25 @@ window.hacerLogin=function(){const u=document.getElementById("loginUser").value.
 </script>
 <script>
 const PASS_CLIENTES_PRIVADA = "1234";
-const extras=[{name:"Refresco",price:25,img:"https://images.unsplash.com/photo-1553456558-aff63285bdd1?w=200"},{name:"Papas",price:45,img:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=200"}];
+// NUEVO: Sugerencias dinámicas - agarra productos de tu categoría Bebidas
+function obtenerSugerencias(){
+  let sugeridos = [];
+  // Si existe categoría Bebidas, úsala
+  if(menuData["Bebidas"] && menuData["Bebidas"].length > 0){
+    sugeridos = menuData["Bebidas"].slice(0,6);
+  } else if(menuData["BEBIDAS"] && menuData["BEBIDAS"].length > 0){
+    sugeridos = menuData["BEBIDAS"].slice(0,6);
+  } else {
+    // Si no hay bebidas, agarra 6 productos aleatorios de cualquier categoría
+    Object.keys(menuData).forEach(cat=>{
+      menuData[cat].forEach(p=>{
+        if(p.disp!== false) sugeridos.push({...p, catOrigen: cat});
+      });
+    });
+    sugeridos = sugeridos.sort(()=>0.5 - Math.random()).slice(0,6);
+  }
+  return sugeridos;
+}
 let mapa=null,markerCliente=null,markerRest=null,routeLayer=null,coordsMapa=null,debounceTimer=null;
 function calcularPrecioEnvio(km){if(km<=0)return 0;if(km<=1)return 35;let extraKm=km-1;let bloques=Math.ceil(extraKm/0.75);return 35+(bloques*5);}
 function renderCart(){const list=document.getElementById("cartList");const ids=Object.keys(carrito);if(ids.length===0){list.innerHTML='<div style="text-align:center;padding:20px;color:#777">Carrito vacío 🛒</div>';}else{list.innerHTML="";ids.forEach(id=>{const it=carrito[id];list.innerHTML+=`<div class="cart-item"><img src="${it.img}"><div class="cart-item-info"><div class="cart-item-name">${it.nombre} x${it.cant}</div><div class="cart-item-price">$${it.precio*it.cant}</div></div><div style="display:flex;gap:8px;align-items:center"><div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1,'${it.nombre}',${it.precio},'${it.img}')">−</button><div class="qty-num">${it.cant}</div><button class="qty-btn" onclick="cambiarQty('${id}',1,'${it.nombre}',${it.precio},'${it.img}')">+</button></div><button class="cart-del" onclick="eliminar('${id}')">🗑️</button></div></div>`;});}const addDiv=document.getElementById("addonsScroll");addDiv.innerHTML="";extras.forEach(e=>{addDiv.innerHTML+=`<div class="addon-card" onclick="addExtra('${e.name}',${e.price},'${e.img}')"><img src="${e.img}"><div class="addon-name">${e.name}</div><div class="addon-price">$${e.price}</div></div>`;});actualizarResumenFinal();}

@@ -77,6 +77,108 @@ body{background:#0f0f0f;color:#fff;padding-bottom:90px}
 .eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid #eee;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
 </style>
 </head>
+<body>
+<div class="header" id="headerBg">
+<div id="statusBadge" class="status-neon abierto">● ABIERTO</div>
+<div class="logo-box"><img id="logoImg" src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"></div>
+<div class="restaurant-name" id="restNameDisplay">BURGER <span>KINGO</span></div>
+<div class="tagline">DOLORES HIDALGO • COMIDA RÁPIDA</div>
+</div>
+<div class="categories" id="categories"></div>
+<div class="products" id="products"></div>
+<div class="bottom-nav">
+<button class="nav-item active"><div>🏠</div>INICIO</button>
+<div class="nav-center-wrap" onclick="abrirAdmin()"><div class="nav-center"><img id="adminLogoImg" src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"></div><div class="nav-center-label">ADMIN</div></div>
+<div class="nav-item-wrapper"><button class="nav-item" onclick="abrirCarrito()"><div>🛒</div>CARRITO</button><div class="cart-badge" id="cartCount">0</div></div>
+</div>
+<div class="elegant-overlay" id="elegantOverlay" onclick="cerrarElegant()"><div class="elegant-card" onclick="event.stopPropagation()"><div class="elegant-icon">📋</div><div class="elegant-title" id="elegantTitle">Faltan datos</div><div class="elegant-text" id="elegantText">...</div><button class="elegant-btn" onclick="cerrarElegant()">Entendido</button></div></div>
+<div class="login-overlay" id="loginOverlay"><div class="login-card"><div class="login-logo"><img id="loginLogoImg" src="https://cdn-icons-png.flaticon.com/512/3075/3075977.png"></div><div class="login-title" id="loginTitle">BURGER KINGO</div><div class="login-sub">PANEL ADMINISTRADOR</div><input id="loginUser" class="login-input" placeholder="👤 Usuario"><div class="pass-wrap"><input id="loginPass" type="password" class="login-input" placeholder="🔒 Contraseña" style="margin-bottom:12px;padding-right:50px"><button class="eye-btn" type="button" onclick="togglePass('loginPass',this)">👁️</button></div><button class="login-btn" onclick="hacerLogin()">Ingresar →</button><button onclick="cerrarLogin()" style="margin-top:12px;background:none;border:none;color:#888;font-size:12px;font-weight:700;cursor:pointer">Cancelar</button></div></div>
+<style>
+.checkout-modal{position:fixed;inset:0;z-index:300;display:none;flex-direction:column;max-width:500px;margin:0 auto;background:#f8f8f8;overflow-y:auto}.checkout-modal.show{display:flex}
+.checkout-header-pro{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;background:#0f0f0f;position:sticky;top:0;z-index:10}.checkout-title-pro{font-weight:900;font-size:16px;color:#fff}
+.map-box-pro{margin:0;height:45vh;min-height:380px;position:relative;width:100%}#map{height:100%;width:100%}
+.map-info{position:absolute;bottom:14px;left:14px;right:14px;background:#111;color:#fff;border-radius:14px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:400}
+.map-info-label{font-size:10px;color:#aaa;font-weight:700}.map-info-val{font-size:14px;font-weight:900;color:#fff}
+.form-section{background:#fff;margin-top:10px;padding:20px}.section-label{font-size:11px;font-weight:900;color:#111;margin-bottom:12px;letter-spacing:.8px;text-transform:uppercase}
+.input-row{display:flex;gap:10px;align-items:flex-end}.input-group-pro{flex:1}.input-group-pro label{font-size:11px;font-weight:700;color:#666;display:block;margin-bottom:6px}.input-field-pro{width:100%;background:#f5f5f5;border:1px solid #e5e5e5;border-radius:12px;padding:14px;color:#111;font-size:14px;outline:none}
+.btn-gps-icon{width:50px;height:50px;background:#111;border:none;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.resumen-pro{background:#fff;margin-top:10px;padding:20px}.resumen-row{display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:10px}.resumen-row.total{color:#111;font-weight:900;font-size:18px;border-top:1px dashed #e0e0e0;padding-top:14px;margin-top:6px}.resumen-row.envio{color:#111;font-weight:700}
+.btn-whatsapp{margin:22px;background:#25D366;color:#fff;border:none;padding:18px;border-radius:16px;font-weight:900;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-whatsapp:disabled{background:#ccc;color:#888;cursor:not-allowed}
+.admin-modal{position:fixed;inset:0;z-index:500;display:none;flex-direction:column;max-width:500px;margin:0 auto;background:#f5f5f5;overflow:hidden}.admin-modal.show{display:flex}
+.admin-header{background:#0f0f0f;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}.admin-header h2{color:#fff;font-size:16px;font-weight:900}
+.admin-tabs{display:flex;background:#fff;border-bottom:1px solid #e5e5e5;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.admin-tabs::-webkit-scrollbar{display:none}
+.admin-tab{flex:0 0 auto;min-width:115px;padding:14px 18px;text-align:center;font-size:11px;font-weight:800;cursor:pointer;color:#888;border-bottom:3px solid transparent;white-space:nowrap}
+.admin-tab.active{color:#111;border-bottom-color:var(--theme)}
+.admin-body{flex:1;overflow-y:auto;padding:16px}.admin-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #eee}
+.admin-input{width:100%;padding:12px 14px;border:1px solid #e5e5e5;border-radius:10px;background:#f9f9f9;margin-top:6px;font-size:14px;outline:none}.admin-label{font-size:11px;font-weight:800;color:#333;margin-top:12px;display:block}
+.admin-btn{width:100%;padding:13px;border:none;border-radius:12px;font-weight:900;cursor:pointer;margin-top:12px}.btn-yellow{background:var(--theme);color:#111}.btn-dark{background:#111;color:#fff}
+.product-admin-item{display:flex;gap:12px;align-items:center;padding:10px;background:#fff;border-radius:12px;border:1px solid #eee;margin-bottom:10px}
+.product-admin-item img{width:50px;height:50px;border-radius:8px;object-fit:cover}.admin-actions{display:flex;gap:6px;margin-left:auto;align-items:center}.admin-actions button{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;font-weight:900}.btn-edit{background:#e8f5ff;color:#0077ff}.btn-del{background:#ffe8e8;color:#ff3333}
+.btn-disp{width:36px!important;border-radius:20px!important;font-size:12px}.btn-disp.on{background:#22c55e;color:#fff}.btn-disp.off{background:#ff4444;color:#fff}
+.switch{position:relative;width:46px;height:26px;background:#ddd;border-radius:20px;cursor:pointer;transition:.2s}.switch.on{background:#22c55e}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.stat-card{background:#fff;border-radius:12px;padding:14px;border:1px solid #eee;text-align:center}.stat-num{font-size:22px;font-weight:900;color:#111}.stat-label{font-size:10px;color:#888;font-weight:700;margin-top:4px}
+.pedido-item{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid #eee}.pedido-top{display:flex;justify-content:space-between;font-size:12px;font-weight:900;color:#111}
+</style>
+
+<div class="cart-overlay" id="cartOverlay" onclick="cerrarCarrito()"></div>
+<div class="cart-modal" id="cartModal">
+<div class="cart-header"><div class="cart-title">🛒 Tu Pedido</div><button class="cart-close" onclick="cerrarCarrito()">✕</button></div>
+<div class="cart-body"><div id="cartList"></div><div class="addons-title">¿ALGO MÁS? 👇</div><div class="addons-scroll" id="addonsScroll"></div></div>
+<div class="cart-footer"><button class="btn-pedir" onclick="abrirCheckout()">CONFIRMAR PEDIDO ✅</button></div>
+</div>
+
+<div class="checkout-modal" id="checkoutModal">
+<div class="checkout-header-pro"><div class="checkout-title-pro">📍 Datos de entrega</div><button class="cart-close" onclick="cerrarCheckout()" style="background:#2a2a2a;color:#fff">✕</button></div>
+<div class="map-box-pro"><div id="map"></div><div class="map-info"><div><div class="map-info-label">DISTANCIA REAL</div><div class="map-info-val" id="infoKm">--</div></div><div><div class="map-info-label">ENVÍO</div><div class="map-info-val" id="infoEnvioMapa">$0</div></div><div><div class="map-info-label">ESTADO</div><div class="map-info-val" id="infoEstado" style="color:#22c55e">● ABIERTO</div></div></div></div>
+<div class="form-section"><div class="section-label">Dirección del cliente</div><div class="input-row"><div class="input-group-pro"><label>ESCRIBE TU DIRECCIÓN</label><input id="cliDir" class="input-field-pro" placeholder="Ej: Hidalgo 45, Centro" oninput="buscarDireccion()"></div><button class="btn-gps-icon" onclick="toggleGps()">📍</button></div></div>
+<div class="form-section"><div class="section-label">Datos de contacto</div><div class="input-group-pro" style="margin-bottom:16px"><label>NOMBRE COMPLETO</label><input id="cliNombre" class="input-field-pro" placeholder="Juan Pérez"></div><div class="input-group-pro" style="margin-bottom:16px"><label>NÚMERO DE WHATSAPP</label><input id="cliTel" class="input-field-pro" placeholder="418 123 4567"></div><div class="input-group-pro"><label>REFERENCIA</label><input id="cliRef" class="input-field-pro" placeholder="Casa azul..."></div></div>
+<div class="resumen-pro"><div class="section-label">Resumen</div><div class="resumen-row"><span>Productos (<span id="rCant">0</span>)</span><span id="rSub">$0</span></div><div class="resumen-row envio"><span>Envío (<span id="rKm">0.0 km</span>)</span><span id="rEnvio">$0</span></div><div class="resumen-row total"><span>Total a pagar</span><span id="rTotal">$0</span></div></div>
+<button class="btn-whatsapp" id="btnFinalizar" onclick="enviarFinal()">Finalizar pedido</button><div style="height:80px"></div>
+</div>
+
+<div class="admin-modal" id="adminModal">
+<div class="admin-header"><h2>👤 Panel Admin</h2><div style="display:flex;gap:8px"><button onclick="cerrarSesion()" style="background:#2a2a2a;color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer">Salir</button><button class="cart-close" onclick="cerrarAdmin()" style="background:#2a2a2a;color:#fff">✕</button></div></div>
+<div class="admin-tabs">
+<div class="admin-tab active" id="tabProd" onclick="switchTab('prod')">📦 PRODUCTOS</div>
+<div class="admin-tab" id="tabAjust" onclick="switchTab('ajust')">🔧 AJUSTES</div>
+<div class="admin-tab" id="tabPed" onclick="switchTab('ped')">🧾 PEDIDOS</div>
+<div class="admin-tab" id="tabStats" onclick="switchTab('stats')">📊 ESTADÍSTICAS</div>
+<div class="admin-tab" id="tabDev" onclick="switchTab('dev')">⚙️ DESARROLLADOR</div>
+</div>
+<div class="admin-body">
+<div id="adminProductos">
+<div class="admin-card">
+<div style="font-weight:900;font-size:13px;margin-bottom:10px">➕ AGREGAR / EDITAR PRODUCTO</div>
+<input type="hidden" id="editIndex">
+<label class="admin-label">CATEGORÍA - Escribe nueva o elige existente</label>
+<div style="display:flex;gap:8px">
+<input id="prodCat" class="admin-input" placeholder="Ej: Bebidas, Postres" style="flex:1">
+<select id="catSelect" class="admin-input" style="flex:1" onchange="if(this.value)document.getElementById('prodCat').value=this.value"><option value="">-- Categorías --</option></select>
+</div>
+<label class="admin-label">NOMBRE</label><input id="prodName" class="admin-input">
+<label class="admin-label">DESCRIPCIÓN</label><input id="prodDesc" class="admin-input">
+<label class="admin-label">PRECIO $</label><input id="prodPrice" type="number" class="admin-input">
+<label class="admin-label">📎 FOTO DEL PRODUCTO</label>
+<div class="clip-box" id="boxProd" onclick="document.getElementById('fileProd').click()">
+<input type="file" id="fileProd" accept="image/*" onchange="handleImg(this,'prod')">
+<div class="clip-text" id="txtProd">📎 Toca para elegir foto</div>
+<img id="prevProd" class="clip-preview">
+</div>
+<button class="admin-btn btn-yellow" onclick="guardarProducto()">💾 Guardar Producto</button>
+<button class="admin-btn btn-dark" onclick="limpiarFormProd()" style="margin-top:8px">Limpiar</button>
+</div>
+<div id="listaProductosAdmin"></div>
+</div>
+<div id="adminAjustes" style="display:none">
+<div class="admin-card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:900;font-size:13px">¿NEGOCIO ABIERTO? (Manual)</div><div style="font-size:10px;color:#888">Si auto está activo, este se ignora</div></div><div id="switchAbierto" class="switch on" onclick="toggleAbierto()"><div style="position:absolute;top:2px;left:2px;width:22px;height:22px;background:#fff;border-radius:50%"></div></div></div></div>
+<div class="admin-card" style="border:2px solid var(--theme)">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+<div style="font-weight:900;font-size:13px">⏰ HORARIO AUTOMÁTICO</div>
+<div id="switchAuto" class="switch on" onclick="toggleAuto()"><div style="position:absolute;top:2px;left:2px;width:22px;height:22px;background:#fff;border-radius:50%"></div></div>
+</div>
+  
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",

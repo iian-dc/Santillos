@@ -178,6 +178,64 @@ body{background:#0f0f0f;color:#fff;padding-bottom:90px}
 <div style="font-weight:900;font-size:13px">⏰ HORARIO AUTOMÁTICO</div>
 <div id="switchAuto" class="switch on" onclick="toggleAuto()"><div style="position:absolute;top:2px;left:2px;width:22px;height:22px;background:#fff;border-radius:50%"></div></div>
 </div>
+<div id="horarioContainer"></div>
+</div>
+<div class="admin-card" style="border:2px solid #111">
+<div style="font-weight:900;font-size:13px;margin-bottom:12px">🔐 SEGURIDAD ADMIN</div>
+<label class="admin-label">Nuevo Usuario</label><input id="ajUser" class="admin-input" placeholder="admin">
+<label class="admin-label">Nueva Contraseña</label><div class="pass-wrap"><input id="ajPass" type="password" class="admin-input" placeholder="1234" style="padding-right:50px"><button class="eye-btn" type="button" onclick="togglePass('ajPass',this)">👁️</button></div>
+</div>
+<div class="admin-card"><div style="font-weight:900;font-size:13px;margin-bottom:10px">📱 WhatsApp</div><input id="ajWhatsapp" class="admin-input"></div>
+<div class="admin-card"><div style="font-weight:900;font-size:13px;margin-bottom:10px">📍 Dirección Restaurante</div><input id="ajDirRest" class="admin-input"><button class="admin-btn btn-dark" onclick="actualizarDirRest()">📍 Actualizar ubicación</button><div style="font-size:11px;color:#666;margin-top:8px">Actual: <span id="coordsActual"></span></div></div>
+<div class="admin-card">
+<div style="font-weight:900;font-size:13px;margin-bottom:10px">🏪 Marca</div>
+<label class="admin-label">Nombre negocio</label><input id="ajNombre" class="admin-input">
+<label class="admin-label">📎 Logo</label>
+<div class="clip-box" id="boxLogo" onclick="document.getElementById('fileLogo').click()">
+<input type="file" id="fileLogo" accept="image/*" onchange="handleImg(this,'logo')">
+<div class="clip-text" id="txtLogo">📎 Toca para elegir logo</div>
+<img id="prevLogo" class="clip-preview">
+</div>
+<label class="admin-label">📎 Foto Portada</label>
+<div class="clip-box" id="boxPortada" onclick="document.getElementById('filePortada').click()">
+<input type="file" id="filePortada" accept="image/*" onchange="handleImg(this,'portada')">
+<div class="clip-text" id="txtPortada">📎 Toca para elegir portada</div>
+<img id="prevPortada" class="clip-preview">
+</div>
+<label class="admin-label">Color del Tema</label><input id="ajColor" type="color" class="admin-input" style="height:50px">
+</div>
+<button class="admin-btn btn-yellow" onclick="guardarAjustes()">💾 Guardar en la Nube ☁️</button>
+</div>
+<div id="adminPedidos" style="display:none"><div id="listaPedidosAdmin"></div></div>
+
+<div id="adminStats" style="display:none">
+<div class="stat-grid"><div class="stat-card"><div class="stat-num" id="statTotalPed">0</div><div class="stat-label">PEDIDOS</div></div><div class="stat-card"><div class="stat-num" id="statVentas">$0</div><div class="stat-label">VENTAS</div></div><div class="stat-card"><div class="stat-num" id="statProdVend">0</div><div class="stat-label">PRODUCTOS</div></div><div class="stat-card"><div class="stat-num" id="statTicket">$0</div><div class="stat-label">TICKET PROM</div></div></div>
+<div class="admin-card"><div style="font-weight:900;font-size:12px">🏆 Más vendido</div><div id="statTopProd" style="margin-top:8px;font-size:13px;color:#111">--</div></div>
+<div class="admin-card" style="border:2px solid #ff4444">
+<div style="font-weight:900;font-size:13px;color:#ff4444;margin-bottom:8px">🗑️ Zona de peligro</div>
+<div style="font-size:11px;color:#666;margin-bottom:12px">Borra solo pedidos y estadísticas.</div>
+<button class="admin-btn" style="background:#ffe8e8;color:#ff4444;border:1px solid #ffcccc" onclick="borrarEstadisticas()">🗑️ Borrar Historial / Estadísticas</button>
+</div>
+</div>
+
+<div id="adminDev" style="display:none">
+<div class="admin-card" style="border:2px solid #111;background:#0f0f0f">
+<div style="font-weight:900;font-size:13px;color:#fff;margin-bottom:2px">⚙️ Panel desarrollador</div>
+<div style="font-size:10px;color:#666;margin-bottom:12px">Acceso técnico / logs</div>
+<div style="display:flex;gap:8px">
+<div class="pass-wrap" style="flex:1"><input id="passClientes" type="password" class="admin-input" placeholder="Código dev" style="margin-top:0;background:#1a1a1a;color:#fff;border-color:#2a2a2a;padding-right:50px"><button class="eye-btn" type="button" onclick="togglePass('passClientes',this)" style="background:#2a2a2a;border-color:#3a3a3a">👁️</button></div>
+<button onclick="verClientesPrivados()" style="background:#2a2a2a;color:#fff;border:1px solid #3a3a3a;padding:0 18px;border-radius:10px;font-weight:900;cursor:pointer">Entrar</button>
+</div>
+<div id="listaClientesPrivada" style="display:none;margin-top:14px;max-height:500px;overflow-y:auto"></div>
+<div id="devExtraActions" style="display:none;margin-top:14px">
+<button class="admin-btn" style="background:#1a1a1a;color:#ffcc00;border:1px solid #2a2a2a" onclick="borrarDevLogs()">🗑️ Borrar logs de desarrollador</button>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
   
 <script>
 const firebaseConfig = {

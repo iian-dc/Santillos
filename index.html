@@ -284,6 +284,17 @@ db.ref('admin').on('value',snap=>{if(snap.val())adminCred=snap.val();});
 function togglePass(id,btn){const inp=document.getElementById(id);if(inp.type==="password"){inp.type="text";btn.innerText="🙈";}else{inp.type="password";btn.innerText="👁️";}}
 function showElegant(titulo,texto){document.getElementById("elegantTitle").innerText=titulo;document.getElementById("elegantText").innerText=texto;document.getElementById("elegantOverlay").classList.add("show");}
 function cerrarElegant(){document.getElementById("elegantOverlay").classList.remove("show");}
+  let ordenCategorias = [];
+db.ref('ordenCategorias').on('value',snap=>{if(snap.val()){ordenCategorias=snap.val(); renderCategorias(); }});
+
+function getCatsOrdenadas(){
+  let cats = Object.keys(menuData);
+  if(ordenCategorias.length===0) return cats;
+  let ordenadas = [];
+  ordenCategorias.forEach(c=>{ if(cats.includes(c)) ordenadas.push(c); });
+  cats.forEach(c=>{ if(!ordenadas.includes(c)) ordenadas.push(c); });
+  return ordenadas;
+}
 function renderCategorias(){const d=document.getElementById("categories");d.innerHTML="";Object.keys(menuData).forEach(c=>{const b=document.createElement("button");b.className="cat-btn"+(c===categoriaActiva?" active":"");b.innerText=c;b.onclick=()=>{categoriaActiva=c;renderCategorias();renderProductos();};d.appendChild(b);});}
 function renderProductos(){const d=document.getElementById("products");if(!d)return;d.innerHTML="";if(!menuData[categoriaActiva]){categoriaActiva=Object.keys(menuData)[0];}if(!categoriaActiva)return;menuData[categoriaActiva].forEach((p,i)=>{if(p.disp===false)return;const id=categoriaActiva+"_"+i;if(cantidades[id]===undefined)cantidades[id]=0;d.innerHTML+=`<div class="product-card"><img class="product-img" id="img_${id}" src="${p.img}"><div class="product-info"><div class="product-name">${p.name}</div><div class="product-desc">${p.desc}</div><div class="product-bottom"><div class="product-price">$${p.price}</div><div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1,'${p.name}',${p.price},'${p.img}')">−</button><div class="qty-num" id="qty_${id}">${cantidades[id]}</div><button class="qty-btn" onclick="cambiarQtyWithAnim('${id}',1,'${p.name}',${p.price},'${p.img}')">+</button></div></div></div></div>`;});}
 function animarAlCarrito(id){const img=document.getElementById("img_"+id);const cart=document.getElementById("cartCount");if(!img||!cart)return;const r1=img.getBoundingClientRect();const r2=cart.getBoundingClientRect();const fly=img.cloneNode();fly.className="fly-img";fly.style.left=r1.left+"px";fly.style.top=r1.top+"px";document.body.appendChild(fly);setTimeout(()=>{fly.style.left=r2.left+"px";fly.style.top=r2.top+"px";fly.style.width="20px";fly.style.height="20px";fly.style.opacity="0.5";},30);setTimeout(()=>{fly.remove();},800);}

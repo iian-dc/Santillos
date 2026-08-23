@@ -400,6 +400,22 @@ window.guardarProducto=function(){const cat=document.getElementById("prodCat").v
 window.editarProd=function(cat,idx){const p=menuData[cat][idx];document.getElementById("prodCat").value=cat;document.getElementById("prodName").value=p.name;document.getElementById("prodDesc").value=p.desc;document.getElementById("prodPrice").value=p.price;tempProdImg=p.img;document.getElementById("prevProd").src=p.img;document.getElementById("prevProd").style.display="block";document.getElementById("boxProd").classList.add("has-img");document.getElementById("txtProd").style.display="none";document.getElementById("editIndex").value=cat+"|"+idx;switchTab('prod');}
 window.borrarProd=function(cat,idx){if(!confirm("¿Borrar "+menuData[cat][idx].name+"?"))return;menuData[cat].splice(idx,1);if(menuData[cat].length===0)delete menuData[cat];db.ref('menu').set(menuData);}
 window.limpiarFormProd=function(){document.getElementById("prodCat").value="";document.getElementById("prodName").value="";document.getElementById("prodDesc").value="";document.getElementById("prodPrice").value="";document.getElementById("editIndex").value="";tempProdImg="";document.getElementById("fileProd").value="";document.getElementById("prevProd").style.display="none";document.getElementById("boxProd").classList.remove("has-img");document.getElementById("txtProd").style.display="block";}
+  function renderOrdenAdmin(){
+  const box=document.getElementById("adminCatsOrdenBox");
+  if(!box) return;
+  box.innerHTML="";
+  getCatsOrdenadas().forEach((cat,i)=>{
+    box.innerHTML+=`<div style="display:flex;justify-content:space-between;align-items:center;background:#f9f9f9;border:1px solid #eee;padding:10px;border-radius:10px;margin-bottom:6px"><b>${cat}</b><div><button onclick="moverCat(${i},-1)" style="background:#111;color:#fff;border:none;width:30px;height:30px;border-radius:6px">↑</button> <button onclick="moverCat(${i},1)" style="background:#111;color:#fff;border:none;width:30px;height:30px;border-radius:6px">↓</button></div></div>`;
+  });
+}
+function moverCat(i,dir){
+  let n=i+dir;
+  if(n<0 || n>=ordenCategorias.length) return;
+  if(ordenCategorias.length===0) ordenCategorias=getCatsOrdenadas();
+  [ordenCategorias[i],ordenCategorias[n]]=[ordenCategorias[n],ordenCategorias[i]];
+  db.ref('ordenCategorias').set(ordenCategorias);
+  renderOrdenAdmin();
+}
 </script>
 </body>
 </html>

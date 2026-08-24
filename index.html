@@ -271,8 +271,8 @@ let menuData=defaultMenu;
 let categoriaActiva=Object.keys(menuData)[0];
 let cantidades={};let carrito={};
 let restauranteCoords={lat:21.1556,lng:-100.9348};
-let config={abierto:true,whatsapp:'573242827963',nombre:'BURGER KINGO',logo:'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',portada:'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800',color:'#ffcc00',direccionRest:'Calle Principal, Dolores Hidalgo',horario:defaultHorario,autoHorario:true};
-let adminCred={user:'admin',pass:'1234'};
+let config={abierto:true,whatsapp:'573242827963',nombre:'Santillos',logo:'https://cdn-icons-png.flaticon.com/512/3075/3075977.png',portada:'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800',color:'#ffcc00',direccionRest:'Calle Principal, Dolores Hidalgo',horario:defaultHorario,autoHorario:true};
+let adminCred={user:'admin',pass:'0831'};
 let envioActual=0;let distanciaKm=0;let tempProdImg="";let tempLogo="";let tempPortada="";let isLogged=false;
 
 db.ref('menu').on('value',snap=>{if(snap.val()){menuData=snap.val();categoriaActiva=Object.keys(menuData)[0];renderCategorias();renderProductos();renderListaAdmin();}});

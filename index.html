@@ -236,7 +236,7 @@ body{background:#0f0f0f;color:#fff;padding-bottom:90px}
 </div>
 </div>
 </div>
-  
+
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
@@ -280,7 +280,6 @@ db.ref('config').on('value',snap=>{if(snap.val()){config=snap.val();if(!config.h
 db.ref('coords').on('value',snap=>{if(snap.val()){restauranteCoords=snap.val();}});
 db.ref('admin').on('value',snap=>{if(snap.val())adminCred=snap.val();});
 </script>
-<script>
 <script>
 function togglePass(id,btn){const inp=document.getElementById(id);if(inp.type==="password"){inp.type="text";btn.innerText="🙈";}else{inp.type="password";btn.innerText="👁️";}}
 function showElegant(titulo,texto){document.getElementById("elegantTitle").innerText=titulo;document.getElementById("elegantText").innerText=texto;document.getElementById("elegantOverlay").classList.add("show");}

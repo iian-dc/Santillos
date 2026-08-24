@@ -251,12 +251,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let defaultMenu={
-"Hamburguesas":[{name:"Clásica Sencilla",desc:"Carne 100% res",price:65,img:"https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=300",disp:true}],
-"Hot Dogs":[{name:"Hot Dog Clásico",desc:"Salchicha jumbo",price:35,img:"https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=300",disp:true}],
-"Papas":[{name:"Papas Francesa",desc:"Orden grande",price:45,img:"https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=300",disp:true}],
-"Bebidas":[{name:"Refresco 600ml",desc:"Coca, Sprite",price:25,img:"https://images.unsplash.com/photo-1553456558-aff63285bdd1?w=300",disp:true}]
-};
+let defaultMenu={};
   
 let defaultHorario={
 lunes:{activo:true,apertura:"10:00",cierre:"22:00"},

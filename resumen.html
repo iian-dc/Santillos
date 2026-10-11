@@ -246,7 +246,7 @@ async function confirmarPedido(){
     const refPush=await db.ref('pedidos').push(pedidoData);
     localStorage.setItem('santillos_cliente',JSON.stringify({nombre:pedidoData.nombre,telefono:pedidoData.telefono,direccion:pedidoData.direccion,referencia:pedidoData.referencia}));
     localStorage.removeItem('santillos_carrito');
-    window.location.href="gracias.html?id="+refPush.key;
+    window.location.href="confirmacion.html?id="+refPush.key;
   }catch(e){
     alert("Error: "+e.message);
     btn.innerText="Confirmar pedido";btn.disabled=false;

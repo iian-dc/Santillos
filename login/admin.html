@@ -10,22 +10,22 @@
 body{background:#f5f5f7;display:flex;min-height:100vh}
 a{text-decoration:none;color:inherit}
 
-/* SIDEBAR */
-.sidebar{width:260px;background:#111111;border-right:1px solid #222;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:0.3s}
-.sidebar-header{padding:22px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #222}
+/* SIDEBAR - COLOR VINO TINTO */
+.sidebar{width:260px;background:#5e0a28;border-right:1px solid #4a081f;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:0.3s}
+.sidebar-header{padding:22px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.12)}
 .logo-circle{width:44px;height:44px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#5e0a28;font-size:20px}
 .logo-text{color:#fff;font-weight:800;font-size:15px;line-height:1.1}
-.logo-text span{display:block;font-size:10px;color:#777;font-weight:600}
+.logo-text span{display:block;font-size:10px;color:rgba(255,255,255,0.7);font-weight:600}
 .sidebar-menu{flex:1;padding:14px 10px;overflow-y:auto}
-.menu-title{font-size:10px;color:#555;font-weight:800;letter-spacing:1px;margin:16px 10px 8px}
-.menu-item{display:flex;align-items:center;gap:12px;padding:12px 12px;border-radius:14px;color:#888;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:4px;transition:0.2s}
-.menu-item i{width:20px;font-size:14px}
-.menu-item:hover{background:#1c1c1c;color:#fff}
-.menu-item.active{background:#5e0a28;color:#fff}
-.sidebar-footer{padding:14px;border-top:1px solid #222}
-.btn-logout{width:100%;background:#1c1c1c;color:#888;border:1px solid #2a2a2a;padding:12px;border-radius:14px;font-weight:700;font-size:12px;cursor:pointer}
+.menu-title{font-size:10px;color:rgba(255,255,255,0.6);font-weight:800;letter-spacing:1px;margin:16px 10px 8px}
+.menu-item{display:flex;align-items:center;gap:12px;padding:12px 12px;border-radius:14px;color:#ffffff;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:4px;transition:0.2s}
+.menu-item i{width:20px;font-size:14px;color:#fff}
+.menu-item:hover{background:rgba(255,255,255,0.12);color:#fff}
+.menu-item.active{background:#8a1538;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.sidebar-footer{padding:14px;border-top:1px solid rgba(255,255,255,0.12)}
+.btn-logout{width:100%;background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:12px;border-radius:14px;font-weight:700;font-size:12px;cursor:pointer}
 
-/* MAIN */
+/* MAIN - NO TOCADO */
 .main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-width:0}
 .topbar{height:64px;background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50}
 .topbar-left{display:flex;align-items:center;gap:12px}
@@ -81,8 +81,10 @@ td{font-size:12px;padding:12px 10px;border-bottom:1px solid #f5f5f5;font-weight:
   </div>
   <div class="sidebar-menu">
     <div class="menu-title">OPERACIÓN</div>
-    <div class="menu-item active" onclick="goTo('dashboard', this)"><i class="fa-solid fa-chart-simple"></i> Dashboard</div>
-    <div class="menu-item" onclick="goTo('pedidos_vivo', this)"><i class="fa-solid fa-fire"></i> Pedidos en Vivo <span id="countVivo" style="margin-left:auto;background:#fff;color:#5e0a28;padding:2px 7px;border-radius:10px;font-size:10px;display:none">0</span></div>
+    <!-- 1. PRIMERO PEDIDOS ACTIVOS -->
+    <div class="menu-item active" onclick="goTo('pedidos_activos', this)"><i class="fa-solid fa-fire"></i> Pedidos Activos <span id="countVivo" style="margin-left:auto;background:#fff;color:#5e0a28;padding:2px 7px;border-radius:10px;font-size:10px;display:none">0</span></div>
+    
+    <div class="menu-item" onclick="goTo('dashboard', this)"><i class="fa-solid fa-chart-simple"></i> Dashboard</div>
     <div class="menu-item" onclick="goTo('historial', this)"><i class="fa-solid fa-clock-rotate-left"></i> Historial Pedidos</div>
 
     <div class="menu-title">RESTAURANTE</div>
@@ -105,7 +107,7 @@ td{font-size:12px;padding:12px 10px;border-bottom:1px solid #f5f5f5;font-weight:
   <div class="topbar">
     <div class="topbar-left">
       <button class="btn-menu" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fa-solid fa-bars"></i></button>
-      <div class="topbar-title" id="topTitle">Dashboard</div>
+      <div class="topbar-title" id="topTitle">Pedidos Activos</div>
     </div>
     <div class="topbar-right">
       <div class="user-badge"><i class="fa-solid fa-user"></i> <span id="userNameTop">admin</span></div>
@@ -114,8 +116,13 @@ td{font-size:12px;padding:12px 10px;border-bottom:1px solid #f5f5f5;font-weight:
 
   <div class="content">
 
+    <!-- PEDIDOS ACTIVOS - AHORA PRIMERO -->
+    <div class="section active" id="sec-pedidos_activos">
+      <div class="card"><h4 style="font-size:13px;margin-bottom:12px">Pedidos Activos - Cocina</h4><div class="table-wrap"><table><thead><tr><th>ID</th><th>CLIENTE</th><th>PEDIDO</th><th>TOTAL</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead><tbody id="tablaVivo"></tbody></table></div></div>
+    </div>
+
     <!-- DASHBOARD -->
-    <div class="section active" id="sec-dashboard">
+    <div class="section" id="sec-dashboard">
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-icon" style="background:#111;color:#fff"><i class="fa-solid fa-receipt"></i></div><div class="kpi-label">PEDIDOS HOY</div><div class="kpi-value" id="kpiPedidos">0</div></div>
         <div class="kpi-card"><div class="kpi-icon" style="background:#5e0a28;color:#fff"><i class="fa-solid fa-dollar-sign"></i></div><div class="kpi-label">VENTAS HOY</div><div class="kpi-value" id="kpiVentas">$0</div></div>
@@ -125,19 +132,13 @@ td{font-size:12px;padding:12px 10px;border-bottom:1px solid #f5f5f5;font-weight:
       <div class="card"><h4 style="font-size:13px;margin-bottom:12px">Pedidos Recientes</h4><div class="table-wrap"><table><thead><tr><th>CLIENTE</th><th>TOTAL</th><th>ESTADO</th><th>FECHA</th></tr></thead><tbody id="tablaDashboard"></tbody></table></div></div>
     </div>
 
-    <!-- PEDIDOS VIVO -->
-    <div class="section" id="sec-pedidos_vivo">
-      <div class="card"><h4 style="font-size:13px;margin-bottom:12px">Pedidos en Vivo - Cocina</h4><div class="table-wrap"><table><thead><tr><th>ID</th><th>CLIENTE</th><th>PEDIDO</th><th>TOTAL</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead><tbody id="tablaVivo"></tbody></table></div></div>
-    </div>
-
-    <!-- OTRAS SECCIONES -->
-    <div class="section" id="sec-historial"><div class="card"><h4>Historial de Pedidos</h4><p style="font-size:11px;color:#888;margin-top:8px">Aquí se listan todos los pedidos entregados. Conectado a Firebase /pedidos</p><div class="table-wrap"><table><thead><tr><th>ID</th><th>CLIENTE</th><th>TOTAL</th><th>FECHA</th><th>ESTADO</th></tr></thead><tbody id="tablaHistorial"></tbody></table></div></div></div>
-    <div class="section" id="sec-productos"><div class="card"><h4>Menú / Productos</h4><p style="font-size:11px;color:#888">Ruta: /admin.html#productos - Aquí editas tu menú. Próximo paso te lo conecto a tu colección productos</p><button class="btn btn-dark" style="margin-top:12px">+ Nuevo Producto</button></div></div>
+    <div class="section" id="sec-historial"><div class="card"><h4>Historial de Pedidos</h4><div class="table-wrap"><table><thead><tr><th>ID</th><th>CLIENTE</th><th>TOTAL</th><th>FECHA</th><th>ESTADO</th></tr></thead><tbody id="tablaHistorial"></tbody></table></div></div></div>
+    <div class="section" id="sec-productos"><div class="card"><h4>Menú / Productos</h4><p style="font-size:11px;color:#888">Ruta: /admin.html#productos - Aquí editas tu menú.</p><button class="btn btn-dark" style="margin-top:12px">+ Nuevo Producto</button></div></div>
     <div class="section" id="sec-categorias"><div class="card"><h4>Categorías</h4><p style="font-size:11px;color:#888">Ej: Hamburguesas, Papas, Bebidas, Combos</p></div></div>
     <div class="section" id="sec-clientes"><div class="card"><h4>Clientes</h4><div id="listaClientes"></div></div></div>
-    <div class="section" id="sec-reportes"><div class="card"><h4>Reportes / Ventas</h4><p style="font-size:11px;color:#888">Ventas por día, semana, mes. Exportable a Excel</p></div></div>
+    <div class="section" id="sec-reportes"><div class="card"><h4>Reportes / Ventas</h4></div></div>
     <div class="section" id="sec-usuarios"><div class="card"><h4>Usuarios / Roles</h4><div class="table-wrap"><table><thead><tr><th>USUARIO</th><th>ROL</th><th>ESTADO</th></tr></thead><tbody id="tablaUsuarios"></tbody></table></div></div></div>
-    <div class="section" id="sec-config"><div class="card"><h4>Configuración Restaurante</h4><p style="font-size:11px;color:#888">Nombre, WhatsApp, costo envío, horarios</p></div></div>
+    <div class="section" id="sec-config"><div class="card"><h4>Configuración Restaurante</h4></div></div>
 
   </div>
 </div>
@@ -159,7 +160,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// SEGURIDAD: Si no está logueado, lo mandamos al login
 if(!localStorage.getItem('santillos_admin_login')){
   window.location.href = './login/';
 }
@@ -181,7 +181,6 @@ window.cerrarSesion = function(){
   window.location.href='./login/';
 }
 
-// CARGAR PEDIDOS DESDE FIREBASE - Ejemplo con tu estructura /pedidos
 onValue(ref(db, 'pedidos'), (snap)=>{
   const data = snap.val() || {};
   const lista = Object.entries(data).map(([k,v])=>({id:k,...v})).reverse();
@@ -192,7 +191,6 @@ onValue(ref(db, 'pedidos'), (snap)=>{
   document.getElementById('kpiProceso').innerText = proceso;
   if(proceso>0){ document.getElementById('countVivo').style.display='inline-block'; document.getElementById('countVivo').innerText=proceso; }
 
-  // Tablas
   document.getElementById('tablaDashboard').innerHTML = lista.slice(0,5).map(p=>`<tr><td>${p.cliente||'Cliente'}</td><td>$${p.total||0}</td><td><span class="badge badge-${p.estado||'pendiente'}">${p.estado||'pendiente'}</span></td><td>${p.fecha||''}</td></tr>`).join('') || '<tr><td colspan=4 style="text-align:center;color:#888">Sin pedidos aún</td></tr>';
   document.getElementById('tablaVivo').innerHTML = lista.filter(p=>p.estado!=='entregado').map(p=>`<tr><td>${p.id.slice(-5)}</td><td>${p.cliente||''}</td><td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.productos||''}</td><td>$${p.total||0}</td><td><span class="badge badge-${p.estado||'pendiente'}">${p.estado||'pendiente'}</span></td><td><button class="btn btn-dark">Ver</button></td></tr>`).join('') || '<tr><td colspan=6 style="text-align:center;color:#888">No hay pedidos en vivo</td></tr>';
   document.getElementById('tablaHistorial').innerHTML = lista.map(p=>`<tr><td>${p.id.slice(-5)}</td><td>${p.cliente||''}</td><td>$${p.total||0}</td><td>${p.fecha||''}</td><td>${p.estado||''}</td></tr>`).join('');
@@ -205,7 +203,6 @@ onValue(ref(db, 'usuarios'), (snap)=>{
   document.getElementById('tablaUsuarios').innerHTML = lista.map(u=>`<tr><td>${u.usuario}</td><td>${u.rol}</td><td>${u.activo?'Activo':'Inactivo'}</td></tr>`).join('');
 });
 
-// Si viene con hash
 const hash = location.hash.replace('#','');
 if(hash) { const el = document.querySelector(`[onclick*="${hash}"]`); if(el) goTo(hash, el); }
 </script>

@@ -34,35 +34,26 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
 .section{display:none}
 .section.active{display:block;animation:fade 0.2s}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-.kpi-card{background:#fff;border:1px solid #eee;border-radius:18px;padding:18px}
 .card{background:#fff;border:1px solid #eee;border-radius:18px;padding:18px}
-
-/* NUEVO DISEÑO PEDIDOS ACTIVOS */
 .pedidos-header{font-size:16px;font-weight:800;margin-bottom:14px}
 .pedido-card{background:#fff;border:1px solid #eee;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
 .pedido-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-bottom:1px dashed #eee;padding-bottom:12px;margin-bottom:12px}
 .pedido-id{font-weight:800;font-size:14px}
 .pedido-fecha{font-size:11px;color:#666;font-weight:600}
-.pedido-fecha span{display:block}
 .cronometro{padding:6px 14px;border-radius:20px;font-weight:800;font-size:12px;display:flex;align-items:center;gap:6px}
 .crono-verde{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;box-shadow:0 0 10px rgba(34,197,94,0.3)}
 .crono-amarillo{background:#fef9c3;color:#854d0e;border:1px solid #fde68a;box-shadow:0 0 10px rgba(234,179,8,0.3)}
 .crono-rojo{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;box-shadow:0 0 12px rgba(239,68,68,0.4);animation:pulse 1s infinite}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
-
 .pedido-body{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .pedido-info{font-size:11px}
 .pedido-info b{font-size:12px;color:#111;display:block;margin-bottom:2px}
 .pedido-info .small{color:#777;font-weight:600}
 .ip-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:10px;font-weight:700}
-.ip-box i{margin-right:4px}
-
 .pedido-total{font-size:18px;font-weight:900;color:#111}
 .envio-gratis{font-size:10px;font-weight:800;padding:4px 8px;border-radius:8px;display:inline-block;margin-top:4px}
 .envio-si{background:#dcfce7;color:#166534}
 .envio-no{background:#f3f4f6;color:#374151}
-
 .pedido-acciones{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
 .btn-estado{border:none;padding:8px 12px;border-radius:20px;font-size:10px;font-weight:800;cursor:pointer;transition:0.2s}
 .btn-estado:hover{transform:scale(1.05)}
@@ -72,13 +63,11 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
 .btn-entregado{background:#16a34a;color:#fff}
 .btn-cancelado{background:#ef4444;color:#fff}
 .btn-estado.active{outline:2px solid #111;outline-offset:2px}
-
 @media(max-width:900px){
   .sidebar{transform:translateX(-100%)}
   .sidebar.open{transform:translateX(0)}
   .main{margin-left:0}
   .btn-menu{display:flex;align-items:center;justify-content:center}
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
   .pedido-body{grid-template-columns:1fr}
 }
 </style>
@@ -109,25 +98,19 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
     <div class="topbar-left"><button class="btn-menu" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fa-solid fa-bars"></i></button><div class="topbar-title" id="topTitle">Pedidos Activos</div></div>
     <div class="topbar-right"><div class="user-badge"><i class="fa-solid fa-user"></i> <span id="userNameTop">admin</span></div></div>
   </div>
-
   <div class="content">
-
-    <!-- PEDIDOS ACTIVOS NUEVO -->
     <div class="section active" id="sec-pedidos_activos">
       <div class="pedidos-header">Listado de Pedidos</div>
       <div id="listaPedidosActivos"></div>
     </div>
-
-    <!-- RESTO INTACTO -->
-    <div class="section" id="sec-dashboard"><div class="kpi-grid"><div class="kpi-card"><div class="kpi-label">PEDIDOS HOY</div><div id="kpiPedidos" style="font-size:22px;font-weight:800">0</div></div><div class="kpi-card"><div class="kpi-label">VENTAS HOY</div><div id="kpiVentas" style="font-size:22px;font-weight:800">$0</div></div><div class="kpi-card"><div class="kpi-label">EN PROCESO</div><div id="kpiProceso" style="font-size:22px;font-weight:800">0</div></div><div class="kpi-card"><div class="kpi-label">CLIENTES</div><div id="kpiClientes" style="font-size:22px;font-weight:800">0</div></div></div><div class="card"><div id="tablaDashboard"></div></div></div>
-    <div class="section" id="sec-historial"><div class="card"><h4>Historial</h4><div id="tablaHistorial"></div></div></div>
-    <div class="section" id="sec-productos"><div class="card"><h4>Menú / Productos</h4></div></div>
-    <div class="section" id="sec-categorias"><div class="card"><h4>Categorías</h4></div></div>
-    <div class="section" id="sec-clientes"><div class="card"><h4>Clientes</h4></div></div>
-    <div class="section" id="sec-reportes"><div class="card"><h4>Reportes</h4></div></div>
-    <div class="section" id="sec-usuarios"><div class="card"><h4>Usuarios</h4><div id="tablaUsuarios"></div></div></div>
-    <div class="section" id="sec-config"><div class="card"><h4>Configuración</h4></div></div>
-
+    <div class="section" id="sec-dashboard"><div class="card">Dashboard - Ruta: login/dashboard/</div></div>
+    <div class="section" id="sec-historial"><div class="card">Historial - Ruta: login/historial/</div></div>
+    <div class="section" id="sec-productos"><div class="card">Productos - Ruta: login/productos/</div></div>
+    <div class="section" id="sec-categorias"><div class="card">Categorías - Ruta: login/categorias/</div></div>
+    <div class="section" id="sec-clientes"><div class="card">Clientes - Ruta: login/clientes/</div></div>
+    <div class="section" id="sec-reportes"><div class="card">Reportes - Ruta: login/reportes/</div></div>
+    <div class="section" id="sec-usuarios"><div class="card">Usuarios - Ruta: login/usuarios/</div></div>
+    <div class="section" id="sec-config"><div class="card">Configuración - Ruta: login/config/</div></div>
   </div>
 </div>
 
@@ -151,59 +134,95 @@ const db = getDatabase(app);
 if(!localStorage.getItem('santillos_admin_login')){ window.location.href='./'; }
 document.getElementById('userNameTop').innerText = localStorage.getItem('santillos_admin_usuario')||'admin';
 
+// RUTAS login/nombre
 window.goTo = function(id, el){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('active');
-  document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
-  if(el) el.classList.add('active');
-  document.getElementById('topTitle').innerText = el ? el.innerText.replace(/\d+/g,'').trim() : id;
-  document.getElementById('sidebar').classList.remove('open');
+  if(id === 'pedidos_activos'){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('sec-'+id).classList.add('active');
+    document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
+    if(el) el.classList.add('active');
+    document.getElementById('topTitle').innerText = 'Pedidos Activos';
+    document.getElementById('sidebar').classList.remove('open');
+    history.replaceState(null,null,'./admin.html#'+id);
+  } else {
+    // Ruta para futuros archivos
+    window.location.href = './'+id+'/';
+  }
 }
 
 window.cerrarSesion = function(){ localStorage.clear(); window.location.href='./'; }
 
 let pedidosCache = [];
 
-function calcularMinutos(fechaStr, horaStr, timestamp){
-  let inicio;
-  if(timestamp) inicio = new Date(timestamp);
-  else if(fechaStr){
-    try{ inicio = new Date(fechaStr + ' ' + (horaStr||'')); }catch{ inicio = new Date(); }
-  } else inicio = new Date();
+function obtenerInicioPedido(p){
+  if(p.timestamp) return new Date(p.timestamp);
+  if(p.creadoEn) return new Date(p.creadoEn);
+  if(p.fechaISO) return new Date(p.fechaISO);
+  // Si tiene fecha y hora separadas
+  if(p.fecha){
+    const f = p.fecha;
+    // Si ya es timestamp string
+    const d = new Date(f);
+    if(!isNaN(d)) return d;
+  }
+  // Fallback: usa la fecha de Firebase key (no perfecto pero evita NaN)
+  return new Date();
+}
+
+function calcularMinutos(p){
+  const inicio = obtenerInicioPedido(p);
   const ahora = new Date();
-  const diffMs = ahora - inicio;
-  return Math.floor(diffMs/60000);
+  const diff = Math.floor((ahora - inicio)/60000);
+  return diff < 0 ? 0 : diff;
 }
 
 function renderPedidos(){
   const cont = document.getElementById('listaPedidosActivos');
   if(pedidosCache.length===0){ cont.innerHTML='<div class="card" style="text-align:center;color:#888;padding:30px">No hay pedidos activos</div>'; return; }
 
-  cont.innerHTML = pedidosCache.map(p=>{
-    const minutos = calcularMinutos(p.fecha, p.hora, p.timestamp || p.creado);
-    let cronoClass = 'crono-verde'; let cronoIcon='fa-clock';
-    if(minutos>=40){ cronoClass='crono-rojo'; }
-    else if(minutos>=20){ cronoClass='crono-amarillo'; }
+  cont.innerHTML = pedidosCache.map((p, index)=>{
+    const minutos = calcularMinutos(p);
+    let cronoClass = 'crono-verde';
+    if(minutos>=40) cronoClass='crono-rojo';
+    else if(minutos>=20) cronoClass='crono-amarillo';
 
-    const idCorto = (p.id||'').slice(-6).toUpperCase() || Math.random().toString(36).substring(2,6).toUpperCase();
-    const envioTexto = (p.envioGratis===true || p.envio===0) ? '<span class="envio-gratis envio-si"><i class="fa-solid fa-truck"></i> Envío Gratis</span>' : `<span class="envio-gratis envio-no">Envío: $${p.costoEnvio||p.envio||0}</span>`;
+    // NÚMERO DE PEDIDO EN NÚMEROS
+    const numeroPedido = `ST-${String(index+1).padStart(4,'0')}`;
+
+    // CLIENTE - detecta diferentes estructuras de tu Firebase
+    const nombreCliente = p.cliente?.nombre || p.nombre || p.clienteNombre || p.customerName || 'Cliente sin nombre';
+    const telefonoCliente = p.cliente?.telefono || p.telefono || p.phone || 'Sin teléfono';
+    const direccionCliente = p.cliente?.direccion || p.direccion || p.address || p.ubicacionTexto || 'Sin dirección';
+
+    // PRODUCTOS - detecta array, objeto o string
+    let productosTexto = 'Sin productos';
+    if(Array.isArray(p.productos)){ productosTexto = p.productos.map(pr=>`${pr.cantidad||1}x ${pr.nombre||pr.name}`).join(', '); }
+    else if(typeof p.productos === 'object' && p.productos!==null){ productosTexto = Object.values(p.productos).map(pr=>`${pr.cantidad||1}x ${pr.nombre||''}`).join(', '); }
+    else if(typeof p.productos === 'string' && p.productos.length>0){ productosTexto = p.productos; }
+    else if(p.detalle){ productosTexto = p.detalle; }
+    else if(p.items){ productosTexto = p.items; }
+
+    const envioTexto = (p.envioGratis===true || p.envio===0 || p.costoEnvio===0) ? '<span class="envio-gratis envio-si"><i class="fa-solid fa-truck"></i> Envío Gratis</span>' : `<span class="envio-gratis envio-no">Envío: $${p.costoEnvio||p.envio||0}</span>`;
+
+    const fechaMostrar = p.fecha || new Date(obtenerInicioPedido(p)).toLocaleDateString();
+    const horaMostrar = p.hora || new Date(obtenerInicioPedido(p)).toLocaleTimeString();
 
     return `
     <div class="pedido-card">
       <div class="pedido-top">
         <div>
-          <div class="pedido-id"># PEDIDO ${idCorto}</div>
-          <div class="pedido-fecha"><span><i class="fa-regular fa-calendar"></i> ${p.fecha||new Date().toLocaleDateString()}</span><span><i class="fa-regular fa-clock"></i> ${p.hora||new Date().toLocaleTimeString()}</span></div>
+          <div class="pedido-id"># PEDIDO ${numeroPedido}</div>
+          <div class="pedido-fecha"><span><i class="fa-regular fa-calendar"></i> ${fechaMostrar}</span> <span><i class="fa-regular fa-clock"></i> ${horaMostrar}</span> <span style="font-size:10px;color:#aaa">ID: ${p.id.slice(0,8)}</span></div>
         </div>
-        <div class="cronometro ${cronoClass}"><i class="fa-solid ${cronoIcon}"></i> ${minutos} min</div>
+        <div class="cronometro ${cronoClass}"><i class="fa-solid fa-stopwatch"></i> ${minutos} min</div>
       </div>
       <div class="pedido-body">
         <div class="pedido-info">
-          <b><i class="fa-solid fa-user"></i> ${p.cliente||p.nombre||'Cliente'}</b>
-          <div class="small"><i class="fa-solid fa-phone"></i> ${p.telefono||'Sin teléfono'}</div>
-          <div class="small"><i class="fa-solid fa-location-dot"></i> ${p.direccion||p.ubicacionTexto||'Sin dirección'}</div>
-          <div class="ip-box"><i class="fa-solid fa-globe"></i> IP: ${p.ip||p.ipCliente||'No registrada'} | ${p.ciudadIP||'Ubicación por IP pendiente'}</div>
-          <div style="margin-top:8px;font-size:10px;background:#fff7ed;border:1px solid #ffedd5;padding:6px 8px;border-radius:8px"><b>Productos:</b> ${p.productos||p.detalle||'Sin detalle'}</div>
+          <b><i class="fa-solid fa-user"></i> ${nombreCliente}</b>
+          <div class="small"><i class="fa-solid fa-phone"></i> ${telefonoCliente}</div>
+          <div class="small"><i class="fa-solid fa-location-dot"></i> ${direccionCliente}</div>
+          <div class="ip-box"><i class="fa-solid fa-globe"></i> IP: ${p.ip||p.ipCliente||'Pendiente vincular'} | ${p.ciudad||p.ciudadIP||'Ubicación por IP pendiente'}</div>
+          <div style="margin-top:8px;font-size:11px;background:#fff7ed;border:1px solid #ffedd5;padding:8px;border-radius:10px"><b><i class="fa-solid fa-burger"></i> Productos:</b><br>${productosTexto}</div>
         </div>
         <div class="pedido-info" style="text-align:right">
           <div class="pedido-total">$${Number(p.total||0).toLocaleString()}</div>
@@ -212,54 +231,33 @@ function renderPedidos(){
         </div>
       </div>
       <div class="pedido-acciones">
-        <button class="btn-estado btn-aceptado ${p.estado==='aceptado'?'active':''}" onclick="cambiarEstado('${p.id}','aceptado')"><i class="fa-solid fa-check"></i> Aceptado</button>
-        <button class="btn-estado btn-preparando ${p.estado==='preparando'?'active':''}" onclick="cambiarEstado('${p.id}','preparando')"><i class="fa-solid fa-fire-burner"></i> Preparando</button>
-        <button class="btn-estado btn-camino ${p.estado==='en_camino'?'active':''}" onclick="cambiarEstado('${p.id}','en_camino')"><i class="fa-solid fa-motorcycle"></i> En Camino</button>
-        <button class="btn-estado btn-entregado ${p.estado==='entregado'?'active':''}" onclick="cambiarEstado('${p.id}','entregado')"><i class="fa-solid fa-box"></i> Entregado</button>
-        <button class="btn-estado btn-cancelado ${p.estado==='cancelado'?'active':''}" onclick="cambiarEstado('${p.id}','cancelado')"><i class="fa-solid fa-xmark"></i> Cancelado</button>
+        <button class="btn-estado btn-aceptado ${p.estado==='aceptado'?'active':''}" onclick="cambiarEstado('${p.id}','aceptado')">Aceptado</button>
+        <button class="btn-estado btn-preparando ${p.estado==='preparando'?'active':''}" onclick="cambiarEstado('${p.id}','preparando')">Preparando</button>
+        <button class="btn-estado btn-camino ${p.estado==='en_camino'?'active':''}" onclick="cambiarEstado('${p.id}','en_camino')">En Camino</button>
+        <button class="btn-estado btn-entregado ${p.estado==='entregado'?'active':''}" onclick="cambiarEstado('${p.id}','entregado')">Entregado</button>
+        <button class="btn-estado btn-cancelado ${p.estado==='cancelado'?'active':''}" onclick="cambiarEstado('${p.id}','cancelado')">Cancelado</button>
         <button class="btn-estado" style="background:#111;color:#fff;margin-left:auto" onclick="bloquearIP('${p.ip||''}')"><i class="fa-solid fa-ban"></i> Bloquear IP</button>
       </div>
     </div>`;
   }).join('');
 }
 
-window.cambiarEstado = function(id, nuevoEstado){
-  update(ref(db, 'pedidos/'+id), { estado: nuevoEstado });
-}
+window.cambiarEstado = function(id, nuevoEstado){ update(ref(db, 'pedidos/'+id), { estado: nuevoEstado }); }
+window.bloquearIP = function(ip){ if(!ip){ alert('IP aún no vinculada. Lo vamos a vincular en el checkout ahora.'); return; } if(confirm('¿Bloquear IP '+ip+'?')){ update(ref(db, 'ips_bloqueadas/'+ip.replace(/\./g,'_')), { ip: ip, bloqueada:true, fecha: new Date().toISOString() }); } }
 
-window.bloquearIP = function(ip){
-  if(!ip){ alert('Este pedido no tiene IP registrada. Vamos a añadirlo en el checkout para futuros pedidos.'); return; }
-  if(confirm('¿Bloquear IP '+ip+' para pedidos ficticios?')){
-    update(ref(db, 'ips_bloqueadas/'+ip.replace(/\./g,'_')), { ip: ip, bloqueada:true, fecha: new Date().toISOString() });
-    alert('IP '+ip+' bloqueada');
-  }
-}
-
-// CARGAR PEDIDOS
 onValue(ref(db, 'pedidos'), (snap)=>{
   const data = snap.val() || {};
-  const lista = Object.entries(data).map(([k,v])=>({id:k,...v})).filter(p=>p.estado!=='entregado' && p.estado!=='cancelado').reverse();
+  // Ordenar por timestamp descendente y filtrar activos
+  let lista = Object.entries(data).map(([k,v])=>({id:k,...v}));
+  lista.sort((a,b)=> new Date(b.timestamp||b.creadoEn||0) - new Date(a.timestamp||a.creadoEn||0));
+  lista = lista.filter(p=>p.estado!=='entregado' && p.estado!=='cancelado');
   pedidosCache = lista;
   document.getElementById('countVivo').style.display = lista.length>0 ? 'inline-block' : 'none';
   document.getElementById('countVivo').innerText = lista.length;
-  document.getElementById('kpiProceso').innerText = lista.length;
   renderPedidos();
-
-  // KPIs generales
-  const todos = Object.values(data);
-  document.getElementById('kpiPedidos').innerText = todos.length;
-  let ventas = 0; todos.forEach(p=>ventas+=Number(p.total||0));
-  document.getElementById('kpiVentas').innerText = '$'+ventas.toLocaleString();
 });
 
-// Actualizar cronómetro cada 30 segundos
-setInterval(renderPedidos, 30000);
-
-onValue(ref(db, 'usuarios'), (snap)=>{
-  const data = snap.val() || {};
-  document.getElementById('kpiClientes').innerText = Object.keys(data).length;
-  document.getElementById('tablaUsuarios').innerHTML = Object.values(data).map(u=>`<tr><td>${u.usuario}</td><td>${u.rol}</td><td>${u.activo?'Activo':'Inactivo'}</td></tr>`).join('');
-});
+setInterval(renderPedidos, 1000);
 </script>
 </body>
 </html>

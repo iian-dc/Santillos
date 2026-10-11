@@ -1,44 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - Santillos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#0f0f0f;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-card{background:#1c1c1c;border:1px solid #2a2a2a;width:100%;max-width:360px;border-radius:28px;padding:28px 22px;box-shadow:0 15px 40px rgba(0,0,0,0.6)}
-.logo-wrap{width:72px;height:72px;background:#5e0a28;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;font-weight:900;border:3px solid #2a2a2a}
-.login-title{text-align:center;font-size:20px;font-weight:800;margin-bottom:4px}
-.login-sub{text-align:center;font-size:11px;color:#777;font-weight:600;margin-bottom:22px}
-.input-group{position:relative;margin-bottom:14px}
-.input-group i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#777;font-size:14px}
-.input-group input{width:100%;background:#232323;border:1.5px solid #2a2a2a;color:#fff;border-radius:16px;padding:14px 14px 14px 40px;font-size:13px;font-weight:600;outline:none}
+body{background:#ffffff;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:#1c1c1c;border:1px solid #2a2a2a;width:100%;max-width:370px;border-radius:28px;padding:30px 24px;box-shadow:0 20px 50px rgba(0,0,0,0.15)}
+.logo-wrap{width:78px;height:78px;background:#ffffff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:3px solid #fff;overflow:hidden}
+.logo-wrap img{width:70%;height:70%;object-fit:contain}
+.logo-wrap span{font-size:32px;font-weight:900;color:#5e0a28}
+.login-title{text-align:center;font-size:18px;font-weight:800;margin-bottom:20px;letter-spacing:0.3px}
+
+.input-group{position:relative;margin-bottom:16px}
+.input-group .icon-left{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#777;font-size:14px}
+.input-group input{width:100%;background:#232323;border:1.5px solid #2a2a2a;color:#fff;border-radius:16px;padding:14px 40px 14px 40px;font-size:13px;font-weight:600;outline:none;transition:0.2s}
 .input-group input:focus{border-color:#5e0a28}
-.btn-login{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:22px;padding:15px;font-weight:800;font-size:14px;cursor:pointer;margin-top:10px}
+.clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.08);border:none;color:#888;width:26px;height:26px;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:12px}
+.clear-btn.show{display:flex}
+
+.btn-login{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:22px;padding:15px;font-weight:800;font-size:14px;cursor:pointer;margin-top:8px;transition:0.2s}
+.btn-login:active{transform:scale(0.98)}
 .btn-login:disabled{opacity:0.6}
 .error-msg{display:none;background:rgba(255,90,90,0.12);border:1px solid rgba(255,90,90,0.3);color:#ff7a7a;font-size:11px;font-weight:700;padding:10px 12px;border-radius:12px;margin-bottom:14px;text-align:center}
 .error-msg.show{display:block}
-.footer-txt{text-align:center;margin-top:18px;font-size:10px;color:#555;font-weight:700}
 </style>
 </head>
 <body>
 
 <div class="login-card">
-  <div class="logo-wrap">S</div>
-  <div class="login-title">Santillos Admin</div>
-  <div class="login-sub">ACCESO SOLO PARA ADMINISTRADOR</div>
+  <div class="logo-wrap">
+    <!-- Si tienes logo.png ponlo aquí, por ahora dejo la S -->
+    <span>S</span>
+    <!-- <img src="../logo.png" alt="Santillos"> -->
+  </div>
+  <div class="login-title">Panel de Administración</div>
+
   <div class="error-msg" id="errorMsg"></div>
-  <div class="input-group"><i class="fa-solid fa-user"></i><input type="text" id="user" placeholder="Usuario" autocomplete="off"></div>
-  <div class="input-group"><i class="fa-solid fa-lock"></i><input type="password" id="pass" placeholder="Contraseña"></div>
+
+  <div class="input-group">
+    <i class="fa-solid fa-user icon-left"></i>
+    <input type="text" id="user" placeholder="Usuario" autocomplete="off" oninput="toggleClear('user')">
+    <button class="clear-btn" id="clearUser" onclick="clearInput('user')"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <div class="input-group">
+    <i class="fa-solid fa-lock icon-left"></i>
+    <input type="password" id="pass" placeholder="Contraseña" oninput="toggleClear('pass')">
+    <button class="clear-btn" id="clearPass" onclick="clearInput('pass')"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
   <button class="btn-login" id="btnLogin" onclick="hacerLogin()">Ingresar</button>
-  <div class="footer-txt">SANTILLOS • PANEL PRIVADO</div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, get, set, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
@@ -54,6 +73,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Función para crear el usuario admin si no existe - YO LO ORGANIZO
+async function asegurarUsuarioAdmin(){
+  const dbRef = ref(db);
+  const snap = await get(child(dbRef, 'usuarios/admin'));
+  if(!snap.exists()){
+    await set(ref(db, 'usuarios/admin'), {
+      usuario: "admin",
+      password: "1234",
+      rol: "administrador",
+      nombre: "Dueño Santillos",
+      activo: true,
+      creado: new Date().toISOString()
+    });
+    console.log("Usuario admin creado automáticamente");
+  }
+}
+asegurarUsuarioAdmin();
+
+window.toggleClear = function(id){
+  const val = document.getElementById(id).value;
+  const btn = document.getElementById(id === 'user' ? 'clearUser' : 'clearPass');
+  if(val.length > 0) btn.classList.add('show');
+  else btn.classList.remove('show');
+}
+
+window.clearInput = function(id){
+  document.getElementById(id).value = '';
+  toggleClear(id);
+  document.getElementById(id).focus();
+}
+
 window.hacerLogin = async function(){
   const u = document.getElementById('user').value.trim();
   const p = document.getElementById('pass').value.trim();
@@ -68,50 +118,32 @@ window.hacerLogin = async function(){
   btn.innerText = 'Verificando...'; btn.disabled = true; error.classList.remove('show');
 
   try{
-    const dbRef = ref(db);
-    const snapshot = await get(child(dbRef, `usuarios/${u}`));
-
+    const snapshot = await get(child(ref(db), `usuarios/${u}`));
     if(!snapshot.exists()){
-      throw new Error('no-existe');
+      error.innerText = 'Usuario o contraseña incorrectos';
+      error.classList.add('show'); btn.innerText='Ingresar'; btn.disabled=false; return;
     }
-
     const data = snapshot.val();
-
     if(data.password !== p){
-      throw new Error('clave-mala');
-    }
-    if(data.activo === false){
-      error.innerText = 'Usuario desactivado';
-      error.classList.add('show');
-      btn.innerText = 'Ingresar'; btn.disabled = false; return;
+      error.innerText = 'Usuario o contraseña incorrectos';
+      error.classList.add('show'); btn.innerText='Ingresar'; btn.disabled=false; return;
     }
     if(data.rol !== 'administrador'){
-      error.innerText = 'No tienes permiso de administrador. Rol: ' + data.rol;
-      error.classList.add('show');
-      btn.innerText = 'Ingresar'; btn.disabled = false; return;
+      error.innerText = 'No tienes permiso de administrador';
+      error.classList.add('show'); btn.innerText='Ingresar'; btn.disabled=false; return;
     }
 
-    // LOGIN OK
     localStorage.setItem('santillos_admin_login', 'true');
     localStorage.setItem('santillos_admin_user', JSON.stringify(data));
-    localStorage.setItem('santillos_admin_usuario', u);
-
+    
+    // AQUÍ LO MANDAMOS A ADMIN.HTML
     window.location.href = '../admin.html';
 
-  }catch(err){
-    console.log(err);
-    if(err.message === 'no-existe' || err.message === 'clave-mala'){
-      error.innerText = 'Usuario o contraseña incorrectos';
-    }else{
-      error.innerText = 'Error: ' + err.message;
-    }
-    error.classList.add('show');
-    btn.innerText = 'Ingresar'; btn.disabled = false;
+  }catch(e){
+    error.innerText = 'Error de conexión';
+    error.classList.add('show'); btn.innerText='Ingresar'; btn.disabled=false;
   }
 }
-
-document.getElementById('pass').addEventListener('keypress', (e)=>{ if(e.key==='Enter') hacerLogin(); });
-document.getElementById('user').addEventListener('keypress', (e)=>{ if(e.key==='Enter') hacerLogin(); });
 </script>
 </body>
 </html>

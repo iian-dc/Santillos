@@ -41,15 +41,13 @@ body{background:#0f0f0f}
     </div>
   </div>
 </div>
-
 <div class="overlay" id="overlayBloqueado" style="display:none">
   <div class="card-location">
     <div class="title">Ubicación bloqueada</div>
-    <div class="subtitle">Bloqueaste la ubicación antes. Toca el candado 🔒 arriba en la barra, dale a Permisos > Ubicación > Permitir y luego vuelve a darle al botón.</div>
+    <div class="subtitle">Bloqueaste la ubicación antes. Toca el candado 🔒 arriba en la barra, dale a Permisos > Ubicación > Permitir y luego vuelve a intentar.</div>
     <button class="btn-burgundy" onclick="volverAPedir()">Entendido, volver a intentar</button>
   </div>
 </div>
-
 <script>
 const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
@@ -61,10 +59,12 @@ function volverAPedir(){
   document.getElementById('overlayConfirmar').style.display='none';
   document.getElementById('overlayBloqueado').style.display='none';
   document.getElementById('overlayPermitir').style.display='flex';
+  document.getElementById('btnPermitir').innerText="Permitir ubicación";
 }
 
+// PRECARGA INTERNA MIENTRAS EL CLIENTE DECIDE - NO REDIRIGE SOLO
 const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
-(async function precargarMenuEnFondo(){
+let precargaPromise = (async()=>{
   try{
     const [menu, order, config] = await Promise.all([
       fetch(DB_URL+'/menu.json').then(r=>r.json()).catch(()=>null),
@@ -78,18 +78,17 @@ const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
   }catch(e){}
 })();
 
-function permitirUbicacion(){
+async function permitirUbicacion(){
   const btn = document.getElementById('btnPermitir');
-  btn.innerText = "Solicitando permiso...";
-
-  if(!navigator.geolocation){ 
-    alert("Tu navegador no soporta GPS"); 
-    btn.innerText="Permitir ubicación"; 
-    return; 
-  }
+  btn.innerText = "Cargando menú...";
+  // Espera a que la precarga interna termine (max 2.5 seg) para que el menú abra listo
+  try{ await Promise.race([precargaPromise, new Promise(r=>setTimeout(r,2500))]); }catch(e){}
+  
+  btn.innerText = "Solicitando ubicación...";
+  if(!navigator.geolocation){ alert("Tu navegador no soporta GPS"); btn.innerText="Permitir ubicación"; return; }
   
   navigator.geolocation.getCurrentPosition(async (pos)=>{
-    btn.innerText = "Entrando al menú...";
+    btn.innerText = "Entrando...";
     const data={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip:ipCliente,userAgent:navigator.userAgent,fecha:new Date().toLocaleString(),timestamp:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`};
     try{ 
       const pushRef = await db.ref('ubicaciones').push(data); 
@@ -101,11 +100,10 @@ function permitirUbicacion(){
   },(err)=>{
     btn.innerText="Permitir ubicación";
     if(err.code === 1){
-      // Ya habia bloqueado antes - no podemos forzar el popup del sistema, mostramos ayuda
       document.getElementById('overlayPermitir').style.display='none';
       document.getElementById('overlayBloqueado').style.display='flex';
     } else {
-      alert("Activa tu GPS y vuelve a intentar.");
+      alert("Activa tu GPS y vuelve a darle a Permitir ubicación.");
     }
   },{enableHighAccuracy:true,timeout:25000,maximumAge:0});
 }

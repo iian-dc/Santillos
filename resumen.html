@@ -24,7 +24,7 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;margin:10px 12px;padding:12px}
 .card-title{font-size:13px;font-weight:800;margin-bottom:10px}
 .input-wrap{position:relative;margin-bottom:4px}
-.input-field{background:#232323;border:1px solid #333;border-radius:12px;padding:10px 12px;display:flex;gap:8px;align-items:center}
+.input-field{background:#232323;border:1.5px solid #333;border-radius:12px;padding:10px 12px;display:flex;gap:8px;align-items:center}
 .input-field i{color:#777;font-size:14px;min-width:18px;text-align:center}
 .input-field input{flex:1;background:transparent;border:none;color:#fff;font-size:12px;outline:none}
 .resumen-item{display:flex;align-items:center;gap:10px;margin-bottom:8px}
@@ -65,56 +65,55 @@ document.getElementById('subtotalTxt').innerText='$'+subtotal; document.getEleme
 let f=META-subtotal;let pct=Math.min(100,Math.round(subtotal/META*100));document.getElementById('freeFill').style.width=pct+'%';document.getElementById('freePct').innerText=pct+'%';if(f<=0){document.getElementById('freeTxt').innerText='¡Tienes envio gratis!';document.getElementById('freeSub').innerText='Tu pedido supera $'+META;}else{document.getElementById('freeTxt').innerText='Te faltan $'+f+' para envío gratis';document.getElementById('freeSub').innerText='Cuando completes $'+f+' más, tu envío será gratis';}
 try{let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');if(cli.nombre)nombre.value=cli.nombre;if(cli.telefono)telefono.value=cli.telefono;if(cli.direccion)direccion.value=cli.direccion;if(cli.referencia)referencia.value=cli.referencia;}catch(e){}
 
-let map, markerTienda, markerCliente, directionsService, directionsRenderer, autocomplete, bounds;
+let map, markerTienda, markerCliente, directionsService, directionsRenderer, autocomplete;
 function initMap(){
-  map=new google.maps.Map(document.getElementById("map"),{center:TIENDA,zoom:15,disableDefaultUI:false,zoomControl:false,mapTypeControl:false});
+  // ZOOM ALEJADO PARA VER DOLORES HIDALGO COMPLETO AL INICIO
+  map=new google.maps.Map(document.getElementById("map"),{center:TIENDA,zoom:13,disableDefaultUI:false,zoomControl:false,mapTypeControl:false});
   directionsService=new google.maps.DirectionsService();
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.9}});
-  bounds=new google.maps.LatLngBounds();
 
-  // ICONOS TIPO PIN DE LA FOTO - RESTAURANTE VINO Y CLIENTE VERDE
+  // PIN PEQUEÑO - TAMAÑO NORMAL COMO GOOGLE MAPS
   const iconRestaurante = {
-    url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52"><path d="M20 0C9 0 0 9 0 20c0 14 20 32 20 32s20-18 20-32C40 9 31 0 20 0z" fill="#5e0a28"/><circle cx="20" cy="19" r="8" fill="white"/></svg>`),
-    scaledSize: new google.maps.Size(40,52),
-    anchor: new google.maps.Point(20,52)
+    url: "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='34' viewBox='0 0 24 34'%3E%3Cpath d='M12 0C5.4 0 0 5.1 0 11.4C0 21.3 12 34 12 34C12 34 24 21.3 24 11.4C24 5.1 18.6 0 12 0Z' fill='%235e0a28'/%3E%3Ccircle cx='12' cy='11.5' r='5' fill='white'/%3E%3C/svg%3E",
+    scaledSize: new google.maps.Size(24, 34),
+    anchor: new google.maps.Point(12, 34)
   };
-
-  const iconCliente = {
-    url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 40 52"><path d="M20 0C9 0 0 9 0 20c0 14 20 32 20 32s20-18 20-32C40 9 31 0 20 0z" fill="#22c55e"/><circle cx="20" cy="19" r="8" fill="white"/></svg>`),
-    scaledSize: new google.maps.Size(40,52),
-    anchor: new google.maps.Point(20,52)
-  };
-
-  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRestaurante,title:"Santillos"});
-  bounds.extend(TIENDA);
-  map.fitBounds(bounds);
+  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRestaurante,title:"Santillos",optimized:false});
 
   autocomplete=new google.maps.places.Autocomplete(document.getElementById("direccion"),{types:['geocode'],componentRestrictions:{country:'mx'}});
   autocomplete.addListener("place_changed",()=>{
     const place=autocomplete.getPlace();
     if(!place.geometry) return;
-    mostrarRuta(place.geometry.location, iconCliente);
+    mostrarRuta(place.geometry.location);
   });
-
-  // Guardar iconCliente global para usar en mostrarRuta
-  window._iconCliente = iconCliente;
-  window._iconRestaurante = iconRestaurante;
 }
-
-function mostrarRuta(destino, iconCli){
+function mostrarRuta(destino){
   if(markerCliente) markerCliente.setMap(null);
-  const icono = iconCli || window._iconCliente;
-  markerCliente=new google.maps.Marker({position:destino,map:map,icon:icono,title:"Cliente"});
-  directionsService.route({origin:TIENDA,destination:destino,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
-    if(status==='OK'){directionsRenderer.setDirections(res); map.fitBounds(res.routes[0].bounds);} else { bounds=new google.maps.LatLngBounds(); bounds.extend(TIENDA); bounds.extend(destino); map.fitBounds(bounds); }
+  // PIN CLIENTE VERDE PEQUEÑO - MISMO TAMAÑO QUE RESTAURANTE
+  const iconCliente = {
+    url: "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='34' viewBox='0 0 24 34'%3E%3Cpath d='M12 0C5.4 0 0 5.1 0 11.4C0 21.3 12 34 12 34C12 34 24 21.3 24 11.4C24 5.1 18.6 0 12 0Z' fill='%2322c55e'/%3E%3Ccircle cx='12' cy='11.5' r='5' fill='white'/%3E%3C/svg%3E",
+    scaledSize: new google.maps.Size(24, 34),
+    anchor: new google.maps.Point(12, 34)
+  };
+  markerCliente=new google.maps.Marker({position:destino,map:map,icon:iconCliente,optimized:false});
+  directionsService.route({origin:TIENDA,destination:destino,travelMode:google.maps.TravelMode.DRIVING},(res,stat)=>{
+    if(stat==='OK'){
+      directionsRenderer.setDirections(res);
+      // AJUSTA ZOOM AUTOMATICO SOLO DESPUES DE PONER DIRECCION - DE RESTAURANTE A CLIENTE
+      const bounds=new google.maps.LatLngBounds();
+      bounds.extend(TIENDA);
+      bounds.extend(destino);
+      map.fitBounds(bounds,{top:30,bottom:30,left:30,right:30});
+    }
   });
 }
-
 function confirmarPedido(){
-  let cli={nombre:nombre.value,telefono:telefono.value,direccion:direccion.value,referencia:referencia.value};
-  localStorage.setItem('santillos_cliente',JSON.stringify(cli));
-  let pedido={cliente:cli,carrito:carrito,total:subtotal,fecha:Date.now()};
-  db.ref('pedidos').push(pedido).then(()=>{localStorage.removeItem('santillos_carrito');location.href='gracias.html'});
+  let dir=document.getElementById('direccion').value.trim();let tel=document.getElementById('telefono').value.trim();let nom=document.getElementById('nombre').value.trim();
+  if(!dir||!tel||!nom){alert('Llena tu dirección, teléfono y nombre');return;}
+  let ref=document.getElementById('referencia').value.trim();
+  localStorage.setItem('santillos_cliente',JSON.stringify({nombre:nom,telefono:tel,direccion:dir,referencia:ref}));
+  let pedido={cliente:{nombre:nom,telefono:tel,direccion:dir,referencia:ref},carrito:carrito,total:subtotal,fecha:new Date().toISOString()};
+  db.ref('pedidos').push(pedido).then(()=>{localStorage.removeItem('santillos_carrito');alert('¡Pedido confirmado!');location.href='index.html';});
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>

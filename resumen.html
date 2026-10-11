@@ -2,33 +2,46 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Resumen - Santillos</title>
+<title>Checkout - Santillos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:20px}
+body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:24px}
 .header{padding:18px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:#0f0f0f;z-index:10;border-bottom:1px solid #1e1e1e}
 .header a{width:36px;height:36px;background:#1c1c1c;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none}
 .header h1{font-size:22px;font-weight:800}
+
+/* BARRA ENVIO GRATIS */
+.free-card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;margin:12px;padding:14px}
+.free-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.free-top b{font-size:13px}
+.free-top span{font-size:13px;color:#22c55e;font-weight:800}
+.free-bar{width:100%;height:16px;background:#2a2a2a;border-radius:20px;overflow:hidden}
+.free-fill{height:100%;background:linear-gradient(90deg,#22c55e,#10d8a2);border-radius:20px;transition:width 0.5s ease}
+.free-sub{font-size:11px;color:#aaa;margin-top:8px}
+.map-box{width:100%;height:122px;border-radius:14px;overflow:hidden;margin-top:12px;position:relative;background:#111;border:1px solid #2a2a2a}
+.map-box iframe{width:100%;height:100%;border:0;filter:brightness(0.6) saturate(0.8)}
+.map-tag{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.7);border:1px solid #333;padding:6px 10px;border-radius:12px;font-size:11px;display:flex;align-items:center;gap:6px}
+
 .card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;margin:12px;padding:14px}
-.card-title{font-size:13px;font-weight:800;margin-bottom:10px;color:#fff}
-.resumen-item{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.resumen-item img{width:48px;height:48px;border-radius:12px;object-fit:cover;background:#111}
+.card-title{font-size:14px;font-weight:800;margin-bottom:12px}
+.input-field{background:#232323;border:1px solid #333;border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.input-field i{color:#5e0a28;font-size:16px;min-width:20px;text-align:center}
+.input-field input{flex:1;background:transparent;border:none;color:#fff;font-size:13px;outline:none}
+.input-field input::placeholder{color:#777}
+.resumen-item{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.resumen-item img{width:42px;height:42px;border-radius:10px;object-fit:cover;background:#111}
 .resumen-info{flex:1}
-.resumen-name{font-size:13px;font-weight:700}
+.resumen-name{font-size:12px;font-weight:700}
 .resumen-qty{font-size:11px;color:#999}
-.resumen-price{font-weight:800;font-size:13px}
-.subtotal-row{display:flex;justify-content:space-between;padding:12px 12px;font-size:13px;color:#bbb}
-.input-group{position:relative;margin-bottom:10px}
-.input-group i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#777;font-size:14px}
-.input-group input, .input-group textarea{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:14px;padding:12px 14px 12px 40px;color:#fff;font-size:13px;outline:none}
-.input-group textarea{padding-left:14px;resize:none;height:70px}
+.resumen-price{font-size:12px;font-weight:800}
+.subtotal-row{display:flex;justify-content:space-between;padding:10px 12px;font-size:12px;color:#999;border-top:1px solid #2a2a2a;margin-top:8px}
 .total-card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:20px;margin:12px;padding:16px}
 .total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.total-row span{font-size:20px;font-weight:800}
+.total-row span{font-size:18px;font-weight:800}
 .btn-confirm{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:18px;padding:16px;font-weight:800;font-size:15px;cursor:pointer}
 </style>
 </head>
@@ -36,34 +49,53 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 
 <div class="header">
   <a href="carrito.html"><i class="fa-solid fa-chevron-left"></i></a>
-  <h1>Resumen</h1>
+  <h1>Checkout</h1>
+</div>
+
+<!-- BARRA ENVIO + MAPA -->
+<div class="free-card">
+  <div class="free-top">
+    <b id="freeTxt">Te faltan $42 para envío gratis</b>
+    <span id="freePct">79%</span>
+  </div>
+  <div class="free-bar"><div class="free-fill" id="freeFill" style="width:79%"></div></div>
+  <div class="free-sub" id="freeSub">Cuando completes $42 más, tu envío será gratis</div>
+  
+  <div class="map-box">
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3728.5!2d-100.938!3d21.155!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjHCsDA5JzE4LjAiTiAxMDDCsDU2JzE2LjgiVw!5e0!3m2!1ses!2smx!4v1" loading="lazy"></iframe>
+    <div class="map-tag"><i class="fa-solid fa-location-dot" style="color:#ff3b3b"></i> Tienda — 1.2 km • 15 min</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Detalles de entrega</div>
+  <div class="input-field">
+    <i class="fa-solid fa-location-dot"></i>
+    <input type="text" id="direccion" placeholder="Dirección - Ej: Av. Reforma 250, Col. Juárez" onclick="abrirGoogleMaps()">
+  </div>
+  <div class="input-field">
+    <i class="fa-solid fa-house"></i>
+    <input type="text" id="referencia" placeholder="Referencia - Casa color azul, portón negro">
+  </div>
+  <div class="input-field">
+    <i class="fa-solid fa-phone"></i>
+    <input type="tel" id="telefono" placeholder="Teléfono - +52 55 2345 6789">
+  </div>
+  <div class="input-field">
+    <i class="fa-solid fa-user"></i>
+    <input type="text" id="nombre" placeholder="Nombre - María López">
+  </div>
 </div>
 
 <div class="card">
   <div class="card-title">Resumen del pedido</div>
   <div id="listaResumen"></div>
-</div>
-
-<div class="subtotal-row"><span>Subtotal</span><span id="subtotalTxt">$0</span></div>
-
-<div class="card">
-  <div class="card-title">Dirección de entrega</div>
-  <div class="input-group"><i class="fa-solid fa-location-dot"></i><input type="text" id="direccion" placeholder="Calle 123, Col. Centro"></div>
-</div>
-
-<div class="card">
-  <div class="card-title">Datos del cliente</div>
-  <div class="input-group"><i class="fa-solid fa-user"></i><input type="text" id="nombre" placeholder="Nombre del cliente"></div>
-  <div class="input-group"><i class="fa-solid fa-phone"></i><input type="tel" id="telefono" placeholder="+52 55 1234 5678"></div>
-</div>
-
-<div class="card">
-  <div class="card-title">Nota (opcional)</div>
-  <div class="input-group"><textarea id="nota" placeholder="Nota para el repartidor (ej. sin cebolla, timbre, dejar en portería...)"></textarea></div>
+  <div class="subtotal-row"><span>Subtotal</span><span id="subtotalTxt">$0.00</span></div>
+  <div class="subtotal-row" style="border-top:none;margin-top:0;padding-top:4px"><span>Envío</span><span id="envioTxt" style="color:#22c55e">Gratis</span></div>
 </div>
 
 <div class="total-card">
-  <div class="total-row"><span>Total</span><span id="totalFinal">$0</span></div>
+  <div class="total-row"><span>Total</span><span id="totalFinal">$0.00</span></div>
   <button class="btn-confirm" onclick="confirmarPedido()">Confirmar pedido</button>
 </div>
 
@@ -71,35 +103,62 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 
+const META_ENVIO_GRATIS = 200; // cambia aquí tu monto de envío gratis
+
 let carrito={};try{carrito=JSON.parse(localStorage.getItem('santillos_carrito')||'{}')}catch(e){}
 if(Object.keys(carrito).length===0){ window.location.href="carrito.html"; }
 
 let subtotal=0; let html='';
 Object.values(carrito).forEach(p=>{
-  const t = p.precio * p.cant; subtotal+=t;
-  html+=`<div class="resumen-item"><img src="${p.img}"><div class="resumen-info"><div class="resumen-name">${p.nombre}</div><div class="resumen-qty">x${p.cant}</div></div><div class="resumen-price">$${t}</div></div>`;
+  const t=p.precio*p.cant; subtotal+=t;
+  html+=`<div class="resumen-item"><img src="${p.img}"><div class="resumen-info"><div class="resumen-name">${p.nombre} x${p.cant}</div><div class="resumen-qty">$${p.precio} c/u</div></div><div class="resumen-price">$${t}</div></div>`;
 });
 document.getElementById('listaResumen').innerHTML=html;
-document.getElementById('subtotalTxt').innerText='$'+subtotal;
-document.getElementById('totalFinal').innerText='$'+subtotal;
+document.getElementById('subtotalTxt').innerText='$'+subtotal.toFixed(2);
+document.getElementById('totalFinal').innerText='$'+subtotal.toFixed(2);
+
+// barra envio gratis
+function actualizarBarra(){
+  const faltan = META_ENVIO_GRATIS - subtotal;
+  const pct = Math.min(100, Math.round((subtotal / META_ENVIO_GRATIS)*100));
+  document.getElementById('freeFill').style.width = pct+'%';
+  document.getElementById('freePct').innerText = pct+'%';
+  if(faltan<=0){
+    document.getElementById('freeTxt').innerText='¡Tienes envío gratis!';
+    document.getElementById('freeSub').innerText='Tu pedido supera $'+META_ENVIO_GRATIS+' y el envío es gratis';
+    document.getElementById('envioTxt').innerText='Gratis';
+    document.getElementById('envioTxt').style.color='#22c55e';
+  }else{
+    document.getElementById('freeTxt').innerText='Te faltan $'+faltan+' para envío gratis';
+    document.getElementById('freeSub').innerText='Cuando completes $'+faltan+' más, tu envío será gratis';
+    document.getElementById('envioTxt').innerText='— $'+faltan+' para gratis';
+    document.getElementById('envioTxt').style.color='#999';
+  }
+}
+actualizarBarra();
 
 // cargar datos guardados
-try{ const cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}'); if(cli.nombre) document.getElementById('nombre').value=cli.nombre; if(cli.telefono) document.getElementById('telefono').value=cli.telefono; if(cli.direccion) document.getElementById('direccion').value=cli.direccion; }catch(e){}
+try{ const cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}'); if(cli.nombre) document.getElementById('nombre').value=cli.nombre; if(cli.telefono) document.getElementById('telefono').value=cli.telefono; if(cli.direccion) document.getElementById('direccion').value=cli.direccion; if(cli.referencia) document.getElementById('referencia').value=cli.referencia; }catch(e){}
+
+function abrirGoogleMaps(){
+  const dir=document.getElementById('direccion').value;
+  if(dir) window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(dir),'_blank');
+}
 
 function confirmarPedido(){
-  const nombre=document.getElementById('nombre').value.trim();
-  const telefono=document.getElementById('telefono').value.trim();
   const direccion=document.getElementById('direccion').value.trim();
-  const nota=document.getElementById('nota').value.trim();
-  if(!nombre||!telefono||!direccion){ alert('Completa nombre, teléfono y dirección'); return; }
-  const pedido={cliente:{nombre,telefono,direccion,nota},productos:carrito,subtotal,total:subtotal,fecha:Date.now(),estado:'pendiente'};
-  localStorage.setItem('santillos_cliente', JSON.stringify({nombre,telefono,direccion}));
+  const referencia=document.getElementById('referencia').value.trim();
+  const telefono=document.getElementById('telefono').value.trim();
+  const nombre=document.getElementById('nombre').value.trim();
+  if(!direccion||!telefono||!nombre){ alert('Completa dirección, teléfono y nombre'); return; }
+  const pedido={cliente:{nombre,telefono,direccion,referencia},productos:carrito,subtotal,total:subtotal,fecha:Date.now(),estado:'pendiente'};
+  localStorage.setItem('santillos_cliente', JSON.stringify({nombre,telefono,direccion,referencia}));
   db.ref('pedidos').push(pedido).then(()=>{
     localStorage.setItem('santillos_ultimo_pedido', JSON.stringify(pedido));
     localStorage.setItem('santillos_carrito','{}');
     localStorage.setItem('santillos_cantidades','{}');
     window.location.href="gracias.html";
-  }).catch(()=>{ alert('Error al enviar pedido, intenta de nuevo'); });
+  });
 }
 </script>
 </body>

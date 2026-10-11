@@ -12,26 +12,23 @@ body{background:#0f0f0f;color:#fff;padding-bottom:110px;max-width:500px;margin:0
 .header-cart h1{font-size:22px;font-weight:800;display:flex;align-items:center;gap:10px}
 .header-cart a{color:#fff;text-decoration:none;width:36px;height:36px;background:#1c1c1c;border-radius:50%;display:flex;align-items:center;justify-content:center}
 .titulo-seccion{padding:16px 16px 8px;font-size:13px;font-weight:700;color:#999;letter-spacing:0.5px}
-.lista-carrito{padding:0 12px;display:grid;gap:10px}
-.cart-item{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;display:flex;overflow:hidden;padding:10px;gap:12px;align-items:center}
-.cart-img{width:78px;min-width:78px;height:78px;border-radius:14px;overflow:hidden;background:#111}
+.lista-carrito{padding:0 12px;display:grid;gap:8px}
+.cart-item{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;display:flex;overflow:hidden;padding:8px;gap:10px;align-items:center;min-height:76px}
+.cart-img{width:62px;min-width:62px;height:62px;border-radius:12px;overflow:hidden;background:#111}
 .cart-img img{width:100%;height:100%;object-fit:cover}
-.cart-info{flex:1;display:flex;flex-direction:column;gap:3px}
-.cart-name{font-weight:700;font-size:14px;line-height:1.2}
-.cart-desc{font-size:11px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
-.cart-price{font-weight:800;font-size:15px;margin-top:4px}
-.cart-actions{display:flex;flex-direction:column;gap:8px}
-.btn-icon{width:38px;height:38px;border-radius:12px;border:1.5px solid #2a2a2a;background:#232323;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px}
+.cart-info{flex:1;display:flex;flex-direction:column;gap:2px}
+.cart-name{font-weight:700;font-size:13px;line-height:1.2}
+.cart-desc{font-size:10px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.cart-price{font-weight:800;font-size:13px;margin-top:2px}
+.cart-actions{display:flex;flex-direction:column;gap:6px}
+.btn-icon{width:34px;height:34px;border-radius:10px;border:1.5px solid #2a2a2a;background:#232323;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
 .btn-icon.delete{color:#ff5a5a}
-.resumen{margin:16px 12px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;padding:16px;display:grid;gap:12px}
-.resumen-row{display:flex;justify-content:space-between;font-size:13px;color:#bbb}
-.resumen-row.total{font-size:16px;font-weight:800;color:#fff;border-top:1px solid #2a2a2a;padding-top:12px;margin-top:4px}
-.btn-pago{margin:16px 12px;width:calc(100% - 24px);background:#ff2e2e;color:#fff;border:none;border-radius:24px;padding:16px;font-weight:800;font-size:15px;cursor:pointer}
+.resumen{margin:12px 12px;background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;padding:14px 16px;display:grid;gap:0}
+.resumen-row.total{font-size:16px;font-weight:800;color:#fff;display:flex;justify-content:space-between}
+.btn-pago{margin:14px 12px;width:calc(100% - 24px);background:#5e0a28;color:#fff;border:none;border-radius:24px;padding:16px;font-weight:800;font-size:15px;cursor:pointer}
 .vacio{padding:60px 20px;text-align:center;color:#777}
 .vacio i{font-size:48px;margin-bottom:16px;display:block}
 .vacio a{color:#fff;background:#5e0a28;padding:10px 18px;border-radius:20px;text-decoration:none;font-weight:700;display:inline-block;margin-top:16px}
-
-/* MODAL EDITAR CENTRADO */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
 .modal-card{background:#1c1c1c;border:1px solid #2a2a2a;width:100%;max-width:360px;border-radius:24px;padding:20px;position:relative;animation:pop 0.25s ease}
@@ -49,7 +46,6 @@ body{background:#0f0f0f;color:#fff;padding-bottom:110px;max-width:500px;margin:0
 .modal-btns{display:flex;gap:10px}
 .btn-cancel{flex:1;background:transparent;border:1.5px solid #3a3a3a;color:#fff;border-radius:22px;padding:12px;font-weight:700;cursor:pointer}
 .btn-save{flex:1;background:#5e0a28;border:none;color:#fff;border-radius:22px;padding:12px;font-weight:800;cursor:pointer}
-
 .bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:92%;max-width:460px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:10px 8px;z-index:100;border-radius:28px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
 .nav-item-rappi{display:flex;flex-direction:column;align-items:center;gap:4px;color:#777;font-size:9px;font-weight:800;background:none;border:none;cursor:pointer;min-width:64px;text-decoration:none}
 .nav-item-rappi.active{color:#fff}
@@ -73,14 +69,11 @@ body{background:#0f0f0f;color:#fff;padding-bottom:110px;max-width:500px;margin:0
 <div class="lista-carrito" id="listaCarrito"></div>
 
 <div class="resumen" id="resumenBox">
-  <div class="resumen-row"><span>Subtotal</span><span id="subtotalTxt">$0.00</span></div>
-  <div class="resumen-row"><span>Envío</span><span style="color:#22c55e;font-weight:800">Gratis</span></div>
-  <div class="resumen-row total"><span>Total</span><span id="totalTxt">$0.00</span></div>
+  <div class="resumen-row total"><span>Subtotal</span><span id="totalTxt">$0.00</span></div>
 </div>
 
 <button class="btn-pago" id="btnPago" onclick="irAPagar()">Continuar al pago</button>
 
-<!-- MODAL EDITAR -->
 <div class="modal-overlay" id="modalEditar" onclick="cerrarModal()">
   <div class="modal-card" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="cerrarModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -150,7 +143,6 @@ function renderCarrito(){
     `;
   });
   lista.innerHTML=html;
-  document.getElementById('subtotalTxt').innerText='$'+subtotal.toFixed(2);
   document.getElementById('totalTxt').innerText='$'+subtotal.toFixed(2);
   document.getElementById('cartCount').innerText=totalItems;
 }
@@ -192,10 +184,8 @@ function vaciarCarrito(){
   renderCarrito();
 }
 function irAPagar(){
-  // aqui continuamos despues con el pago
   window.location.href="checkout.html";
 }
-
 renderCarrito();
 </script>
 </body>

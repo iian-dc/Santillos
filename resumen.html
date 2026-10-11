@@ -71,30 +71,56 @@ try{let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');if(cli.n
 let map, markerTienda, markerCliente, directionsService, directionsRenderer;
 function initMap(){
   map=new google.maps.Map(document.getElementById("map"),{center:TIENDA,zoom:15,disableDefaultUI:false,zoomControl:false});
-  // Icono Rappi restaurante - circulo blanco con borde vino y tienda dentro
-  const iconRappiTienda={url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="42" height="42"><circle cx="21" cy="21" r="18" fill="white" stroke="#5e0a28" stroke-width="3"/><circle cx="21" cy="21" r="8" fill="#5e0a28"/><path d="M17 20 L21 16 L25 20 L25 24 L17 24 Z" fill="white"/></svg>'),scaledSize:new google.maps.Size(42,42),anchor:new google.maps.Point(21,21)};
-  // Icono Rappi cliente - circulo negro con casa blanca
-  const iconRappiCliente={url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38"><circle cx="19" cy="19" r="16" fill="#111" stroke="white" stroke-width="2.5"/><path d="M12 18 L19 11 L26 18 L24 18 L24 24 L14 24 L14 18 Z" fill="white"/></svg>'),scaledSize:new google.maps.Size(38,38),anchor:new google.maps.Point(19,19)};
-  
-  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRappiTienda,title:"Santillos"});
-  directionsService=new google.maps.DirectionsService();
-  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.9}});
 
-  const autocomplete=new google.maps.places.Autocomplete(document.getElementById("direccion"),{componentRestrictions:{country:"mx"},fields:["geometry","formatted_address"],types:["address"]});
+  // --- TU TIENDITA 3D SIN FONDO, BIEN PEQUEÑA ---
+  const iconTienda3D={
+    url: 'santillos_3d.png',
+    scaledSize: new google.maps.Size(52, 46),
+    anchor: new google.maps.Point(26, 46)
+  };
+  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconTienda3D,title:"Santillos"});
+
+  // Cliente - punto negro estilo Rappi (luego lo cambiamos)
+  const iconCliente={
+    url:"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='10' fill='%23111111' stroke='white' stroke-width='3'/%3E%3C/svg%3E",
+    scaledSize: new google.maps.Size(28,28),
+    anchor: new google.maps.Point(14,14)
+  };
+
+  directionsService=new google.maps.DirectionsService();
+  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.8}});
+
+  const autocomplete=new google.maps.places.Autocomplete(document.getElementById("direccion"),{componentRestrictions:{country:"mx"}});
   autocomplete.addListener("place_changed",()=>{
     const place=autocomplete.getPlace();
-    if(!place.geometry)return;
-    const loc=place.geometry.location;
-    if(markerCliente)markerCliente.setMap(null);
-    markerCliente=new google.maps.Marker({position:loc,map:map,icon:iconRappiCliente});
-    directionsService.route({origin:TIENDA,destination:loc,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
-      if(status==="OK"){directionsRenderer.setDirections(res);}else{map.setCenter(loc);map.setZoom(16);}
-    });
+    if(!place.geometry) return;
+    const pos={lat:place.geometry.location.lat(),lng:place.geometry.location.lng()};
+    if(markerCliente) markerCliente.setMap(null);
+    markerCliente=new google.maps.Marker({position:pos,map:map,icon:iconCliente});
+    const bounds=new google.maps.LatLngBounds();bounds.extend(TIENDA);bounds.extend(pos);map.fitBounds(bounds);
+    calcularRuta(pos);
   });
 }
-function validar(idF,idE,key){let field=document.getElementById(idF);let val=document.getElementById(key).value.trim();if(!val){field.classList.add('error');document.getElementById(idE).classList.add('show');setTimeout(()=>field.classList.remove('error'),800);return false;}field.classList.remove('error');document.getElementById(idE).classList.remove('show');return true;}
-function confirmarPedido(){let ok1=validar('fieldDir','errDir','direccion');let ok2=validar('fieldTel','errTel','telefono');let ok3=validar('fieldNom','errNom','nombre');if(!ok1||!ok2||!ok3)return;let pedido={cliente:{nombre:nombre.value,telefono:telefono.value,direccion:direccion.value,referencia:referencia.value},productos:carrito,subtotal,total:subtotal,fecha:Date.now(),estado:'pendiente'};localStorage.setItem('santillos_cliente',JSON.stringify(pedido.cliente));db.ref('pedidos').push(pedido).then(()=>{localStorage.setItem('santillos_carrito','{}');localStorage.setItem('santillos_cantidades','{}');location.href="gracias.html";});}
+function calcularRuta(destino){
+  directionsService.route({origin:TIENDA,destination:destino,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
+    if(status==="OK") directionsRenderer.setDirections(res);
+  });
+}
+function confirmarPedido(){
+  let ok=true;
+  if(!direccion.value.trim()){document.getElementById('fieldDir').classList.add('error');document.getElementById('errDir').classList.add('show');ok=false;}else{document.getElementById('fieldDir').classList.remove('error');document.getElementById('errDir').classList.remove('show');}
+  if(!telefono.value.trim()){document.getElementById('fieldTel').classList.add('error');document.getElementById('errTel').classList.add('show');ok=false;}else{document.getElementById('fieldTel').classList.remove('error');document.getElementById('errTel').classList.remove('show');}
+  if(!nombre.value.trim()){document.getElementById('fieldNom').classList.add('error');document.getElementById('errNom').classList.add('show');ok=false;}else{document.getElementById('fieldNom').classList.remove('error');document.getElementById('errNom').classList.remove('show');}
+  if(!ok) return;
+  const pedido={cliente:{nombre:nombre.value,telefono:telefono.value,direccion:direccion.value,referencia:referencia.value},carrito:carrito,total:subtotal,fecha:new Date().toISOString()};
+  db.ref('pedidos').push(pedido).then(()=>{
+    localStorage.setItem('santillos_cliente',JSON.stringify(pedido.cliente));
+    localStorage.removeItem('santillos_carrito');
+    alert('Pedido enviado con éxito');
+    location.href='index.html';
+  });
+}
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8q8D7l5g6h9j0k1l2m3n4o5p6q7r8s9t&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>

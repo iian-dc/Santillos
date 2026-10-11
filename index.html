@@ -10,7 +10,7 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
 body{background:#0f0f0f}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}
-.card-location{background:#fff;border-radius:28px;padding:28px 22px 18px;width:100%;max-width:360px;text-align:center;animation:pop .3s ease}
+.card-location{background:#fff;border-radius:28px;padding:28px 22px 18px;width:100%;max-width:360px;text-align:center;animation:pop.3s ease}
 @keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
 .title{font-size:22px;font-weight:800;color:#111;margin-bottom:10px}
 .subtitle{font-size:14px;color:#444;line-height:1.5;margin-bottom:22px}
@@ -22,7 +22,14 @@ body{background:#0f0f0f}
 </style>
 </head>
 <body>
-<div class="overlay" id="overlayPermitir">
+<div class="overlay" id="overlayCargando">
+  <div class="card-location">
+    <div class="title">Verificando acceso...</div>
+    <div class="subtitle">Un momento por favor</div>
+  </div>
+</div>
+
+<div class="overlay" id="overlayPermitir" style="display:none">
   <div class="card-location">
     <svg viewBox="0 0 80 90" style="width:86px;margin:0 auto 12px;display:block" fill="none"><path d="M40 0C18 0 0 18 0 40C0 65 40 90 40 90S80 65 80 40C80 18 62 0 40 0Z" fill="white" stroke="#111" stroke-width="3"/><ellipse cx="40" cy="82" rx="18" ry="4" fill="none" stroke="#b91c45" stroke-width="3"/><circle cx="40" cy="38" r="16" fill="#b91c45"/></svg>
     <div class="title">¿Permitir tu ubicación?</div>
@@ -31,6 +38,7 @@ body{background:#0f0f0f}
     <button class="btn-link" onclick="mostrarConfirmacionNo()">Ahora no</button>
   </div>
 </div>
+
 <div class="overlay" id="overlayConfirmar" style="display:none">
   <div class="card-location">
     <div class="title">¿Estás seguro de que no deseas continuar?</div>
@@ -41,6 +49,7 @@ body{background:#0f0f0f}
     </div>
   </div>
 </div>
+
 <div class="overlay" id="overlayBloqueado" style="display:none">
   <div class="card-location">
     <div class="title">Ubicación bloqueada</div>
@@ -48,11 +57,50 @@ body{background:#0f0f0f}
     <button class="btn-burgundy" onclick="volverAPedir()">Entendido, volver a intentar</button>
   </div>
 </div>
+
+<div class="overlay" id="overlayIPBloqueada" style="display:none">
+  <div class="card-location" style="border:2px solid #e30613">
+    <div style="font-size:48px;margin-bottom:10px">⛔</div>
+    <div class="title" style="color:#e30613">Acceso bloqueado</div>
+    <div class="subtitle">Por motivos de seguridad, tu acceso ha sido bloqueado. No podrás ingresar a la plataforma.<br><br>Si crees que es un error, contacta a soporte.<br><br><small id="ipBloqueadaTxt"></small></div>
+    <button class="btn-burgundy" style="background:#111" onclick="window.location.href='https://www.google.com'">Entendido</button>
+  </div>
+</div>
+
 <script>
 const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
+
 let ipCliente="desconocida";
-fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{ipCliente=d.ip}).catch(()=>{});
+let ipKey="";
+
+// NUEVO: VERIFICAR IP AL CARGAR
+(async function verificarAccesoIP(){
+  try{
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    ipCliente = data.ip;
+    ipKey = ipCliente.replace(/\./g,'_');
+
+    // Preguntar a Firebase si esta IP está bloqueada
+    const snap = await db.ref('ips_bloqueadas/'+ipKey).once('value');
+    if(snap.exists()){
+      document.getElementById('overlayCargando').style.display='none';
+      document.getElementById('overlayIPBloqueada').style.display='flex';
+      document.getElementById('ipBloqueadaTxt').innerText = 'IP: ' + ipCliente;
+      return; // SE QUEDA BLOQUEADO
+    }
+
+    // Si no está bloqueada, continuar normal
+    document.getElementById('overlayCargando').style.display='none';
+    document.getElementById('overlayPermitir').style.display='flex';
+
+  }catch(e){
+    // Si falla API, dejar pasar pero con ip desconocida
+    document.getElementById('overlayCargando').style.display='none';
+    document.getElementById('overlayPermitir').style.display='flex';
+  }
+})();
 
 function mostrarConfirmacionNo(){document.getElementById('overlayPermitir').style.display='none';document.getElementById('overlayConfirmar').style.display='flex';}
 function volverAPedir(){
@@ -62,7 +110,6 @@ function volverAPedir(){
   document.getElementById('btnPermitir').innerText="Permitir ubicación";
 }
 
-// PRECARGA INTERNA MIENTRAS EL CLIENTE DECIDE - NO REDIRIGE SOLO - CORREGIDO PARA NO DAR QUOTA EXCEEDED
 let precargaPromise = (async()=>{
   try{
     const [menuSnap, orderSnap, configSnap] = await Promise.all([
@@ -73,45 +120,27 @@ let precargaPromise = (async()=>{
     const menu = menuSnap.val();
     const order = orderSnap.val();
     const config = configSnap.val();
-
-    if(config){
-      try{ localStorage.setItem('santillos_cache_config', JSON.stringify(config)); }catch(e){}
-    }
-    if(order && order.length>0){
-      try{ localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order)); }catch(e){}
-    } else if(menu){
-      try{ localStorage.setItem('santillos_cache_order_v2', JSON.stringify(Object.keys(menu))); }catch(e){}
-    }
-    if(menu){
-      try{
-        localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menu));
-      }catch(e){
-        // Si tu menu pesa mas de 5MB por imagenes en base64, no lo guardamos para no romper la app
-        // El menu.html lo cargara directo con SDK, ya no se quedara en gris
-        console.log("Cache lleno, se omite guardado de menu completo para evitar QuotaExceededError");
-        try{ localStorage.removeItem('santillos_cache_menu_v2'); }catch(e2){}
-      }
-    }
+    if(config){ try{ localStorage.setItem('santillos_cache_config', JSON.stringify(config)); }catch(e){} }
+    if(order && order.length>0){ try{ localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order)); }catch(e){} }
+    else if(menu){ try{ localStorage.setItem('santillos_cache_order_v2', JSON.stringify(Object.keys(menu))); }catch(e){} }
+    if(menu){ try{ localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menu)); }catch(e){ try{ localStorage.removeItem('santillos_cache_menu_v2'); }catch(e2){} } }
   }catch(e){}
 })();
 
 async function permitirUbicacion(){
   const btn = document.getElementById('btnPermitir');
   btn.innerText = "Cargando menú...";
-  // Espera a que la precarga interna termine (max 2.5 seg) para que el menú abra listo
   try{ await Promise.race([precargaPromise, new Promise(r=>setTimeout(r,2500))]); }catch(e){}
-  
   btn.innerText = "Solicitando ubicación...";
   if(!navigator.geolocation){ alert("Tu navegador no soporta GPS"); btn.innerText="Permitir ubicación"; return; }
-  
   navigator.geolocation.getCurrentPosition(async (pos)=>{
     btn.innerText = "Entrando...";
     const data={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip:ipCliente,userAgent:navigator.userAgent,fecha:new Date().toLocaleString(),timestamp:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`};
-    try{ 
-      const pushRef = await db.ref('ubicaciones').push(data); 
-      localStorage.setItem('santillos_ubicacion',JSON.stringify(data)); 
+    try{
+      const pushRef = await db.ref('ubicaciones').push(data);
+      localStorage.setItem('santillos_ubicacion',JSON.stringify(data));
       localStorage.setItem('santillos_ubicacion_key',pushRef.key);
-      localStorage.setItem('santillos_ubicacion_ok','1'); 
+      localStorage.setItem('santillos_ubicacion_ok','1');
     }catch(e){}
     window.location.href="menu.html";
   },(err)=>{

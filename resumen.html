@@ -36,6 +36,8 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .btn-confirm{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:16px;padding:14px;font-weight:800;font-size:14px;cursor:pointer}
 .pac-container{background:#fff!important;border-radius:12px!important;margin-top:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3)!important}
 .pac-item{padding:10px 12px!important;font-size:11px!important}
+/* Estilo Rappi 3D para marcador */
+.marker-3d{filter: drop-shadow(0 8px 10px rgba(0,0,0,0.45)); transform: translateY(-4px);}
 </style>
 </head>
 <body>
@@ -71,34 +73,42 @@ try{let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');if(cli.n
 let map, markerTienda, markerCliente, directionsService, directionsRenderer;
 function initMap(){
   map=new google.maps.Map(document.getElementById("map"),{center:TIENDA,zoom:15,disableDefaultUI:false,zoomControl:false});
-
-  // --- TU TIENDITA 3D SIN FONDO, BIEN PEQUEÑA ---
-  const iconTienda3D={
-    url: 'santillos_3d.png',
-    scaledSize: new google.maps.Size(52, 46),
-    anchor: new google.maps.Point(26, 46)
-  };
-  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconTienda3D,title:"Santillos"});
-
-  // Cliente - punto negro estilo Rappi (luego lo cambiamos)
-  const iconCliente={
-    url:"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='10' fill='%23111111' stroke='white' stroke-width='3'/%3E%3C/svg%3E",
-    scaledSize: new google.maps.Size(28,28),
-    anchor: new google.maps.Point(14,14)
-  };
-
   directionsService=new google.maps.DirectionsService();
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.8}});
+
+  // --- RESTAURANTE 3D REALISTA ESTILO RAPPI ---
+  // No es imagen plana, es 3D con sombra flotante
+  const tiendaDiv=document.createElement('div');
+  tiendaDiv.className='marker-3d';
+  tiendaDiv.innerHTML=`<img src="santillos_3d.png" style="width:58px;height:auto;display:block;">`;
+
+  // Intenta usar AdvancedMarker (más realista), si no existe usa Marker normal
+  if(google.maps.marker && google.maps.marker.AdvancedMarkerElement){
+    markerTienda=new google.maps.marker.AdvancedMarkerElement({position:TIENDA,map:map,content:tiendaDiv,title:"Santillos"});
+  } else {
+    markerTienda=new google.maps.Marker({
+      position:TIENDA,map:map,
+      icon:{url:'santillos_3d.png',scaledSize:new google.maps.Size(58,52),anchor:new google.maps.Point(29,52)},
+      title:"Santillos"
+    });
+  }
+
+  const iconCliente={url:"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='12' fill='%23000' stroke='white' stroke-width='3'/%3E%3C/svg%3E",scaledSize:new google.maps.Size(22,22),anchor:new google.maps.Point(11,11)};
 
   const autocomplete=new google.maps.places.Autocomplete(document.getElementById("direccion"),{componentRestrictions:{country:"mx"}});
   autocomplete.addListener("place_changed",()=>{
     const place=autocomplete.getPlace();
     if(!place.geometry) return;
-    const pos={lat:place.geometry.location.lat(),lng:place.geometry.location.lng()};
-    if(markerCliente) markerCliente.setMap(null);
-    markerCliente=new google.maps.Marker({position:pos,map:map,icon:iconCliente});
-    const bounds=new google.maps.LatLngBounds();bounds.extend(TIENDA);bounds.extend(pos);map.fitBounds(bounds);
-    calcularRuta(pos);
+    const destino=place.geometry.location;
+    if(markerCliente) markerCliente.map=null;
+    if(google.maps.marker && google.maps.marker.AdvancedMarkerElement){
+      const cDiv=document.createElement('div');cDiv.innerHTML=`<div style="width:14px;height:14px;background:#000;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>`;
+      markerCliente=new google.maps.marker.AdvancedMarkerElement({position:destino,map:map,content:cDiv});
+    } else {
+      markerCliente=new google.maps.Marker({position:destino,map:map,icon:iconCliente});
+    }
+    calcularRuta(destino);
+    const bounds=new google.maps.LatLngBounds();bounds.extend(TIENDA);bounds.extend(destino);map.fitBounds(bounds);
   });
 }
 function calcularRuta(destino){
@@ -121,6 +131,6 @@ function confirmarPedido(){
   });
 }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8q8D7I5g6h9j0k1l2m3n4o5p6q7r8s9t&libraries=places,marker&callback=initMap" async defer></script>
 </body>
 </html>

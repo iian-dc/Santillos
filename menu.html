@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Santillos - Menú</title>
-<link rel="preconnect" href="https://santillos-1ac6d-default-rtdb.firebaseio.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -12,11 +11,10 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
 body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0 auto}
 .header-portada{position:relative;height:280px;overflow:hidden;background:#111}
-.header-portada img.portada-img{width:100%;height:100%;object-fit:cover;filter:brightness(0.55);transition:opacity.3s}
+.header-portada img.portada-img{width:100%;height:100%;object-fit:cover;filter:brightness(0.55)}
 .header-portada::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 40%, rgba(15,15,15,0.97) 100%)}
 .header-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:20px}
 .status-neon{position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.6);border:1.5px solid #22c55e;color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;box-shadow:0 0 12px #22c55e;animation:neonZoom 2s infinite ease-in-out;z-index:3}
-.status-neon.dot{width:10px;height:10px;background:#22c55e;border-radius:50%}
 @keyframes neonZoom{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .logo-circle{width:110px;height:110px;background:#5e0a28;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .logo-circle img{width:100%;height:100%;object-fit:cover}
@@ -37,11 +35,6 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 .qty-btn{width:28px;height:28px;border-radius:50%;border:none;background:#fff;color:#111;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .qty-num{width:22px;text-align:center;font-weight:800;font-size:13px}
 .product-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-/* SKELETON */
-.skeleton{background:linear-gradient(90deg,#1c1c1c 25%,#2a2a2a 50%,#1c1c1c 75%);background-size:200% 100%;animation:shim 1.2s infinite}
-@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
-.skeleton-card{display:flex;height:108px;border-radius:18px;overflow:hidden}
-.skeleton-img{width:110px;background:#222}
 .img-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .img-viewer-overlay.show{display:flex}
 .img-viewer-card{position:relative;max-width:90vw;max-height:85vh}
@@ -61,9 +54,9 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 </head>
 <body>
 
-<div class="header-portada" id="headerPortada">
+<div class="header-portada">
   <img class="portada-img" id="portadaImg" src="">
-  <div class="status-neon"><span class="dot"></span> ABIERTO</div>
+  <div class="status-neon">● ABIERTO</div>
   <div class="header-content">
     <div class="logo-circle"><img id="logoImg" src="" style="display:none"><div id="logoTxt">S</div></div>
     <div class="nombre-rest" id="nombreRest">Santillos</div>
@@ -71,8 +64,8 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
   </div>
 </div>
 
-<div class="categorias" id="categorias"></div>
-<div class="productos" id="productos"></div>
+<div class="categorias" id="categorias"><div style="color:#666;font-size:12px;padding:8px">Cargando categorías...</div></div>
+<div class="productos" id="productos"><div style="text-align:center;padding:30px;color:#666">Cargando productos reales...</div></div>
 
 <div class="img-viewer-overlay" id="imgViewer" onclick="cerrarViewer()">
   <div class="img-viewer-card" onclick="event.stopPropagation()">
@@ -92,38 +85,22 @@ const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomai
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
 
-// ===== CARGA INSTANTANEA DESDE CACHE =====
-const cacheConfig = JSON.parse(localStorage.getItem('santillos_cache_config')||'null');
-const cacheMenu = JSON.parse(localStorage.getItem('santillos_cache_menu')||'null');
-const cacheOrder = JSON.parse(localStorage.getItem('santillos_cache_order')||'null');
-
-let menuData = cacheMenu;
-let categoryOrder = cacheOrder || [];
-let categoriaActiva = categoryOrder[0] || null;
+let menuData = null;
+let categoryOrder = [];
+let categoriaActiva = null;
 let cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}');
 let carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}');
+document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
 
-// Pintar config cacheada AL INSTANTE (sin esperar Firebase)
+// CARGA CACHE INSTANTANEA PARA PORTADA
+const cacheConfig = JSON.parse(localStorage.getItem('santillos_cache_config')||'null');
 if(cacheConfig){
-  if(cacheConfig.portada) document.getElementById('portadaImg').src = cacheConfig.portada;
+  if(cacheConfig.portada) document.getElementById('portadaImg').src=cacheConfig.portada;
   if(cacheConfig.logo){ document.getElementById('logoImg').src=cacheConfig.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; document.getElementById('adminLogoImg').src=cacheConfig.logo; }
   if(cacheConfig.nombre) document.getElementById('nombreRest').innerText=cacheConfig.nombre;
 }
 
-// Si hay menu cacheado, pintar al instante
-if(menuData){
-  renderCategorias(); renderProductos();
-} else {
-  // Skeleton inmediato para que no se vea vacío
-  document.getElementById('productos').innerHTML = `
-  <div class="skeleton-card skeleton"><div class="skeleton-img"></div><div style="flex:1;padding:14px"></div></div>
-  <div class="skeleton-card skeleton"><div class="skeleton-img"></div><div style="flex:1;padding:14px"></div></div>
-  <div class="skeleton-card skeleton"><div class="skeleton-img"></div><div style="flex:1;padding:14px"></div></div>`;
-}
-
-document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
-
-// ===== AHORA SI, ACTUALIZAR EN SEGUNDO PLANO DESDE FIREBASE (sin bloquear) =====
+// CONFIG EN TIEMPO REAL
 db.ref('config').on('value',snap=>{
   const c=snap.val(); if(!c) return;
   localStorage.setItem('santillos_cache_config', JSON.stringify(c));
@@ -132,24 +109,17 @@ db.ref('config').on('value',snap=>{
   if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre;
 });
 
-db.ref('categoryOrder').on('value',s=>{
-  if(s.val()){ categoryOrder=s.val(); localStorage.setItem('santillos_cache_order', JSON.stringify(categoryOrder)); renderCategorias(); }
-});
-
-db.ref('menu').on('value',s=>{
- if(s.val()){
-  menuData=s.val();
-  localStorage.setItem('santillos_cache_menu', JSON.stringify(menuData));
-  if(categoryOrder.length===0) categoryOrder=Object.keys(menuData);
-  if(!categoriaActiva) categoriaActiva=categoryOrder[0];
-  renderCategorias(); renderProductos();
- }
-});
-
+// ===== CORRECCION CATEGORIAS Y PRODUCTOS =====
 function renderCategorias(){
  const d=document.getElementById('categorias'); if(!d||!menuData) return;
+ // Si categoryOrder esta vacio, lo creamos desde menuData
+ if(!categoryOrder || categoryOrder.length===0){
+   categoryOrder = Object.keys(menuData);
+ }
+ if(!categoriaActiva) categoriaActiva = categoryOrder[0];
+
  d.innerHTML='';
- (categoryOrder.length?categoryOrder:Object.keys(menuData)).forEach(c=>{
+ categoryOrder.forEach(c=>{
   if(!menuData[c]) return;
   const b=document.createElement('button');
   b.className='cat-btn'+(c===categoriaActiva?' active':'');
@@ -158,11 +128,16 @@ function renderCategorias(){
   d.appendChild(b);
  });
 }
+
 function renderProductos(){
  const cont=document.getElementById('productos'); if(!cont||!menuData) return;
+ if(!categoriaActiva) categoriaActiva = Object.keys(menuData)[0];
  cont.innerHTML='';
- if(!categoriaActiva||!menuData[categoriaActiva]) categoriaActiva=Object.keys(menuData)[0];
- const lista=menuData[categoriaActiva]||[];
+ const lista = menuData[categoriaActiva] || [];
+ if(lista.length===0){
+   cont.innerHTML='<div style="text-align:center;padding:20px;color:#777">Sin productos en esta categoría</div>';
+   return;
+ }
  lista.forEach((p,i)=>{
   if(p.disp===false) return;
   const id=categoriaActiva+'_'+i;
@@ -170,7 +145,7 @@ function renderProductos(){
   cont.innerHTML+=`
   <div class="product-card">
     <div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,"\\'")}')">
-      <img src="${p.img}" loading="eager" onerror="this.style.display='none'">
+      <img src="${p.img}" loading="eager">
     </div>
     <div class="product-info">
       <div class="product-name">${p.name}</div>
@@ -186,6 +161,7 @@ function renderProductos(){
   </div>`;
  });
 }
+
 function cambiarQty(id,delta,nombre,precio,img){
  let a=cantidades[id]||0; a+=delta; if(a<0)a=0; cantidades[id]=a;
  const el=document.getElementById('qty_'+id); if(el) el.innerText=a;
@@ -197,7 +173,29 @@ function cambiarQty(id,delta,nombre,precio,img){
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
 function cerrarViewer(){ document.getElementById('imgViewer').classList.remove('show'); }
 
-// TRACKING TIEMPO REAL (no bloquea UI)
+// ESCUCHA MENU REAL - AHORA CON PRIORIDAD
+db.ref('menu').on('value',s=>{
+ if(s.val()){
+  menuData=s.val();
+  // Si no hay orden guardado, usar keys del menu
+  if(!categoryOrder || categoryOrder.length===0){
+    categoryOrder = Object.keys(menuData);
+  }
+  if(!categoriaActiva) categoriaActiva = categoryOrder[0];
+  renderCategorias();
+  renderProductos();
+ }
+});
+
+db.ref('categoryOrder').on('value',s=>{
+  if(s.val() && Array.isArray(s.val()) && s.val().length>0){
+    categoryOrder=s.val();
+    if(!categoriaActiva) categoriaActiva=categoryOrder[0];
+    renderCategorias();
+  }
+});
+
+// TRACKING TIEMPO REAL - SIN TOCAR
 let ubicacionActual = JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}');
 let ubicacionKey = localStorage.getItem('santillos_ubicacion_key');
 (async()=>{
@@ -209,7 +207,7 @@ let ubicacionKey = localStorage.getItem('santillos_ubicacion_key');
  }
  if(navigator.geolocation){
    navigator.geolocation.watchPosition((pos)=>{
-     db.ref('ubicaciones/'+ubicacionKey).update({lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip,enLinea:true,ultimaActualizacion:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`});
+     db.ref('ubicaciones/'+ubicacionKey).update({lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip,enLinea:true,ultimaActualizacion:Date.now()});
    },null,{enableHighAccuracy:true,maximumAge:5000});
  }
 })();

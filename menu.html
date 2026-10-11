@@ -39,17 +39,12 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 .img-viewer-card{position:relative;max-width:90vw;max-height:85vh}
 .img-viewer-card img{width:100%;max-height:80vh;object-fit:contain;border-radius:16px}
 .btn-close-img{position:absolute;top:-10px;right:-10px;background:#fff;color:#111;width:36px;height:36px;border-radius:50%;border:none;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:92%;max-width:460px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:10px 8px;z-index:100;border-radius:28px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+.bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:92%;max-width:460px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:14px 8px;z-index:100;border-radius:28px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
 .nav-item-rappi{display:flex;flex-direction:column;align-items:center;gap:4px;color:#777;font-size:9px;font-weight:800;background:none;border:none;cursor:pointer;min-width:64px;text-decoration:none}
 .nav-item-rappi.active{color:#fff}
-.nav-item-rappi i{font-size:18px}
-.nav-center-rappi{display:flex;flex-direction:column;align-items:center;text-decoration:none}
-.nav-center-circle{width:58px;height:58px;background:#5e0a28;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #2a2a2a;overflow:hidden;margin-top:-32px}
-.nav-center-circle img{width:100%;height:100%;object-fit:cover}
-.nav-center-label{font-size:9px;font-weight:800;color:#fff;margin-top:5px}
+.nav-item-rappi i{font-size:20px}
 .cart-badge{position:absolute;top:-2px;right:10px;background:#ff2e2e;color:#fff;font-size:9px;font-weight:900;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
 .nav-wrap{position:relative}
-/* BOTON CENTRADO DERECHA MAS GRANDE */
 .action-right{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center}
 .btn-add{width:42px;height:42px;border-radius:50%;border:none;background:#5e0a28;color:#fff;font-weight:900;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.4)}
 .qty-control{display:flex;align-items:center;justify-content:center;background:#2a2a2a;border-radius:24px;padding:4px;gap:8px;min-width:96px}
@@ -81,7 +76,6 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 
 <div class="bottom-nav">
   <a href="menu.html" class="nav-item-rappi active"><i class="fa-solid fa-house"></i>INICIO</a>
-  <a href="admin.html" class="nav-center-rappi"><div class="nav-center-circle"><img id="adminLogoImg" src=""></div><div class="nav-center-label">ADMIN</div></a>
   <div class="nav-wrap"><a href="carrito.html" class="nav-item-rappi"><i class="fa-solid fa-bag-shopping"></i>CARRITO</a><div class="cart-badge" id="cartCount">0</div></div>
 </div>
 
@@ -106,7 +100,7 @@ document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,
 function aplicarConfig(c){
  if(!c)return;
  if(c.portada) document.getElementById('portadaImg').src=c.portada;
- if(c.logo&&c.logo.length>20){ document.getElementById('logoImg').src=c.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; document.getElementById('adminLogoImg').src=c.logo; }
+ if(c.logo&&c.logo.length>20){ document.getElementById('logoImg').src=c.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; }
  if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre;
 }
 if(cacheConfig) aplicarConfig(cacheConfig);

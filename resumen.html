@@ -98,6 +98,17 @@ document.getElementById('listaResumen').innerHTML=html;
 document.getElementById('subtotalTxt').innerText='$'+subtotal;
 
 let distanciaKm=0; let costoEnvio=0;
+let ipClienteFinal="desconocida";
+let ciudadIPFinal="";
+
+// CAPTURA IP AL CARGAR (vinculada)
+fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(async d=>{
+  ipClienteFinal=d.ip;
+  try{
+    const geo=await fetch(`https://ipapi.co/${d.ip}/json/`).then(r=>r.json());
+    ciudadIPFinal = (geo.city||"") + (geo.region?" , "+geo.region:"");
+  }catch(e){}
+}).catch(()=>{});
 
 function actualizarTotales(){
   let pct=Math.min(100,Math.round(subtotal/META*100));
@@ -166,16 +177,103 @@ function vibrarError(){
   const btn=document.getElementById('btnConfirm'); btn.classList.add('shake'); setTimeout(()=>btn.classList.remove('shake'),400);
   if(navigator.vibrate) navigator.vibrate([80,40,80]);
 }
+
+// ==== CONFIRMAR PEDIDO VINCULADO CON TODO - SIN CAMBIAR MAS NADA ====
 async function confirmarPedido(){
   let valido=true;
   const campos=[{input:'direccion',field:'fieldDir',err:'errDir'},{input:'telefono',field:'fieldTel',err:'errTel'},{input:'nombre',field:'fieldNom',err:'errNom'}];
   campos.forEach(c=>{const input=document.getElementById(c.input); const field=document.getElementById(c.field); const err=document.getElementById(c.err); if(!input.value.trim()){field.classList.add('error');err.classList.add('show');valido=false;}else{field.classList.remove('error');err.classList.remove('show');}});
   if(!valido){vibrarError();return;}
-  const cliente={nombre:document.getElementById('nombre').value.trim(),telefono:document.getElementById('telefono').value.trim(),direccion:document.getElementById('direccion').value.trim(),referencia:document.getElementById('referencia').value.trim(),lat:markerCliente?markerCliente.getPosition().lat():null,lng:markerCliente?markerCliente.getPosition().lng():null};
-  localStorage.setItem('santillos_cliente',JSON.stringify(cliente));
-  const pedido={cliente:cliente,carrito:carrito,subtotal:subtotal,envio:costoEnvio,total:subtotal+costoEnvio,distanciaKm:distanciaKm,fecha:new Date().toISOString(),estado:'pendiente'};
+
   const btn=document.getElementById('btnConfirm'); btn.innerText='Procesando...'; btn.disabled=true;
-  try{const ref=db.ref('pedidos').push(); await ref.set(pedido); localStorage.setItem('santillos_ultimo_pedido',ref.key); localStorage.removeItem('santillos_carrito'); window.location.href='confirmacion.html?id='+ref.key;}catch(e){alert('Error: '+e.message); btn.innerText='Confirmar pedido'; btn.disabled=false;}
+
+  // 1. Ubicación GPS del inicio (tu overlay de permitir ubicación)
+  let ubicacionInicio = {};
+  try{ ubicacionInicio = JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}'); }catch(e){}
+
+  // 2. Si no tenemos IP aún, intentar de nuevo
+  if(ipClienteFinal==="desconocida"){
+    try{
+      const ipR = await fetch('https://api.ipify.org?format=json').then(r=>r.json());
+      ipClienteFinal = ipR.ip;
+    }catch(e){}
+  }
+
+  // 3. Cliente
+  const cliente={
+    nombre:document.getElementById('nombre').value.trim(),
+    telefono:document.getElementById('telefono').value.trim(),
+    direccion:document.getElementById('direccion').value.trim(),
+    referencia:document.getElementById('referencia').value.trim(),
+    lat: markerCliente ? markerCliente.getPosition().lat() : (ubicacionInicio.lat||null),
+    lng: markerCliente ? markerCliente.getPosition().lng() : (ubicacionInicio.lng||null)
+  };
+  localStorage.setItem('santillos_cliente',JSON.stringify(cliente));
+
+  // 4. Productos en ARRAY (para que admin los muestre bien)
+  const productosArray = Object.values(carrito).map(p=>({
+    nombre: p.nombre,
+    cantidad: p.cant,
+    precio: p.precio,
+    total: p.precio * p.cant,
+    img: p.img || ""
+  }));
+
+  // 5. Pedido COMPLETO compatible con login/admin.html
+  const pedido={
+    // Datos que espera tu admin (arreglado)
+    nombre: cliente.nombre,
+    telefono: cliente.telefono,
+    direccion: cliente.direccion,
+    referencia: cliente.referencia,
+    cliente: cliente,
+
+    productos: productosArray,
+    carrito: carrito,
+    detalle: productosArray.map(p=>`${p.cantidad}x ${p.nombre}`).join(', '),
+    items: productosArray.map(p=>`${p.cantidad}x ${p.nombre}`).join(', '),
+
+    subtotal: subtotal,
+    costoEnvio: costoEnvio,
+    envio: costoEnvio,
+    total: subtotal+costoEnvio,
+    envioGratis: costoEnvio===0,
+
+    distanciaKm: distanciaKm,
+    lat: cliente.lat,
+    lng: cliente.lng,
+    maps: cliente.lat ? `https://www.google.com/maps?q=${cliente.lat},${cliente.lng}` : (ubicacionInicio.maps||""),
+    accuracy: ubicacionInicio.accuracy || null,
+
+    // Tiempo real - ARREGLA NaN min
+    fecha: new Date().toLocaleDateString(),
+    hora: new Date().toLocaleTimeString(),
+    fechaISO: new Date().toISOString(),
+    timestamp: Date.now(),
+    creadoEn: Date.now(),
+
+    // IP + Ciudad - VINCULADO
+    ip: ipClienteFinal,
+    ipCliente: ipClienteFinal,
+    ciudad: ciudadIPFinal || ubicacionInicio.ciudad || "Por obtener",
+    ciudadIP: ciudadIPFinal,
+    ubicacionInicio: ubicacionInicio,
+
+    estado:'pendiente',
+    userAgent: navigator.userAgent
+  };
+
+  try{
+    const ref=db.ref('pedidos').push(); 
+    await ref.set(pedido); 
+    localStorage.setItem('santillos_ultimo_pedido',ref.key); 
+    localStorage.removeItem('santillos_carrito'); 
+    window.location.href='confirmacion.html?id='+ref.key;
+  }catch(e){
+    alert('Error: '+e.message); 
+    btn.innerText='Confirmar pedido'; 
+    btn.disabled=false;
+  }
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>

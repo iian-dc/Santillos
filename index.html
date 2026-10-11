@@ -50,9 +50,8 @@ fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{ipCliente=
 function mostrarConfirmacionNo(){document.getElementById('overlayPermitir').style.display='none';document.getElementById('overlayConfirmar').style.display='flex';}
 function volverAPedir(){document.getElementById('overlayConfirmar').style.display='none';document.getElementById('overlayPermitir').style.display='flex';}
 
-// PRECARGA SILENCIOSA MIENTRAS EL CLIENTE DECIDE - NO REDIRIGE
+// PRECARGA EN FONDO
 const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
-let precargaLista = false;
 (async function precargarMenuEnFondo(){
   try{
     const [menu, order, config] = await Promise.all([
@@ -64,16 +63,18 @@ let precargaLista = false;
     if(order && order.length>0) localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order));
     else if(menu) localStorage.setItem('santillos_cache_order_v2', JSON.stringify(Object.keys(menu)));
     if(config) localStorage.setItem('santillos_cache_config', JSON.stringify(config));
-    precargaLista = true;
   }catch(e){}
 })();
 
 function permitirUbicacion(){
   const btn = document.getElementById('btnPermitir');
-  btn.innerText = "Activando ubicación...";
+  btn.innerText = "Obteniendo ubicación...";
   btn.disabled = true;
 
-  if(!navigator.geolocation){ alert("No soporta GPS"); btn.innerText="Permitir ubicación"; btn.disabled=false; return; }
+  if(!navigator.geolocation){ 
+    alert("Tu navegador no soporta GPS"); 
+    btn.innerText="Permitir ubicación"; btn.disabled=false; return; 
+  }
   
   navigator.geolocation.getCurrentPosition(async (pos)=>{
     const data={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip:ipCliente,userAgent:navigator.userAgent,fecha:new Date().toLocaleString(),timestamp:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`};
@@ -83,13 +84,20 @@ function permitirUbicacion(){
       localStorage.setItem('santillos_ubicacion_key',pushRef.key);
       localStorage.setItem('santillos_ubicacion_ok','1'); 
     }catch(e){}
-    // Ya tiene ubicación + precarga, ahora sí entra al menú
     window.location.href="menu.html";
-  },()=>{
+  },(err)=>{
+    // ERROR: NO mostrar la confirmacion de "Ahora no" cuando el usuario SI quiso permitir
     btn.innerText="Permitir ubicación";
     btn.disabled=false;
-    mostrarConfirmacionNo();
-  },{enableHighAccuracy:true,timeout:15000});
+    console.log("Error GPS:", err.code, err.message);
+    if(err.code === 1){
+      // Usuario nego el permiso del navegador -> ahora si mostramos confirmacion
+      mostrarConfirmacionNo();
+    } else {
+      // Error de GPS o timeout -> pedimos que active GPS y reintente, NO lo mandamos a "Ahora no"
+      alert("Activa tu GPS y vuelve a darle a Permitir ubicación. Asegúrate de estar en HTTPS.");
+    }
+  },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
 }
 </script>
 </body>

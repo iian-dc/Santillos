@@ -48,8 +48,11 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
 .pedido-body{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .pedido-info{font-size:11px}
 .pedido-info b{font-size:12px;color:#111;display:block;margin-bottom:2px}
-.pedido-info .small{color:#777;font-weight:600}
-.ip-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:10px;font-weight:700}
+.pedido-info.small{color:#777;font-weight:600}
+.ip-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:10px;font-weight:700;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.ip-status{padding:3px 8px;border-radius:6px;font-size:9px;font-weight:800}
+.ip-activa{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.ip-bloqueada{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
 .pedido-total{font-size:18px;font-weight:900;color:#111}
 .envio-gratis{font-size:10px;font-weight:800;padding:4px 8px;border-radius:8px;display:inline-block;margin-top:4px}
 .envio-si{background:#dcfce7;color:#166534}
@@ -63,12 +66,14 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
 .btn-entregado{background:#16a34a;color:#fff}
 .btn-cancelado{background:#ef4444;color:#fff}
 .btn-estado.active{outline:2px solid #111;outline-offset:2px}
+.btn-bloquear{background:#111;color:#fff}
+.btn-desbloquear{background:#fff;color:#111;border:1px solid #111}
 @media(max-width:900px){
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
-  .main{margin-left:0}
-  .btn-menu{display:flex;align-items:center;justify-content:center}
-  .pedido-body{grid-template-columns:1fr}
+ .sidebar{transform:translateX(-100%)}
+ .sidebar.open{transform:translateX(0)}
+ .main{margin-left:0}
+ .btn-menu{display:flex;align-items:center;justify-content:center}
+ .pedido-body{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -116,7 +121,7 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
@@ -125,8 +130,7 @@ const firebaseConfig = {
   projectId: "santillos-1ac6d",
   storageBucket: "santillos-1ac6d.firebasestorage.app",
   messagingSenderId: "285600299102",
-  appId: "1:285600299102:web:9590597c2b3d8888821ccf",
-  measurementId: "G-TJH35VDGJ9"
+  appId: "1:285600299102:web:9590597c2b3d8888821ccf"
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -134,7 +138,6 @@ const db = getDatabase(app);
 if(!localStorage.getItem('santillos_admin_login')){ window.location.href='./'; }
 document.getElementById('userNameTop').innerText = localStorage.getItem('santillos_admin_usuario')||'admin';
 
-// RUTAS login/nombre
 window.goTo = function(id, el){
   if(id === 'pedidos_activos'){
     document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
@@ -145,35 +148,34 @@ window.goTo = function(id, el){
     document.getElementById('sidebar').classList.remove('open');
     history.replaceState(null,null,'./admin.html#'+id);
   } else {
-    // Ruta para futuros archivos
     window.location.href = './'+id+'/';
   }
 }
-
 window.cerrarSesion = function(){ localStorage.clear(); window.location.href='./'; }
 
 let pedidosCache = [];
+let ipsBloqueadasCache = {};
 
 function obtenerInicioPedido(p){
   if(p.timestamp) return new Date(p.timestamp);
   if(p.creadoEn) return new Date(p.creadoEn);
   if(p.fechaISO) return new Date(p.fechaISO);
-  // Si tiene fecha y hora separadas
   if(p.fecha){
-    const f = p.fecha;
-    // Si ya es timestamp string
-    const d = new Date(f);
+    const d = new Date(p.fecha);
     if(!isNaN(d)) return d;
   }
-  // Fallback: usa la fecha de Firebase key (no perfecto pero evita NaN)
   return new Date();
 }
-
 function calcularMinutos(p){
   const inicio = obtenerInicioPedido(p);
   const ahora = new Date();
   const diff = Math.floor((ahora - inicio)/60000);
-  return diff < 0 ? 0 : diff;
+  return diff < 0? 0 : diff;
+}
+function estadoIP(ip){
+  if(!ip) return 'sin_ip';
+  const key = ip.replace(/\./g,'_');
+  return ipsBloqueadasCache[key]? 'bloqueada' : 'activa';
 }
 
 function renderPedidos(){
@@ -186,29 +188,33 @@ function renderPedidos(){
     if(minutos>=40) cronoClass='crono-rojo';
     else if(minutos>=20) cronoClass='crono-amarillo';
 
-    // NÚMERO DE PEDIDO EN NÚMEROS
     const numeroPedido = `ST-${String(index+1).padStart(4,'0')}`;
-
-    // CLIENTE - detecta diferentes estructuras de tu Firebase
-    const nombreCliente = p.cliente?.nombre || p.nombre || p.clienteNombre || p.customerName || 'Cliente sin nombre';
+    const nombreCliente = p.cliente?.nombre || p.nombre || p.clienteNombre || 'Cliente sin nombre';
     const telefonoCliente = p.cliente?.telefono || p.telefono || p.phone || 'Sin teléfono';
     const direccionCliente = p.cliente?.direccion || p.direccion || p.address || p.ubicacionTexto || 'Sin dirección';
 
-    // PRODUCTOS - detecta array, objeto o string
     let productosTexto = 'Sin productos';
-    if(Array.isArray(p.productos)){ productosTexto = p.productos.map(pr=>`${pr.cantidad||1}x ${pr.nombre||pr.name}`).join(', '); }
-    else if(typeof p.productos === 'object' && p.productos!==null){ productosTexto = Object.values(p.productos).map(pr=>`${pr.cantidad||1}x ${pr.nombre||''}`).join(', '); }
+    if(Array.isArray(p.productos)){ productosTexto = p.productos.map(pr=>`${pr.cantidad||pr.cant||1}x ${pr.nombre||pr.name}`).join(', '); }
+    else if(typeof p.productos === 'object' && p.productos!==null){ productosTexto = Object.values(p.productos).map(pr=>`${pr.cantidad||pr.cant||1}x ${pr.nombre||pr.name||''}`).join(', '); }
     else if(typeof p.productos === 'string' && p.productos.length>0){ productosTexto = p.productos; }
     else if(p.detalle){ productosTexto = p.detalle; }
-    else if(p.items){ productosTexto = p.items; }
 
-    const envioTexto = (p.envioGratis===true || p.envio===0 || p.costoEnvio===0) ? '<span class="envio-gratis envio-si"><i class="fa-solid fa-truck"></i> Envío Gratis</span>' : `<span class="envio-gratis envio-no">Envío: $${p.costoEnvio||p.envio||0}</span>`;
+    const ipActual = p.ip || p.ipCliente || '';
+    const estIP = estadoIP(ipActual);
+    let ipBadge = '';
+    if(estIP==='bloqueada') ipBadge = '<span class="ip-status ip-bloqueada">⛔ BLOQUEADA</span>';
+    else if(estIP==='activa') ipBadge = '<span class="ip-status ip-activa">✅ ACTIVA</span>';
+    else ipBadge = '<span class="ip-status" style="background:#eee">IP PENDIENTE</span>';
 
+    const envioTexto = (p.envioGratis===true || p.envio===0 || p.costoEnvio===0)? '<span class="envio-gratis envio-si"><i class="fa-solid fa-truck"></i> Envío Gratis</span>' : `<span class="envio-gratis envio-no">Envío: $${p.costoEnvio||p.envio||0}</span>`;
     const fechaMostrar = p.fecha || new Date(obtenerInicioPedido(p)).toLocaleDateString();
     const horaMostrar = p.hora || new Date(obtenerInicioPedido(p)).toLocaleTimeString();
+    const btnBloqueo = estIP==='bloqueada'
+     ? `<button class="btn-estado btn-desbloquear" onclick="desbloquearIP('${ipActual}')"><i class="fa-solid fa-lock-open"></i> Desbloquear IP</button>`
+      : `<button class="btn-estado btn-bloquear" onclick="bloquearIP('${ipActual}','${p.id}')"><i class="fa-solid fa-ban"></i> Bloquear IP</button>`;
 
     return `
-    <div class="pedido-card">
+    <div class="pedido-card" style="${estIP==='bloqueada'? 'border:2px solid #ef4444; background:#fff5f5' : ''}">
       <div class="pedido-top">
         <div>
           <div class="pedido-id"># PEDIDO ${numeroPedido}</div>
@@ -221,7 +227,10 @@ function renderPedidos(){
           <b><i class="fa-solid fa-user"></i> ${nombreCliente}</b>
           <div class="small"><i class="fa-solid fa-phone"></i> ${telefonoCliente}</div>
           <div class="small"><i class="fa-solid fa-location-dot"></i> ${direccionCliente}</div>
-          <div class="ip-box"><i class="fa-solid fa-globe"></i> IP: ${p.ip||p.ipCliente||'Pendiente vincular'} | ${p.ciudad||p.ciudadIP||'Ubicación por IP pendiente'}</div>
+          <div class="ip-box">
+            <span><i class="fa-solid fa-globe"></i> ${ipActual || 'IP no vinculada aún'} | ${p.ciudad||p.ciudadIP||'Dolores Hgo'}</span>
+            ${ipBadge}
+          </div>
           <div style="margin-top:8px;font-size:11px;background:#fff7ed;border:1px solid #ffedd5;padding:8px;border-radius:10px"><b><i class="fa-solid fa-burger"></i> Productos:</b><br>${productosTexto}</div>
         </div>
         <div class="pedido-info" style="text-align:right">
@@ -236,23 +245,45 @@ function renderPedidos(){
         <button class="btn-estado btn-camino ${p.estado==='en_camino'?'active':''}" onclick="cambiarEstado('${p.id}','en_camino')">En Camino</button>
         <button class="btn-estado btn-entregado ${p.estado==='entregado'?'active':''}" onclick="cambiarEstado('${p.id}','entregado')">Entregado</button>
         <button class="btn-estado btn-cancelado ${p.estado==='cancelado'?'active':''}" onclick="cambiarEstado('${p.id}','cancelado')">Cancelado</button>
-        <button class="btn-estado" style="background:#111;color:#fff;margin-left:auto" onclick="bloquearIP('${p.ip||''}')"><i class="fa-solid fa-ban"></i> Bloquear IP</button>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          ${btnBloqueo}
+          ${p.maps? `<a href="${p.maps}" target="_blank" class="btn-estado" style="background:#fff;border:1px solid #ddd;text-decoration:none;color:#111"><i class="fa-solid fa-location-dot"></i> Maps</a>` : ''}
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
 window.cambiarEstado = function(id, nuevoEstado){ update(ref(db, 'pedidos/'+id), { estado: nuevoEstado }); }
-window.bloquearIP = function(ip){ if(!ip){ alert('IP aún no vinculada. Lo vamos a vincular en el checkout ahora.'); return; } if(confirm('¿Bloquear IP '+ip+'?')){ update(ref(db, 'ips_bloqueadas/'+ip.replace(/\./g,'_')), { ip: ip, bloqueada:true, fecha: new Date().toISOString() }); } }
+
+window.bloquearIP = async function(ip, pedidoId){
+  if(!ip){ alert('Este pedido aún no tiene IP vinculada. Actualiza el checkout con el código que te di.'); return; }
+  if(!confirm('¿Bloquear IP '+ip+'? Ya no podrá entrar a la tienda.')) return;
+  const key = ip.replace(/\./g,'_');
+  await update(ref(db, 'ips_bloqueadas/'+key), { ip: ip, motivo: 'Bloqueada desde pedido '+pedidoId, fecha: new Date().toLocaleString(), timestamp: Date.now(), pedidoId: pedidoId });
+  alert('IP '+ip+' bloqueada con éxito. Ahora si vuelve a entrar le saldrá la tarjeta de Acceso Bloqueado.');
+}
+
+window.desbloquearIP = async function(ip){
+  if(!confirm('¿Desbloquear IP '+ip+'? Podrá volver a entrar.')) return;
+  const key = ip.replace(/\./g,'_');
+  await remove(ref(db, 'ips_bloqueadas/'+key));
+  alert('IP desbloqueada.');
+}
+
+// Escuchar bloqueadas
+onValue(ref(db, 'ips_bloqueadas'), (snap)=>{
+  ipsBloqueadasCache = snap.val() || {};
+  renderPedidos();
+});
 
 onValue(ref(db, 'pedidos'), (snap)=>{
   const data = snap.val() || {};
-  // Ordenar por timestamp descendente y filtrar activos
   let lista = Object.entries(data).map(([k,v])=>({id:k,...v}));
-  lista.sort((a,b)=> new Date(b.timestamp||b.creadoEn||0) - new Date(a.timestamp||a.creadoEn||0));
+  lista.sort((a,b)=> new Date(b.timestamp||b.creadoEn||b.fechaISO||0) - new Date(a.timestamp||a.creadoEn||a.fechaISO||0));
   lista = lista.filter(p=>p.estado!=='entregado' && p.estado!=='cancelado');
   pedidosCache = lista;
-  document.getElementById('countVivo').style.display = lista.length>0 ? 'inline-block' : 'none';
+  document.getElementById('countVivo').style.display = lista.length>0? 'inline-block' : 'none';
   document.getElementById('countVivo').innerText = lista.length;
   renderPedidos();
 });

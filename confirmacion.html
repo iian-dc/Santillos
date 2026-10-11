@@ -1,1 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedido Confirmado - Santillos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 14px;text-align:center}
+.icon-ok{width:80px;height:80px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:30px auto 16px;font-size:36px;color:#fff}
+h1{font-size:22px;font-weight:800} p{font-size:12px;color:#aaa;margin-top:6px}
+.card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;padding:14px;margin-top:16px;text-align:left}
+.row{display:flex;justify-content:space-between;font-size:12px;margin:6px 0}
+.total{font-size:16px;font-weight:800;border-top:1px solid #2a2a2a;padding-top:8px;margin-top:8px}
+.btn{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:14px;padding:14px;font-weight:800;margin-top:14px;display:block;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="icon-ok"><i class="fa-solid fa-check"></i></div>
+<h1>¡Pedido confirmado!</h1>
+<p id="idPedido">ID:...</p>
+<div class="card" id="detalle">Cargando pedido...</div>
+<a href="index.html" class="btn">Volver al inicio</a>
 
+<script>
+const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
+firebase.initializeApp(firebaseConfig);const db=firebase.database();
+const params=new URLSearchParams(location.search);
+const id=params.get('id')||localStorage.getItem('santillos_ultimo_pedido');
+document.getElementById('idPedido').innerText='ID: '+(id||'');
+if(id){
+  db.ref('pedidos/'+id).once('value').then(s=>{
+    const p=s.val(); if(!p) return;
+    let html=`<div class="row"><span>Cliente</span><b>${p.cliente.nombre}</b></div>
+    <div class="row"><span>Tel</span><b>${p.cliente.telefono}</b></div>
+    <div class="row"><span>Dirección</span><b style="max-width:60%;text-align:right">${p.cliente.direccion}</b></div>
+    <div class="row"><span>Distancia</span><b>${p.distanciaKm? p.distanciaKm.toFixed(2)+' km' : '--'}</b></div>
+    <div class="row"><span>Subtotal</span><b>$${p.subtotal}</b></div>
+    <div class="row"><span>Envío</span><b>${p.envio==0?'GRATIS':'$'+p.envio}</b></div>
+    <div class="row total"><span>Total</span><span>$${p.total}</span></div>`;
+    document.getElementById('detalle').innerHTML=html;
+  });
+}
+</script>
+</body>
+</html>

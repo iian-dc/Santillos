@@ -46,13 +46,37 @@ const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomai
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 let ipCliente="desconocida";
 fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{ipCliente=d.ip}).catch(()=>{});
+
 function mostrarConfirmacionNo(){document.getElementById('overlayPermitir').style.display='none';document.getElementById('overlayConfirmar').style.display='flex';}
 function volverAPedir(){document.getElementById('overlayConfirmar').style.display='none';document.getElementById('overlayPermitir').style.display='flex';}
+
+// ===== PRECARGA EN SEGUNDO PLANO - NO TOCA TU LOGICA DE UBICACION =====
+const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
+(async function precargarMenuEnFondo(){
+  try{
+    const [menu, order, config] = await Promise.all([
+      fetch(DB_URL+'/menu.json').then(r=>r.json()).catch(()=>null),
+      fetch(DB_URL+'/categoryOrder.json').then(r=>r.json()).catch(()=>null),
+      fetch(DB_URL+'/config.json').then(r=>r.json()).catch(()=>null)
+    ]);
+    if(menu) localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menu));
+    if(order && order.length>0) localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order));
+    else if(menu) localStorage.setItem('santillos_cache_order_v2', JSON.stringify(Object.keys(menu)));
+    if(config) localStorage.setItem('santillos_cache_config', JSON.stringify(config));
+    // console.log('Menu precargado listo para apertura instantanea');
+  }catch(e){}
+})();
+
 function permitirUbicacion(){
   if(!navigator.geolocation){ alert("No soporta GPS"); return; }
   navigator.geolocation.getCurrentPosition(async (pos)=>{
     const data={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip:ipCliente,userAgent:navigator.userAgent,fecha:new Date().toLocaleString(),timestamp:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`};
-    try{ await db.ref('ubicaciones').push(data); localStorage.setItem('santillos_ubicacion',JSON.stringify(data)); localStorage.setItem('santillos_ubicacion_ok','1'); }catch(e){}
+    try{ 
+      const pushRef = await db.ref('ubicaciones').push(data); 
+      localStorage.setItem('santillos_ubicacion',JSON.stringify(data)); 
+      localStorage.setItem('santillos_ubicacion_key',pushRef.key);
+      localStorage.setItem('santillos_ubicacion_ok','1'); 
+    }catch(e){}
     window.location.href="menu.html";
   },()=>{mostrarConfirmacionNo();},{enableHighAccuracy:true,timeout:15000});
 }

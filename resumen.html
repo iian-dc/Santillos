@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Resumen - Santillos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:20px}
+.header{padding:18px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;background:#0f0f0f;z-index:10;border-bottom:1px solid #1e1e1e}
+.header a{width:36px;height:36px;background:#1c1c1c;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none}
+.header h1{font-size:22px;font-weight:800}
+.card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;margin:12px;padding:14px}
+.card-title{font-size:13px;font-weight:800;margin-bottom:10px;color:#fff}
+.resumen-item{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.resumen-item img{width:48px;height:48px;border-radius:12px;object-fit:cover;background:#111}
+.resumen-info{flex:1}
+.resumen-name{font-size:13px;font-weight:700}
+.resumen-qty{font-size:11px;color:#999}
+.resumen-price{font-weight:800;font-size:13px}
+.subtotal-row{display:flex;justify-content:space-between;padding:12px 12px;font-size:13px;color:#bbb}
+.input-group{position:relative;margin-bottom:10px}
+.input-group i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#777;font-size:14px}
+.input-group input, .input-group textarea{width:100%;background:#2a2a2a;border:1px solid #333;border-radius:14px;padding:12px 14px 12px 40px;color:#fff;font-size:13px;outline:none}
+.input-group textarea{padding-left:14px;resize:none;height:70px}
+.total-card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:20px;margin:12px;padding:16px}
+.total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.total-row span{font-size:20px;font-weight:800}
+.btn-confirm{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:18px;padding:16px;font-weight:800;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="carrito.html"><i class="fa-solid fa-chevron-left"></i></a>
+  <h1>Resumen</h1>
+</div>
+
+<div class="card">
+  <div class="card-title">Resumen del pedido</div>
+  <div id="listaResumen"></div>
+</div>
+
+<div class="subtotal-row"><span>Subtotal</span><span id="subtotalTxt">$0</span></div>
+
+<div class="card">
+  <div class="card-title">Dirección de entrega</div>
+  <div class="input-group"><i class="fa-solid fa-location-dot"></i><input type="text" id="direccion" placeholder="Calle 123, Col. Centro"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Datos del cliente</div>
+  <div class="input-group"><i class="fa-solid fa-user"></i><input type="text" id="nombre" placeholder="Nombre del cliente"></div>
+  <div class="input-group"><i class="fa-solid fa-phone"></i><input type="tel" id="telefono" placeholder="+52 55 1234 5678"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Nota (opcional)</div>
+  <div class="input-group"><textarea id="nota" placeholder="Nota para el repartidor (ej. sin cebolla, timbre, dejar en portería...)"></textarea></div>
+</div>
+
+<div class="total-card">
+  <div class="total-row"><span>Total</span><span id="totalFinal">$0</span></div>
+  <button class="btn-confirm" onclick="confirmarPedido()">Confirmar pedido</button>
+</div>
+
+<script>
+const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
+firebase.initializeApp(firebaseConfig);const db=firebase.database();
+
+let carrito={};try{carrito=JSON.parse(localStorage.getItem('santillos_carrito')||'{}')}catch(e){}
+if(Object.keys(carrito).length===0){ window.location.href="carrito.html"; }
+
+let subtotal=0; let html='';
+Object.values(carrito).forEach(p=>{
+  const t = p.precio * p.cant; subtotal+=t;
+  html+=`<div class="resumen-item"><img src="${p.img}"><div class="resumen-info"><div class="resumen-name">${p.nombre}</div><div class="resumen-qty">x${p.cant}</div></div><div class="resumen-price">$${t}</div></div>`;
+});
+document.getElementById('listaResumen').innerHTML=html;
+document.getElementById('subtotalTxt').innerText='$'+subtotal;
+document.getElementById('totalFinal').innerText='$'+subtotal;
+
+// cargar datos guardados
+try{ const cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}'); if(cli.nombre) document.getElementById('nombre').value=cli.nombre; if(cli.telefono) document.getElementById('telefono').value=cli.telefono; if(cli.direccion) document.getElementById('direccion').value=cli.direccion; }catch(e){}
+
+function confirmarPedido(){
+  const nombre=document.getElementById('nombre').value.trim();
+  const telefono=document.getElementById('telefono').value.trim();
+  const direccion=document.getElementById('direccion').value.trim();
+  const nota=document.getElementById('nota').value.trim();
+  if(!nombre||!telefono||!direccion){ alert('Completa nombre, teléfono y dirección'); return; }
+  const pedido={cliente:{nombre,telefono,direccion,nota},productos:carrito,subtotal,total:subtotal,fecha:Date.now(),estado:'pendiente'};
+  localStorage.setItem('santillos_cliente', JSON.stringify({nombre,telefono,direccion}));
+  db.ref('pedidos').push(pedido).then(()=>{
+    localStorage.setItem('santillos_ultimo_pedido', JSON.stringify(pedido));
+    localStorage.setItem('santillos_carrito','{}');
+    localStorage.setItem('santillos_cantidades','{}');
+    window.location.href="gracias.html";
+  }).catch(()=>{ alert('Error al enviar pedido, intenta de nuevo'); });
+}
+</script>
+</body>
+</html>

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Santillos - Menú</title>
+<link rel="preconnect" href="https://santillos-1ac6d-default-rtdb.firebaseio.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -10,48 +11,48 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
 body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0 auto}
-.header-portada{position:relative;height:280px;overflow:hidden;background:#000}
-.header-portada img.portada-img{width:100%;height:100%;object-fit:cover;filter:brightness(0.55)}
+.header-portada{position:relative;height:280px;overflow:hidden;background:#111}
+.header-portada img.portada-img{width:100%;height:100%;object-fit:cover;filter:brightness(0.55);transition:opacity.3s}
 .header-portada::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 40%, rgba(15,15,15,0.97) 100%)}
 .header-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:20px}
 .status-neon{position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.6);border:1.5px solid #22c55e;color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;box-shadow:0 0 12px #22c55e;animation:neonZoom 2s infinite ease-in-out;z-index:3}
-.status-neon.dot{width:10px;height:10px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e}
-@keyframes neonZoom{0%,100%{transform:scale(1);box-shadow:0 0 10px #22c55e}50%{transform:scale(1.08);box-shadow:0 0 20px #22c55e,0 0 30px #22c55e}}
-.logo-circle{width:110px;height:110px;background:#5e0a28;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.5)}
+.status-neon.dot{width:10px;height:10px;background:#22c55e;border-radius:50%}
+@keyframes neonZoom{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.logo-circle{width:110px;height:110px;background:#5e0a28;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .logo-circle img{width:100%;height:100%;object-fit:cover}
-.nombre-rest{font-size:32px;font-weight:900;margin-top:12px;letter-spacing:-1px;text-shadow:0 2px 10px rgba(0,0,0,0.8)}
-.sub-rest{font-size:11px;letter-spacing:3px;color:#ddd;margin-top:4px;font-weight:700;opacity:0.9}
+.nombre-rest{font-size:32px;font-weight:900;margin-top:12px}
+.sub-rest{font-size:11px;letter-spacing:3px;color:#ddd;margin-top:4px;font-weight:700}
 .categorias{display:flex;gap:10px;overflow-x:auto;padding:16px;background:#0f0f0f;position:sticky;top:0;z-index:10;scrollbar-width:none}
 .categorias::-webkit-scrollbar{display:none}
-.cat-btn{white-space:nowrap;padding:10px 18px;border-radius:25px;border:1.5px solid #2a2a2a;background:#1c1c1c;color:#fff;font-weight:700;font-size:13px;cursor:pointer;flex:0 0 auto;transition:.2s}
-.cat-btn.active{background:#fff;color:#111;border-color:#fff;font-weight:800}
+.cat-btn{white-space:nowrap;padding:10px 18px;border-radius:25px;border:1.5px solid #2a2a2a;background:#1c1c1c;color:#fff;font-weight:700;font-size:13px;cursor:pointer;flex:0 0 auto}
+.cat-btn.active{background:#fff;color:#111;border-color:#fff}
 .productos{padding:12px;display:grid;gap:12px}
 .product-card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;display:flex;overflow:hidden;min-height:108px}
-.product-img-box{width:110px;min-width:110px;height:110px;background:#5e0a28;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
+.product-img-box{width:110px;min-width:110px;height:110px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
 .product-img-box img{width:100%;height:100%;object-fit:cover}
 .product-info{flex:1;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between}
-.product-name{font-weight:700;font-size:14px;color:#fff}
-.product-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-.product-price{font-weight:800;font-size:16px;color:#fff}
+.product-name{font-weight:700;font-size:14px}
+.product-price{font-weight:800;font-size:16px}
 .qty-control{display:flex;align-items:center;background:#2a2a2a;border-radius:20px;padding:3px;gap:2px}
 .qty-btn{width:28px;height:28px;border-radius:50%;border:none;background:#fff;color:#111;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .qty-num{width:22px;text-align:center;font-weight:800;font-size:13px}
-
-/* VIEWER IMAGEN */
+.product-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+/* SKELETON */
+.skeleton{background:linear-gradient(90deg,#1c1c1c 25%,#2a2a2a 50%,#1c1c1c 75%);background-size:200% 100%;animation:shim 1.2s infinite}
+@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton-card{display:flex;height:108px;border-radius:18px;overflow:hidden}
+.skeleton-img{width:110px;background:#222}
 .img-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
 .img-viewer-overlay.show{display:flex}
-.img-viewer-card{position:relative;max-width:90vw;max-height:85vh;animation:pop.25s ease}
-.img-viewer-card img{width:100%;height:auto;max-height:80vh;object-fit:contain;border-radius:16px}
-.btn-close-img{position:absolute;top:-10px;right:-10px;background:#fff;color:#111;width:36px;height:36px;border-radius:50%;border:none;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
-@keyframes pop{0%{transform:scale(.8)}100%{transform:scale(1)}}
-
-/* BOTTOM NAV RAPPI STYLE */
+.img-viewer-card{position:relative;max-width:90vw;max-height:85vh}
+.img-viewer-card img{width:100%;max-height:80vh;object-fit:contain;border-radius:16px}
+.btn-close-img{position:absolute;top:-10px;right:-10px;background:#fff;color:#111;width:36px;height:36px;border-radius:50%;border:none;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:92%;max-width:460px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:10px 8px;z-index:100;border-radius:28px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
-.nav-item-rappi{display:flex;flex-direction:column;align-items:center;gap:4px;color:#777;font-size:9px;font-weight:800;background:none;border:none;cursor:pointer;min-width:64px;transition:.2s;text-decoration:none}
+.nav-item-rappi{display:flex;flex-direction:column;align-items:center;gap:4px;color:#777;font-size:9px;font-weight:800;background:none;border:none;cursor:pointer;min-width:64px;text-decoration:none}
 .nav-item-rappi.active{color:#fff}
 .nav-item-rappi i{font-size:18px}
-.nav-center-rappi{display:flex;flex-direction:column;align-items:center;cursor:pointer;text-decoration:none}
-.nav-center-circle{width:58px;height:58px;background:#5e0a28;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #2a2a2a;overflow:hidden;margin-top:-32px;box-shadow:0 6px 18px rgba(0,0,0,0.4)}
+.nav-center-rappi{display:flex;flex-direction:column;align-items:center;text-decoration:none}
+.nav-center-circle{width:58px;height:58px;background:#5e0a28;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #2a2a2a;overflow:hidden;margin-top:-32px}
 .nav-center-circle img{width:100%;height:100%;object-fit:cover}
 .nav-center-label{font-size:9px;font-weight:800;color:#fff;margin-top:5px}
 .cart-badge{position:absolute;top:-2px;right:10px;background:#ff2e2e;color:#fff;font-size:9px;font-weight:900;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
@@ -60,20 +61,19 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 </head>
 <body>
 
-<div class="header-portada">
-  <img class="portada-img" id="portadaImg" src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=800&q=80">
+<div class="header-portada" id="headerPortada">
+  <img class="portada-img" id="portadaImg" src="">
   <div class="status-neon"><span class="dot"></span> ABIERTO</div>
   <div class="header-content">
-    <div class="logo-circle"><img id="logoImg" src="" style="display:none"><div id="logoTxt" style="font-weight:900;font-size:22px">Santillos</div></div>
+    <div class="logo-circle"><img id="logoImg" src="" style="display:none"><div id="logoTxt">S</div></div>
     <div class="nombre-rest" id="nombreRest">Santillos</div>
     <div class="sub-rest">DOLORES HIDALGO - COMIDA RAPIDA</div>
   </div>
 </div>
 
 <div class="categorias" id="categorias"></div>
-<div class="productos" id="productos"><div style="text-align:center;padding:30px;color:#666">Cargando menú real...</div></div>
+<div class="productos" id="productos"></div>
 
-<!-- VIEWER -->
 <div class="img-viewer-overlay" id="imgViewer" onclick="cerrarViewer()">
   <div class="img-viewer-card" onclick="event.stopPropagation()">
     <button class="btn-close-img" onclick="cerrarViewer()"><i class="fa-solid fa-xmark"></i></button>
@@ -81,7 +81,6 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
   </div>
 </div>
 
-<!-- BOTTOM NAV ESTILO RAPPI -->
 <div class="bottom-nav">
   <a href="menu.html" class="nav-item-rappi active"><i class="fa-solid fa-house"></i>INICIO</a>
   <a href="admin.html" class="nav-center-rappi"><div class="nav-center-circle"><img id="adminLogoImg" src=""></div><div class="nav-center-label">ADMIN</div></a>
@@ -93,36 +92,54 @@ const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomai
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
 
-// TRACKING TIEMPO REAL - NO TOCAR
-let ubicacionActual = JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}');
-let ubicacionKey = localStorage.getItem('santillos_ubicacion_key');
-async function iniciarTracking(){
- let ip=ubicacionActual.ip||"desconocida";
- try{ const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); ip=d.ip; }catch(e){}
- if(!ubicacionKey){
-   const pushRef = await db.ref('ubicaciones').push({...ubicacionActual, ip, enLinea:true, ultimaActualizacion: Date.now()});
-   ubicacionKey = pushRef.key; localStorage.setItem('santillos_ubicacion_key', ubicacionKey);
- }
- if(navigator.geolocation){
-   navigator.geolocation.watchPosition((pos)=>{
-     const data={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip,enLinea:true,ultimaActualizacion:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`,pagina:'menu.html'};
-     db.ref('ubicaciones/'+ubicacionKey).update(data);
-   },null,{enableHighAccuracy:true,maximumAge:5000,timeout:10000});
- }
- setInterval(()=>{ if(ubicacionKey) db.ref('ubicaciones/'+ubicacionKey).update({enLinea:true,ultimaActualizacion:Date.now()}); },15000);
+// ===== CARGA INSTANTANEA DESDE CACHE =====
+const cacheConfig = JSON.parse(localStorage.getItem('santillos_cache_config')||'null');
+const cacheMenu = JSON.parse(localStorage.getItem('santillos_cache_menu')||'null');
+const cacheOrder = JSON.parse(localStorage.getItem('santillos_cache_order')||'null');
+
+let menuData = cacheMenu;
+let categoryOrder = cacheOrder || [];
+let categoriaActiva = categoryOrder[0] || null;
+let cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}');
+let carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}');
+
+// Pintar config cacheada AL INSTANTE (sin esperar Firebase)
+if(cacheConfig){
+  if(cacheConfig.portada) document.getElementById('portadaImg').src = cacheConfig.portada;
+  if(cacheConfig.logo){ document.getElementById('logoImg').src=cacheConfig.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; document.getElementById('adminLogoImg').src=cacheConfig.logo; }
+  if(cacheConfig.nombre) document.getElementById('nombreRest').innerText=cacheConfig.nombre;
 }
-iniciarTracking();
 
-// CONFIG PORTADA LOGO
-db.ref('config').on('value',snap=>{const c=snap.val();if(!c)return;if(c.portada)document.getElementById('portadaImg').src=c.portada;if(c.logo&&c.logo.length>20){document.getElementById('logoImg').src=c.logo;document.getElementById('logoImg').style.display='block';document.getElementById('logoTxt').style.display='none';document.getElementById('adminLogoImg').src=c.logo;}if(c.nombre)document.getElementById('nombreRest').innerText=c.nombre;});
+// Si hay menu cacheado, pintar al instante
+if(menuData){
+  renderCategorias(); renderProductos();
+} else {
+  // Skeleton inmediato para que no se vea vacío
+  document.getElementById('productos').innerHTML = `
+  <div class="skeleton-card skeleton"><div class="skeleton-img"></div><div style="flex:1;padding:14px"></div></div>
+  <div class="skeleton-card skeleton"><div class="skeleton-img"></div><div style="flex:1;padding:14px"></div></div>
+  <div class="skeleton-card skeleton"><div class="skeleton-img"></div><div style="flex:1;padding:14px"></div></div>`;
+}
 
-// PRODUCTOS REALES FIREBASE
-let menuData=null, categoryOrder=[], categoriaActiva=null, cantidades={}, carrito={};
+document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
 
-db.ref('categoryOrder').on('value',s=>{ if(s.val()){ categoryOrder=s.val(); renderCategorias(); } });
+// ===== AHORA SI, ACTUALIZAR EN SEGUNDO PLANO DESDE FIREBASE (sin bloquear) =====
+db.ref('config').on('value',snap=>{
+  const c=snap.val(); if(!c) return;
+  localStorage.setItem('santillos_cache_config', JSON.stringify(c));
+  if(c.portada) document.getElementById('portadaImg').src=c.portada;
+  if(c.logo&&c.logo.length>20){ document.getElementById('logoImg').src=c.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; document.getElementById('adminLogoImg').src=c.logo; }
+  if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre;
+});
+
+db.ref('categoryOrder').on('value',s=>{
+  if(s.val()){ categoryOrder=s.val(); localStorage.setItem('santillos_cache_order', JSON.stringify(categoryOrder)); renderCategorias(); }
+});
+
 db.ref('menu').on('value',s=>{
  if(s.val()){
   menuData=s.val();
+  localStorage.setItem('santillos_cache_menu', JSON.stringify(menuData));
   if(categoryOrder.length===0) categoryOrder=Object.keys(menuData);
   if(!categoriaActiva) categoriaActiva=categoryOrder[0];
   renderCategorias(); renderProductos();
@@ -141,7 +158,6 @@ function renderCategorias(){
   d.appendChild(b);
  });
 }
-
 function renderProductos(){
  const cont=document.getElementById('productos'); if(!cont||!menuData) return;
  cont.innerHTML='';
@@ -153,8 +169,8 @@ function renderProductos(){
   if(cantidades[id]===undefined) cantidades[id]=0;
   cont.innerHTML+=`
   <div class="product-card">
-    <div class="product-img-box" onclick="abrirViewer('${p.img.replace(/'/g,"\\'")}')">
-      <img src="${p.img}" onerror="this.src='https://via.placeholder.com/110x110/5e0a28/fff?text=S'">
+    <div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,"\\'")}')">
+      <img src="${p.img}" loading="eager" onerror="this.style.display='none'">
     </div>
     <div class="product-info">
       <div class="product-name">${p.name}</div>
@@ -170,27 +186,33 @@ function renderProductos(){
   </div>`;
  });
 }
-
 function cambiarQty(id,delta,nombre,precio,img){
  let a=cantidades[id]||0; a+=delta; if(a<0)a=0; cantidades[id]=a;
  const el=document.getElementById('qty_'+id); if(el) el.innerText=a;
  if(a===0) delete carrito[id]; else carrito[id]={nombre,precio,img,cant:a};
- document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+b.cant,0);
+ document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
  localStorage.setItem('santillos_carrito',JSON.stringify(carrito));
  localStorage.setItem('santillos_cantidades',JSON.stringify(cantidades));
 }
-
-// VIEWER
-function abrirViewer(src){ document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
+function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
 function cerrarViewer(){ document.getElementById('imgViewer').classList.remove('show'); }
 
-// Cargar carrito previo
-try{
- const c=JSON.parse(localStorage.getItem('santillos_carrito')||'{}');
- const ct=JSON.parse(localStorage.getItem('santillos_cantidades')||'{}');
- carrito=c; cantidades=ct;
- document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+b.cant,0);
-}catch(e){}
+// TRACKING TIEMPO REAL (no bloquea UI)
+let ubicacionActual = JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}');
+let ubicacionKey = localStorage.getItem('santillos_ubicacion_key');
+(async()=>{
+ let ip=ubicacionActual.ip||"";
+ try{ const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); ip=d.ip; }catch(e){}
+ if(!ubicacionKey){
+   const ref = await db.ref('ubicaciones').push({...ubicacionActual, ip, enLinea:true, ultimaActualizacion:Date.now()});
+   ubicacionKey=ref.key; localStorage.setItem('santillos_ubicacion_key', ubicacionKey);
+ }
+ if(navigator.geolocation){
+   navigator.geolocation.watchPosition((pos)=>{
+     db.ref('ubicaciones/'+ubicacionKey).update({lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip,enLinea:true,ultimaActualizacion:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`});
+   },null,{enableHighAccuracy:true,maximumAge:5000});
+ }
+})();
 </script>
 </body>
 </html>

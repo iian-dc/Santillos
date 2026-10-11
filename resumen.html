@@ -19,47 +19,43 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .free-bar{width:100%;height:8px;background:#2a2a2a;border-radius:20px;overflow:hidden}
 .free-fill{height:100%;background:linear-gradient(90deg,#22c55e,#10d8a2);border-radius:20px;transition:width 0.5s}
 .free-sub{font-size:10px;color:#aaa;margin-top:6px}
-.map-box{width:100%;height:220px;border-radius:14px;overflow:hidden;margin-top:10px;border:1px solid #2a2a2a}
+.map-box{width:100%;height:240px;border-radius:14px;overflow:hidden;margin-top:10px;border:1px solid #2a2a2a}
 #map{width:100%;height:100%}
 .card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;margin:10px 12px;padding:12px}
 .card-title{font-size:13px;font-weight:800;margin-bottom:10px}
 .input-wrap{position:relative;margin-bottom:4px}
-.input-field{background:#232323;border:1.5px solid #333;border-radius:12px;padding:10px 12px;display:flex;gap:8px;align-items:center;transition:all 0.2s}
+.input-field{background:#232323;border:1.5px solid #333;border-radius:12px;padding:10px 12px;display:flex;gap:8px;align-items:center}
 .input-field.error{border-color:#ff3b3b;animation:shake 0.3s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .input-field i{color:#777;font-size:14px;min-width:18px;text-align:center}
 .input-field input{flex:1;background:transparent;border:none;color:#fff;font-size:12px;outline:none}
 .error-msg{font-size:10px;color:#ff3b3b;margin:4px 0 8px 4px;display:none}.error-msg.show{display:block}
 .resumen-item{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.resumen-item img{width:38px;height:38px;border-radius:8px;object-fit:cover;background:#111}
-.resumen-info{flex:1}.resumen-name{font-size:11px;font-weight:700}.resumen-qty{font-size:10px;color:#999}.resumen-price{font-size:11px;font-weight:800}
-.subtotal-row{display:flex;justify-content:space-between;padding:8px 0;font-size:11px;color:#999;border-top:1px solid #2a2a2a;margin-top:6px}
 .total-card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:18px;margin:10px 12px;padding:14px}
-.total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.total-row span{font-size:17px;font-weight:800}
+.total-row{display:flex;justify-content:space-between;margin-bottom:12px}.total-row span{font-size:17px;font-weight:800}
 .btn-confirm{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:16px;padding:14px;font-weight:800;font-size:14px;cursor:pointer}
-.pac-container{background:#232323 !important;border:1px solid #333 !important;border-radius:12px !important;margin-top:4px}.pac-item{color:#fff !important;border-top:1px solid #2a2a2a !important;padding:8px !important}.pac-item-query{color:#fff !important}
+.pac-container{background:#232323!important;border-radius:12px!important;border:1px solid #333!important;margin-top:4px}
+.pac-item{color:#bbb!important;border-top:1px solid #2a2a2a!important;padding:9px 12px!important;font-size:11px!important}
+.pac-item:hover{background:#2a2a2a!important}.pac-item-query{color:#fff!important}
 </style>
 </head>
 <body>
 <div class="header"><a href="carrito.html"><i class="fa-solid fa-chevron-left"></i></a><h1>Finalizar compra</h1></div>
-
 <div class="free-card">
   <div class="free-top"><b id="freeTxt"></b><span id="freePct"></span></div>
   <div class="free-bar"><div class="free-fill" id="freeFill"></div></div>
   <div class="free-sub" id="freeSub"></div>
   <div class="map-box"><div id="map"></div></div>
 </div>
-
 <div class="card">
   <div class="card-title">Detalles de entrega</div>
-  <div class="input-wrap" id="wrapDir"><div class="input-field" id="fieldDir"><i class="fa-solid fa-location-dot"></i><input type="text" id="direccion" placeholder="Dirección - Ej: Calle Hidalgo 45"></div><div class="error-msg" id="errDir">Llena tu dirección para completar tu pedido</div></div>
+  <div class="input-wrap" id="wrapDir"><div class="input-field" id="fieldDir"><i class="fa-solid fa-location-dot"></i><input type="text" id="direccion" placeholder="Escribe tu dirección..."></div><div class="error-msg" id="errDir">Llena tu dirección para completar tu pedido</div></div>
   <div class="input-wrap"><div class="input-field"><i class="fa-solid fa-house"></i><input type="text" id="referencia" placeholder="Referencia - Casa azul, portón negro"></div></div>
   <div class="input-wrap" id="wrapTel"><div class="input-field" id="fieldTel"><i class="fa-solid fa-phone"></i><input type="tel" id="telefono" placeholder="Teléfono"></div><div class="error-msg" id="errTel">Llena tu teléfono para completar tu pedido</div></div>
   <div class="input-wrap" id="wrapNom"><div class="input-field" id="fieldNom"><i class="fa-solid fa-user"></i><input type="text" id="nombre" placeholder="Nombre"></div><div class="error-msg" id="errNom">Llena tu nombre para completar tu pedido</div></div>
 </div>
-
-<div class="card"><div class="card-title">Resumen del pedido</div><div id="listaResumen"></div><div class="subtotal-row"><span>Subtotal</span><span id="subtotalTxt">$0</span></div><div class="subtotal-row" style="border-top:none;padding-top:2px"><span>Envío</span><span id="envioTxt"></span></div></div>
-<div class="total-card"><div class="total-row"><span>Total</span><span id="totalFinal">$0</span></div><button class="btn-confirm" onclick="confirmarPedido()">Confirmar pedido</button></div>
+<div class="card"><div class="card-title">Resumen del pedido</div><div id="listaResumen"></div><div style="display:flex;justify-content:space-between;padding:8px 0;font-size:11px;color:#999;border-top:1px solid #2a2a2a;margin-top:6px"><span>Subtotal</span><span id="subtotalTxt"></span></div></div>
+<div class="total-card"><div class="total-row"><span>Total</span><span id="totalFinal"></span></div><button class="btn-confirm" onclick="confirmarPedido()">Confirmar pedido</button></div>
 
 <script>
 const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
@@ -67,30 +63,33 @@ firebase.initializeApp(firebaseConfig);const db=firebase.database();
 const META=200; const TIENDA={lat:21.1560,lng:-100.9340};
 let carrito={};try{carrito=JSON.parse(localStorage.getItem('santillos_carrito')||'{}')}catch(e){}
 if(Object.keys(carrito).length===0) location.href="carrito.html";
-let subtotal=0,html='';Object.values(carrito).forEach(p=>{let t=p.precio*p.cant;subtotal+=t;html+=`<div class="resumen-item"><img src="${p.img}"><div class="resumen-info"><div class="resumen-name">${p.nombre} x${p.cant}</div><div class="resumen-qty">$${p.precio} c/u</div></div><div class="resumen-price">$${t}</div></div>`});
+let subtotal=0,html='';Object.values(carrito).forEach(p=>{let t=p.precio*p.cant;subtotal+=t;html+=`<div class="resumen-item"><img src="${p.img}" style="width:38px;height:38px;border-radius:8px"><div style="flex:1"><div style="font-size:11px;font-weight:700">${p.nombre} x${p.cant}</div></div><div style="font-size:11px;font-weight:800">$${t}</div></div>`});
 document.getElementById('listaResumen').innerHTML=html;
 document.getElementById('subtotalTxt').innerText='$'+subtotal; document.getElementById('totalFinal').innerText='$'+subtotal;
-function actualizarBarra(){let f=META-subtotal;let pct=Math.min(100,Math.round(subtotal/META*100));document.getElementById('freeFill').style.width=pct+'%';document.getElementById('freePct').innerText=pct+'%';if(f<=0){document.getElementById('freeTxt').innerText='¡Tienes envío gratis!';document.getElementById('freeSub').innerText='Tu pedido supera $'+META;document.getElementById('envioTxt').innerText='Gratis';document.getElementById('envioTxt').style.color='#22c55e'}else{document.getElementById('freeTxt').innerText='Te faltan $'+f+' para envío gratis';document.getElementById('freeSub').innerText='Cuando completes $'+f+' más, tu envío será gratis';document.getElementById('envioTxt').innerText='— $'+f+' para gratis';document.getElementById('envioTxt').style.color='#999'}} actualizarBarra();
-try{let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');if(cli.nombre)nombre.value=cli.nombre;if(cli.telefono)telefono.value=cli.telefono;if(cli.direccion)direccion.value=cli.direccion;if(cli.referencia)referencia.value=cli.referencia;}catch(e){}
+let f=META-subtotal;let pct=Math.min(100,Math.round(subtotal/META*100));document.getElementById('freeFill').style.width=pct+'%';document.getElementById('freePct').innerText=pct+'%';if(f<=0){document.getElementById('freeTxt').innerText='¡Tienes envio gratis!';document.getElementById('freeSub').innerText='Tu pedido supera $'+META;}else{document.getElementById('freeTxt').innerText='Te faltan $'+f+' para envío gratis';document.getElementById('freeSub').innerText='Cuando completes $'+f+' más, tu envío será gratis';}
+try{let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');if(cli.nombre)document.getElementById('nombre').value=cli.nombre;if(cli.telefono)document.getElementById('telefono').value=cli.telefono;if(cli.direccion)document.getElementById('direccion').value=cli.direccion;if(cli.referencia)document.getElementById('referencia').value=cli.referencia;}catch(e){}
+
 let map, markerTienda, markerCliente, directionsService, directionsRenderer;
 function initMap(){
-  map=new google.maps.Map(document.getElementById('map'),{center:TIENDA,zoom:15,disableDefaultUI:true,styles:[{elementType:"geometry",stylers:[{color:"#1e1e1e"}]},{elementType:"labels.text.fill",stylers:[{color:"#757575"}]},{featureType:"road",elementType:"geometry",stylers:[{color:"#2a2a2a"}]}]});
-  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><circle cx="16" cy="16" r="14" fill="#5e0a28" stroke="white" stroke-width="2"/><text x="16" y="21" text-anchor="middle" font-size="14">🍽️</text></svg>'),scaledSize:new google.maps.Size(32,32)}});
+  map=new google.maps.Map(document.getElementById("map"),{center:TIENDA,zoom:15,disableDefaultUI:true,styles:[{elementType:"geometry",stylers:[{color:"#1e1e1e"}]},{elementType:"labels.text.fill",stylers:[{color:"#888"}]},{featureType:"road",elementType:"geometry",stylers:[{color:"#2a2a2a"}]}]});
+  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><circle cx="16" cy="16" r="14" fill="#5e0a28" stroke="white" stroke-width="2"/><text x="16" y="21" font-size="14" text-anchor="middle">🍽️</text></svg>')}});
   directionsService=new google.maps.DirectionsService();
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.9}});
-  const autocomplete=new google.maps.places.Autocomplete(document.getElementById('direccion'),{componentRestrictions:{country:"mx"},fields:["formatted_address","geometry"]});
-  autocomplete.addListener('place_changed',()=>{
+  const input=document.getElementById("direccion");
+  const autocomplete=new google.maps.places.Autocomplete(input,{componentRestrictions:{country:"mx"},fields:["geometry","formatted_address"],types:["address"]});
+  autocomplete.addListener("place_changed",()=>{
     const place=autocomplete.getPlace();
-    if(!place.geometry) return;
+    if(!place.geometry){return;}
+    const loc=place.geometry.location;
     if(markerCliente) markerCliente.setMap(null);
-    markerCliente=new google.maps.Marker({position:place.geometry.location,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><circle cx="14" cy="14" r="12" fill="white" stroke="#5e0a28" stroke-width="2"/><text x="14" y="19" text-anchor="middle" font-size="12">📍</text></svg>'),scaledSize:new google.maps.Size(28,28)}});
-    const request={origin:TIENDA,destination:place.geometry.location,travelMode:google.maps.TravelMode.DRIVING};
-    directionsService.route(request,(result,status)=>{if(status=='OK'){directionsRenderer.setDirections(result)}});
+    markerCliente=new google.maps.Marker({position:loc,map:map,icon:{url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"><circle cx="14" cy="14" r="12" fill="white" stroke="#5e0a28" stroke-width="2"/><text x="14" y="19" font-size="12" text-anchor="middle">📍</text></svg>')}});
+    const request={origin:TIENDA,destination:loc,travelMode:google.maps.TravelMode.DRIVING};
+    directionsService.route(request,(result,status)=>{if(status==="OK"){directionsRenderer.setDirections(result);}else{map.fitBounds(new google.maps.LatLngBounds().extend(TIENDA).extend(loc));}});
   });
 }
-function validar(idField,idErr,inputId){const f=document.getElementById(idField);const v=document.getElementById(inputId).value.trim();if(!v){f.classList.add('error');document.getElementById(idErr).classList.add('show');setTimeout(()=>f.classList.remove('error'),800);return false}else{f.classList.remove('error');document.getElementById(idErr).classList.remove('show');return true}}
-function confirmarPedido(){let d=validar('fieldDir','errDir','direccion');let t=validar('fieldTel','errTel','telefono');let n=validar('fieldNom','errNom','nombre');if(!d||!t||!n) return;let pedido={cliente:{nombre:nombre.value,telefono:telefono.value,direccion:direccion.value,referencia:referencia.value},productos:carrito,subtotal,total:subtotal,fecha:Date.now(),estado:'pendiente'};localStorage.setItem('santillos_cliente',JSON.stringify(pedido.cliente));db.ref('pedidos').push(pedido).then(()=>{localStorage.setItem('santillos_ultimo_pedido',JSON.stringify(pedido));localStorage.setItem('santillos_carrito','{}');localStorage.setItem('santillos_cantidades','{}');location.href='gracias.html'})}
+function validar(idF,idE,key){let field=document.getElementById(idF);let val=document.getElementById(key).value.trim();if(!val){field.classList.add('error');document.getElementById(idE).classList.add('show');setTimeout(()=>field.classList.remove('error'),800);return false;}field.classList.remove('error');document.getElementById(idE).classList.remove('show');return true;}
+function confirmarPedido(){let ok1=validar('fieldDir','errDir','direccion');let ok2=validar('fieldTel','errTel','telefono');let ok3=validar('fieldNom','errNom','nombre');if(!ok1||!ok2||!ok3)return;let pedido={cliente:{nombre:nombre.value,telefono:telefono.value,direccion:direccion.value,referencia:referencia.value},productos:carrito,subtotal,total:subtotal,fecha:Date.now(),estado:'pendiente'};localStorage.setItem('santillos_cliente',JSON.stringify(pedido.cliente));db.ref('pedidos').push(pedido).then(()=>{localStorage.setItem('santillos_carrito','{}');localStorage.setItem('santillos_cantidades','{}');location.href="gracias.html";});}
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDLUCoJ0hVpN6olydp4tcbNME_zJwGg1Og&libraries=places&callback=initMap" async defer></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap"></script>
 </body>
 </html>

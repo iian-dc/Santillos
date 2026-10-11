@@ -87,84 +87,99 @@ const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomai
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
 
-// CACHE INSTANTANEO - ESTO ES LA CLAVE
-let menuData = JSON.parse(localStorage.getItem('santillos_cache_menu_v2')||'null');
-let categoryOrder = JSON.parse(localStorage.getItem('santillos_cache_order_v2')||'null') || [];
-let cacheConfig = JSON.parse(localStorage.getItem('santillos_cache_config')||'null');
-let categoriaActiva = categoryOrder[0] || null;
+// ===== LECTURA INSTANTANEA DESDE CACHE PRE-CARGADO EN INDEX =====
+let menuData = null;
+let categoryOrder = [];
+let cacheConfig = null;
+try{ menuData = JSON.parse(localStorage.getItem('santillos_cache_menu_v2')||'null'); }catch(e){}
+try{ categoryOrder = JSON.parse(localStorage.getItem('santillos_cache_order_v2')||'null') || []; }catch(e){}
+try{ cacheConfig = JSON.parse(localStorage.getItem('santillos_cache_config')||'null'); }catch(e){}
+
+let categoriaActiva = categoryOrder[0] || (menuData? Object.keys(menuData)[0] : null);
 let cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}');
 let carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}');
 document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
 
-if(cacheConfig){
-  if(cacheConfig.portada) document.getElementById('portadaImg').src=cacheConfig.portada;
-  if(cacheConfig.logo){ document.getElementById('logoImg').src=cacheConfig.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; document.getElementById('adminLogoImg').src=cacheConfig.logo; }
-  if(cacheConfig.nombre) document.getElementById('nombreRest').innerText=cacheConfig.nombre;
+function aplicarConfig(c){
+  if(!c) return;
+  if(c.portada) document.getElementById('portadaImg').src=c.portada;
+  if(c.logo && c.logo.length>20){
+    document.getElementById('logoImg').src=c.logo;
+    document.getElementById('logoImg').style.display='block';
+    document.getElementById('logoTxt').style.display='none';
+    document.getElementById('adminLogoImg').src=c.logo;
+  }
+  if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre;
 }
 
-// SI HAY CACHE, PINTAR INSTANTANEO EN 0 SEGUNDOS
+if(cacheConfig) aplicarConfig(cacheConfig);
+
+// PINTADO INSTANTANEO - SIN ESPERAR A FIREBASE
 if(menuData && Object.keys(menuData).length>0){
-  if(!categoriaActiva) categoriaActiva = categoryOrder[0] || Object.keys(menuData)[0];
   renderCategorias();
   renderProductos();
 } else {
-  // Skeleton mientras carga primera vez
-  document.getElementById('categorias').innerHTML = '<div class="cat-btn skeleton" style="width:80px;height:38px"></div><div class="cat-btn skeleton" style="width:110px;height:38px"></div><div class="cat-btn skeleton" style="width:90px;height:38px"></div>';
-  document.getElementById('productos').innerHTML = '<div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div><div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div><div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div>';
+  // Solo si es la primerisima vez y no hubo precarga
+  document.getElementById('categorias').innerHTML = '<div class="cat-btn skeleton" style="width:80px;height:38px"></div><div class="cat-btn skeleton" style="width:110px;height:38px"></div>';
+  document.getElementById('productos').innerHTML = '<div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div><div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div>';
 }
 
-// CARGA RAPIDA VIA REST + SDK EN PARALELO
 const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
 
-// Cargar config rapido
-fetch(DB_URL+'/config.json').then(r=>r.json()).then(c=>{
-  if(!c) return;
-  localStorage.setItem('santillos_cache_config', JSON.stringify(c));
-  if(c.portada) document.getElementById('portadaImg').src=c.portada;
-  if(c.logo&&c.logo.length>20){ document.getElementById('logoImg').src=c.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; document.getElementById('adminLogoImg').src=c.logo; }
-  if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre;
-});
-
-// Cargar menu rapido via REST (mas rapido que SDK)
-Promise.all([
-  fetch(DB_URL+'/menu.json').then(r=>r.json()),
-  fetch(DB_URL+'/categoryOrder.json').then(r=>r.json())
-]).then(([menu, order])=>{
-  if(menu){
-    menuData = menu;
-    localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menu));
-    if(order && order.length>0){
-      categoryOrder = order;
-      localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order));
-    } else {
-      categoryOrder = Object.keys(menu);
+// ACTUALIZACION EN SEGUNDO PLANO DESPUES DE PINTAR
+setTimeout(()=>{
+  // Config
+  fetch(DB_URL+'/config.json').then(r=>r.json()).then(c=>{
+    if(!c) return;
+    const viejo = JSON.stringify(cacheConfig);
+    if(JSON.stringify(c)!== viejo){
+      localStorage.setItem('santillos_cache_config', JSON.stringify(c));
+      aplicarConfig(c);
     }
-    if(!categoriaActiva) categoriaActiva = categoryOrder[0];
-    renderCategorias();
-    renderProductos();
-  }
-});
+  }).catch(()=>{});
 
-// Tambien escuchar en tiempo real por si admin agrega algo
-db.ref('menu').on('value',s=>{
- if(s.val()){
-  menuData=s.val();
-  localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menuData));
-  if(!categoriaActiva) categoriaActiva = (categoryOrder[0] || Object.keys(menuData)[0]);
-  renderCategorias(); renderProductos();
- }
-});
-db.ref('categoryOrder').on('value',s=>{
-  if(s.val() && s.val().length>0){
-    categoryOrder=s.val();
-    localStorage.setItem('santillos_cache_order_v2', JSON.stringify(categoryOrder));
-    renderCategorias();
-  }
-});
-db.ref('config').on('value',snap=>{
-  const c=snap.val(); if(!c) return;
-  localStorage.setItem('santillos_cache_config', JSON.stringify(c));
-});
+  // Menu + Order via REST
+  Promise.all([
+    fetch(DB_URL+'/menu.json').then(r=>r.json()).catch(()=>null),
+    fetch(DB_URL+'/categoryOrder.json').then(r=>r.json()).catch(()=>null)
+  ]).then(([menu, order])=>{
+    if(menu && JSON.stringify(menu)!== JSON.stringify(menuData)){
+      menuData = menu;
+      localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menu));
+      if(order && order.length>0){
+        categoryOrder = order;
+        localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order));
+      } else if(!categoryOrder.length){
+        categoryOrder = Object.keys(menu);
+      }
+      if(!categoriaActiva) categoriaActiva = categoryOrder[0];
+      renderCategorias();
+      renderProductos();
+    }
+  }).catch(()=>{});
+
+  // Listeners en tiempo real solo para cuando admin cambie algo, pero ya despues de 2 seg
+  setTimeout(()=>{
+    db.ref('menu').on('value',s=>{
+     if(s.val()){
+      const nuevo = s.val();
+      if(JSON.stringify(nuevo)!== JSON.stringify(menuData)){
+        menuData=nuevo;
+        localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menuData));
+        renderCategorias(); renderProductos();
+      }
+     }
+    });
+    db.ref('categoryOrder').on('value',s=>{
+      if(s.val() && s.val().length>0 && JSON.stringify(s.val())!== JSON.stringify(categoryOrder)){
+        categoryOrder=s.val();
+        localStorage.setItem('santillos_cache_order_v2', JSON.stringify(categoryOrder));
+        renderCategorias();
+      }
+    });
+  },2000);
+
+}, 100);
 
 function renderCategorias(){
  const d=document.getElementById('categorias'); if(!d||!menuData) return;
@@ -176,37 +191,38 @@ function renderCategorias(){
   const b=document.createElement('button');
   b.className='cat-btn'+(c===categoriaActiva?' active':'');
   b.innerText=c;
-  b.onclick=()=>{ categoriaActiva=c; renderCategorias(); renderProductos(); };
+  b.onclick=()=>{ categoriaActiva=c; renderCategorias(); renderProductos(); window.scrollTo({top:0,behavior:'smooth'}); };
   d.appendChild(b);
  });
 }
 function renderProductos(){
  const cont=document.getElementById('productos'); if(!cont||!menuData) return;
  if(!categoriaActiva) categoriaActiva = Object.keys(menuData)[0];
- cont.innerHTML='';
  const lista = menuData[categoriaActiva] || [];
+ let html='';
  lista.forEach((p,i)=>{
   if(p.disp===false) return;
   const id=categoriaActiva+'_'+i;
   if(cantidades[id]===undefined) cantidades[id]=0;
-  cont.innerHTML+=`
+  html+=`
   <div class="product-card">
     <div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,"\\'")}')">
-      <img src="${p.img}" loading="eager">
+      <img src="${p.img}" loading="lazy" decoding="async">
     </div>
     <div class="product-info">
       <div class="product-name">${p.name}</div>
       <div class="product-bottom">
         <div class="product-price">$${p.price}</div>
         <div class="qty-control">
-          <button class="qty-btn" onclick="cambiarQty('${id}',-1,'${p.name}',${p.price},'${p.img}')"><i class="fa-solid fa-minus" style="font-size:10px"></i></button>
+          <button class="qty-btn" onclick="cambiarQty('${id}',-1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')"><i class="fa-solid fa-minus" style="font-size:10px"></i></button>
           <div class="qty-num" id="qty_${id}">${cantidades[id]}</div>
-          <button class="qty-btn" onclick="cambiarQty('${id}',1,'${p.name}',${p.price},'${p.img}')"><i class="fa-solid fa-plus" style="font-size:10px"></i></button>
+          <button class="qty-btn" onclick="cambiarQty('${id}',1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')"><i class="fa-solid fa-plus" style="font-size:10px"></i></button>
         </div>
       </div>
     </div>
   </div>`;
  });
+ cont.innerHTML=html;
 }
 function cambiarQty(id,delta,nombre,precio,img){
  let a=cantidades[id]||0; a+=delta; if(a<0)a=0; cantidades[id]=a;
@@ -219,22 +235,25 @@ function cambiarQty(id,delta,nombre,precio,img){
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
 function cerrarViewer(){ document.getElementById('imgViewer').classList.remove('show'); }
 
-// Tracking
+// Tracking no bloqueante
 let ubicacionKey = localStorage.getItem('santillos_ubicacion_key');
-let ubicacionActual = JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}');
-(async()=>{
+let ubicacionActual = {};
+try{ ubicacionActual = JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}'); }catch(e){}
+setTimeout(async()=>{
  let ip=ubicacionActual.ip||"";
  try{ const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); ip=d.ip; }catch(e){}
  if(!ubicacionKey){
-   const ref = await db.ref('ubicaciones').push({...ubicacionActual, ip, enLinea:true, ultimaActualizacion:Date.now()});
-   ubicacionKey=ref.key; localStorage.setItem('santillos_ubicacion_key', ubicacionKey);
+   try{
+     const ref = await db.ref('ubicaciones').push({...ubicacionActual, ip, enLinea:true, ultimaActualizacion:Date.now()});
+     ubicacionKey=ref.key; localStorage.setItem('santillos_ubicacion_key', ubicacionKey);
+   }catch(e){}
  }
  if(navigator.geolocation){
    navigator.geolocation.watchPosition((pos)=>{
-     db.ref('ubicaciones/'+ubicacionKey).update({lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip,enLinea:true,ultimaActualizacion:Date.now()});
-   },null,{enableHighAccuracy:true,maximumAge:5000});
+     try{ db.ref('ubicaciones/'+ubicacionKey).update({lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip,enLinea:true,ultimaActualizacion:Date.now()}); }catch(e){}
+   },null,{enableHighAccuracy:true,maximumAge:10000});
  }
-})();
+}, 1500);
 </script>
 </body>
 </html>

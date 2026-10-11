@@ -41,6 +41,15 @@ body{background:#0f0f0f}
     </div>
   </div>
 </div>
+
+<div class="overlay" id="overlayBloqueado" style="display:none">
+  <div class="card-location">
+    <div class="title">Ubicación bloqueada</div>
+    <div class="subtitle">Bloqueaste la ubicación antes. Toca el candado 🔒 arriba en la barra, dale a Permisos > Ubicación > Permitir y luego vuelve a darle al botón.</div>
+    <button class="btn-burgundy" onclick="volverAPedir()">Entendido, volver a intentar</button>
+  </div>
+</div>
+
 <script>
 const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
@@ -48,7 +57,11 @@ let ipCliente="desconocida";
 fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{ipCliente=d.ip}).catch(()=>{});
 
 function mostrarConfirmacionNo(){document.getElementById('overlayPermitir').style.display='none';document.getElementById('overlayConfirmar').style.display='flex';}
-function volverAPedir(){document.getElementById('overlayConfirmar').style.display='none';document.getElementById('overlayPermitir').style.display='flex';}
+function volverAPedir(){
+  document.getElementById('overlayConfirmar').style.display='none';
+  document.getElementById('overlayBloqueado').style.display='none';
+  document.getElementById('overlayPermitir').style.display='flex';
+}
 
 const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
 (async function precargarMenuEnFondo(){
@@ -68,7 +81,7 @@ const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
 function permitirUbicacion(){
   const btn = document.getElementById('btnPermitir');
   btn.innerText = "Solicitando permiso...";
-  
+
   if(!navigator.geolocation){ 
     alert("Tu navegador no soporta GPS"); 
     btn.innerText="Permitir ubicación"; 
@@ -87,11 +100,12 @@ function permitirUbicacion(){
     window.location.href="menu.html";
   },(err)=>{
     btn.innerText="Permitir ubicación";
-    // NUNCA mostramos el "¿Estas seguro?" aquí. Solo avisamos
     if(err.code === 1){
-      alert("Denegaste el permiso. Por favor activa la ubicación en la configuración de tu navegador y vuelve a intentar.");
+      // Ya habia bloqueado antes - no podemos forzar el popup del sistema, mostramos ayuda
+      document.getElementById('overlayPermitir').style.display='none';
+      document.getElementById('overlayBloqueado').style.display='flex';
     } else {
-      alert("No se pudo obtener tu ubicación. Activa el GPS y vuelve a darle a Permitir.");
+      alert("Activa tu GPS y vuelve a intentar.");
     }
   },{enableHighAccuracy:true,timeout:25000,maximumAge:0});
 }

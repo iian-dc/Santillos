@@ -97,6 +97,8 @@ let cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}');
 let carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}');
 document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
 
+function safeSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ console.log("Cache lleno en "+k+", se omite guardado"); try{ localStorage.removeItem(k); }catch(e2){} } }
+
 function aplicarConfig(c){
  if(!c)return;
  if(c.portada) document.getElementById('portadaImg').src=c.portada;
@@ -143,16 +145,16 @@ if(menuData && Object.keys(menuData).length>0){
  db.ref('menu').once('value').then(s=>{
    if(s.val()){
      menuData=s.val();
-     localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menuData));
+     safeSet('santillos_cache_menu_v2', menuData);
      return db.ref('categoryOrder').once('value');
    }
  }).then(s=>{
-   if(s && s.val()){ categoryOrder=s.val(); localStorage.setItem('santillos_cache_order_v2', JSON.stringify(categoryOrder)); }
+   if(s && s.val()){ categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); }
    else if(menuData){ categoryOrder=Object.keys(menuData); }
    categoriaActiva=categoryOrder[0];
    renderCategorias(); renderProductos();
  }).catch(()=>{});
- db.ref('config').once('value').then(s=>{ if(s.val()){ aplicarConfig(s.val()); localStorage.setItem('santillos_cache_config', JSON.stringify(s.val())); }});
+ db.ref('config').once('value').then(s=>{ if(s.val()){ aplicarConfig(s.val()); safeSet('santillos_cache_config', s.val()); }});
 }
 
 function cambiarQty(id,delta,nombre,precio,img){
@@ -166,9 +168,9 @@ function cambiarQty(id,delta,nombre,precio,img){
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
 function cerrarViewer(){ document.getElementById('imgViewer').classList.remove('show'); }
 
-// Actualizacion en tiempo real despues
-db.ref('menu').on('value',s=>{ if(s.val()){ const n=s.val(); if(!menuData || JSON.stringify(n)!==JSON.stringify(menuData)){ menuData=n; localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(n)); renderCategorias(); renderProductos(); }}});
-db.ref('categoryOrder').on('value',s=>{ if(s.val()&&s.val().length>0){ categoryOrder=s.val(); localStorage.setItem('santillos_cache_order_v2', JSON.stringify(categoryOrder)); renderCategorias(); }});
+// Actualizacion en tiempo real despues - CORREGIDO CON safeSet
+db.ref('menu').on('value',s=>{ if(s.val()){ const n=s.val(); if(!menuData || JSON.stringify(n)!==JSON.stringify(menuData)){ menuData=n; safeSet('santillos_cache_menu_v2', n); renderCategorias(); renderProductos(); }}});
+db.ref('categoryOrder').on('value',s=>{ if(s.val()&&s.val().length>0){ categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); renderCategorias(); }});
 </script>
 </body>
 </html>

@@ -27,7 +27,7 @@ body{background:#0f0f0f}
     <svg viewBox="0 0 80 90" style="width:86px;margin:0 auto 12px;display:block" fill="none"><path d="M40 0C18 0 0 18 0 40C0 65 40 90 40 90S80 65 80 40C80 18 62 0 40 0Z" fill="white" stroke="#111" stroke-width="3"/><ellipse cx="40" cy="82" rx="18" ry="4" fill="none" stroke="#b91c45" stroke-width="3"/><circle cx="40" cy="38" r="16" fill="#b91c45"/></svg>
     <div class="title">¿Permitir tu ubicación?</div>
     <div class="subtitle">Necesitamos conocer tu ubicación para que puedas iniciar tu pedido y ayudarte a encontrar la mejor opción de entrega.</div>
-    <button class="btn-burgundy" onclick="permitirUbicacion()">Permitir ubicación</button>
+    <button class="btn-burgundy" id="btnPermitir" onclick="permitirUbicacion()">Permitir ubicación</button>
     <button class="btn-link" onclick="mostrarConfirmacionNo()">Ahora no</button>
   </div>
 </div>
@@ -50,8 +50,9 @@ fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{ipCliente=
 function mostrarConfirmacionNo(){document.getElementById('overlayPermitir').style.display='none';document.getElementById('overlayConfirmar').style.display='flex';}
 function volverAPedir(){document.getElementById('overlayConfirmar').style.display='none';document.getElementById('overlayPermitir').style.display='flex';}
 
-// ===== PRECARGA EN SEGUNDO PLANO - NO TOCA TU LOGICA DE UBICACION =====
+// PRECARGA SILENCIOSA MIENTRAS EL CLIENTE DECIDE - NO REDIRIGE
 const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
+let precargaLista = false;
 (async function precargarMenuEnFondo(){
   try{
     const [menu, order, config] = await Promise.all([
@@ -63,12 +64,17 @@ const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
     if(order && order.length>0) localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order));
     else if(menu) localStorage.setItem('santillos_cache_order_v2', JSON.stringify(Object.keys(menu)));
     if(config) localStorage.setItem('santillos_cache_config', JSON.stringify(config));
-    // console.log('Menu precargado listo para apertura instantanea');
+    precargaLista = true;
   }catch(e){}
 })();
 
 function permitirUbicacion(){
-  if(!navigator.geolocation){ alert("No soporta GPS"); return; }
+  const btn = document.getElementById('btnPermitir');
+  btn.innerText = "Activando ubicación...";
+  btn.disabled = true;
+
+  if(!navigator.geolocation){ alert("No soporta GPS"); btn.innerText="Permitir ubicación"; btn.disabled=false; return; }
+  
   navigator.geolocation.getCurrentPosition(async (pos)=>{
     const data={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy,ip:ipCliente,userAgent:navigator.userAgent,fecha:new Date().toLocaleString(),timestamp:Date.now(),maps:`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`};
     try{ 
@@ -77,11 +83,14 @@ function permitirUbicacion(){
       localStorage.setItem('santillos_ubicacion_key',pushRef.key);
       localStorage.setItem('santillos_ubicacion_ok','1'); 
     }catch(e){}
+    // Ya tiene ubicación + precarga, ahora sí entra al menú
     window.location.href="menu.html";
-  },()=>{mostrarConfirmacionNo();},{enableHighAccuracy:true,timeout:15000});
+  },()=>{
+    btn.innerText="Permitir ubicación";
+    btn.disabled=false;
+    mostrarConfirmacionNo();
+  },{enableHighAccuracy:true,timeout:15000});
 }
-// Si ya dio permiso antes, mandar directo
-if(localStorage.getItem('santillos_ubicacion_ok')==='1'){ window.location.href="menu.html"; }
 </script>
 </body>
 </html>

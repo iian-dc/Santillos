@@ -161,7 +161,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 if(!localStorage.getItem('santillos_admin_login')){
-  window.location.href = './login/';
+  window.location.href = './';
 }
 document.getElementById('userNameTop').innerText = localStorage.getItem('santillos_admin_usuario') || 'admin';
 
@@ -178,7 +178,7 @@ window.goTo = function(id, el){
 window.cerrarSesion = function(){
   localStorage.removeItem('santillos_admin_login');
   localStorage.removeItem('santillos_admin_user');
-  window.location.href='./login/';
+  window.location.href='./';
 }
 
 onValue(ref(db, 'pedidos'), (snap)=>{

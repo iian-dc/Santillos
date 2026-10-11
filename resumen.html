@@ -100,8 +100,6 @@ document.getElementById('subtotalTxt').innerText='$'+subtotal;
 let distanciaKm=0; let costoEnvio=0;
 let ipClienteFinal="desconocida";
 let ciudadIPFinal="";
-
-// CAPTURA IP AL CARGAR (vinculada)
 fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(async d=>{
   ipClienteFinal=d.ip;
   try{
@@ -153,129 +151,108 @@ function initMap(){
   map=new google.maps.Map(document.getElementById("map"),{center:TIENDA,zoom:13,disableDefaultUI:false,zoomControl:false,mapTypeControl:false});
   directionsService=new google.maps.DirectionsService();
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.9}});
-  const iconRestaurante={url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 40 50"><path d="M20 0C8.9 0 0 8.9 0 20c0 16.2 20 30 20 30S40 36.2 40 20C40 8.9 31.1 0 20 0z" fill="%235e0a28"/><circle cx="20" cy="19" r="8" fill="white"/></svg>'),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)};
-  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRestaurante,title:"Santillos",optimized:false});
-  autocomplete=new google.maps.places.Autocomplete(document.getElementById("direccion"),{types:['geocode'],componentRestrictions:{country:'mx'}});
-  autocomplete.addListener("place_changed",()=>{const place=autocomplete.getPlace();if(!place.geometry) return; mostrarRuta(place.geometry.location);});
+  const iconRestaurante={url:"data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='%235e0a28' stroke='white' stroke-width='2'/%3E%3Ctext x='20' y='26' text-anchor='middle' fill='white' font-size='18'%3E🍔%3C/text%3E%3C/svg%3E",scaledSize:new google.maps.Size(40,40)};
+  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRestaurante,title:"Santillos"});
+  autocomplete=new google.maps.places.Autocomplete(document.getElementById("direccion"),{componentRestrictions:{country:"mx"},fields:["geometry","formatted_address"]});
+  autocomplete.addListener("place_changed",onPlaceChanged);
+  map.addListener("click",(e)=>{ colocarCliente(e.latLng); geocodeLatLng(e.latLng); });
 }
-function mostrarRuta(destino){
-  if(markerCliente) markerCliente.setMap(null);
-  const iconCliente={url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 40 50"><path d="M20 0C8.9 0 0 8.9 0 20c0 16.2 20 30 20 30S40 36.2 40 20C40 8.9 31.1 0 20 0z" fill="%2322c55e"/><circle cx="20" cy="19" r="8" fill="white"/></svg>'),scaledSize:new google.maps.Size(28,36),anchor:new google.maps.Point(14,36)};
-  markerCliente=new google.maps.Marker({position:destino,map:map,icon:iconCliente,optimized:false});
-  directionsService.route({origin:TIENDA,destination:destino,travelMode:google.maps.TravelMode.DRIVING},(result,status)=>{
+function onPlaceChanged(){
+  const place=autocomplete.getPlace();
+  if(!place.geometry){return;}
+  colocarCliente(place.geometry.location);
+  calcularRuta(place.geometry.location);
+  document.getElementById('direccion').value=place.formatted_address;
+}
+function colocarCliente(latLng){
+  if(markerCliente){markerCliente.setMap(null);}
+  markerCliente=new google.maps.Marker({position:latLng,map:map,animation:google.maps.Animation.DROP});
+}
+function geocodeLatLng(latLng){
+  const geocoder=new google.maps.Geocoder();
+  geocoder.geocode({location:latLng},(results,status)=>{
+    if(status==="OK" && results[0]){ document.getElementById('direccion').value=results[0].formatted_address; calcularRuta(latLng); }
+  });
+}
+function calcularRuta(dest){
+  directionsService.route({origin:TIENDA,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
     if(status==="OK"){
-      directionsRenderer.setDirections(result);
-      let leg=result.routes[0].legs[0];
+      directionsRenderer.setDirections(res);
+      const leg=res.routes[0].legs[0];
       distanciaKm=leg.distance.value/1000;
-      document.getElementById('distanciaTxt').innerText=leg.distance.text+' ('+distanciaKm.toFixed(1)+' km)';
+      document.getElementById('distanciaTxt').innerText=leg.distance.text+" ("+leg.duration.text+")";
       actualizarTotales();
-      let bounds=new google.maps.LatLngBounds(); bounds.extend(TIENDA); bounds.extend(destino); map.fitBounds(bounds);
     }
   });
 }
-function vibrarError(){
-  const btn=document.getElementById('btnConfirm'); btn.classList.add('shake'); setTimeout(()=>btn.classList.remove('shake'),400);
-  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+async function verificarIPBloqueada(ip){
+  if(!ip || ip==="desconocida") return false;
+  const key=ip.replace(/\./g,'_');
+  const snap=await db.ref('ips_bloqueadas/'+key).once('value');
+  return snap.exists();
 }
-
-// ==== CONFIRMAR PEDIDO VINCULADO CON TODO - SIN CAMBIAR MAS NADA ====
 async function confirmarPedido(){
+  const btn=document.getElementById('btnConfirm');
   let valido=true;
-  const campos=[{input:'direccion',field:'fieldDir',err:'errDir'},{input:'telefono',field:'fieldTel',err:'errTel'},{input:'nombre',field:'fieldNom',err:'errNom'}];
-  campos.forEach(c=>{const input=document.getElementById(c.input); const field=document.getElementById(c.field); const err=document.getElementById(c.err); if(!input.value.trim()){field.classList.add('error');err.classList.add('show');valido=false;}else{field.classList.remove('error');err.classList.remove('show');}});
-  if(!valido){vibrarError();return;}
-
-  const btn=document.getElementById('btnConfirm'); btn.innerText='Procesando...'; btn.disabled=true;
-
-  // 1. Ubicación GPS del inicio (tu overlay de permitir ubicación)
-  let ubicacionInicio = {};
-  try{ ubicacionInicio = JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}'); }catch(e){}
-
-  // 2. Si no tenemos IP aún, intentar de nuevo
-  if(ipClienteFinal==="desconocida"){
-    try{
-      const ipR = await fetch('https://api.ipify.org?format=json').then(r=>r.json());
-      ipClienteFinal = ipR.ip;
-    }catch(e){}
+  if(!direccion.value.trim()){document.getElementById('fieldDir').classList.add('error');document.getElementById('errDir').classList.add('show');valido=false;}
+  if(!telefono.value.trim()){document.getElementById('fieldTel').classList.add('error');document.getElementById('errTel').classList.add('show');valido=false;}
+  if(!nombre.value.trim()){document.getElementById('fieldNom').classList.add('error');document.getElementById('errNom').classList.add('show');valido=false;}
+  if(!valido){btn.classList.add('shake');setTimeout(()=>btn.classList.remove('shake'),400);return;}
+  btn.innerText="Verificando acceso...";btn.disabled=true;
+  let ipFinal=ipClienteFinal;
+  if(ipFinal==="desconocida"){try{const r=await fetch('https://api.ipify.org?format=json').then(r=>r.json());ipFinal=r.ip;}catch(e){}}
+  if(await verificarIPBloqueada(ipFinal)){
+    btn.innerText="⛔ IP Bloqueada";
+    alert("⛔ Por motivos de seguridad, tu acceso ha sido bloqueado. No podrás realizar pedidos.");
+    btn.disabled=false;return;
   }
-
-  // 3. Cliente
-  const cliente={
-    nombre:document.getElementById('nombre').value.trim(),
-    telefono:document.getElementById('telefono').value.trim(),
-    direccion:document.getElementById('direccion').value.trim(),
-    referencia:document.getElementById('referencia').value.trim(),
-    lat: markerCliente ? markerCliente.getPosition().lat() : (ubicacionInicio.lat||null),
-    lng: markerCliente ? markerCliente.getPosition().lng() : (ubicacionInicio.lng||null)
+  btn.innerText="Enviando pedido...";
+  let ubicacionGuardada={};try{ubicacionGuardada=JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}');}catch(e){}
+  let productosArray=Object.values(carrito).map(p=>({nombre:p.nombre,cantidad:p.cant,precio:p.precio,total:p.precio*p.cant}));
+  const ahora=new Date();
+  const pedidoData={
+    nombre:nombre.value.trim(),
+    telefono:telefono.value.trim(),
+    direccion:direccion.value.trim(),
+    referencia:referencia.value.trim(),
+    nota:referencia.value.trim(),
+    cliente:{nombre:nombre.value.trim(),telefono:telefono.value.trim(),direccion:direccion.value.trim()},
+    productos:productosArray,
+    detalle:productosArray.map(p=>`${p.cantidad}x ${p.nombre}`).join(', '),
+    subtotal:subtotal,
+    total:subtotal+costoEnvio,
+    costoEnvio:costoEnvio,
+    envio:costoEnvio,
+    envioGratis:costoEnvio===0,
+    distanciaKm:distanciaKm,
+    fecha:ahora.toLocaleDateString(),
+    hora:ahora.toLocaleTimeString(),
+    fechaISO:ahora.toISOString(),
+    timestamp:Date.now(),
+    creadoEn:Date.now(),
+    lat:ubicacionGuardada.lat||null,
+    lng:ubicacionGuardada.lng||null,
+    accuracy:ubicacionGuardada.accuracy||null,
+    maps:ubicacionGuardada.maps|| (ubicacionGuardada.lat? `https://www.google.com/maps?q=${ubicacionGuardada.lat},${ubicacionGuardada.lng}` : ""),
+    ip:ipFinal,
+    ipCliente:ipFinal,
+    ciudad:ciudadIPFinal||ubicacionGuardada.ciudad||"Dolores Hidalgo",
+    ciudadIP:ciudadIPFinal,
+    userAgent:navigator.userAgent,
+    estado:"pendiente",
+    ipEstado:"activa"
   };
-  localStorage.setItem('santillos_cliente',JSON.stringify(cliente));
-
-  // 4. Productos en ARRAY (para que admin los muestre bien)
-  const productosArray = Object.values(carrito).map(p=>({
-    nombre: p.nombre,
-    cantidad: p.cant,
-    precio: p.precio,
-    total: p.precio * p.cant,
-    img: p.img || ""
-  }));
-
-  // 5. Pedido COMPLETO compatible con login/admin.html
-  const pedido={
-    // Datos que espera tu admin (arreglado)
-    nombre: cliente.nombre,
-    telefono: cliente.telefono,
-    direccion: cliente.direccion,
-    referencia: cliente.referencia,
-    cliente: cliente,
-
-    productos: productosArray,
-    carrito: carrito,
-    detalle: productosArray.map(p=>`${p.cantidad}x ${p.nombre}`).join(', '),
-    items: productosArray.map(p=>`${p.cantidad}x ${p.nombre}`).join(', '),
-
-    subtotal: subtotal,
-    costoEnvio: costoEnvio,
-    envio: costoEnvio,
-    total: subtotal+costoEnvio,
-    envioGratis: costoEnvio===0,
-
-    distanciaKm: distanciaKm,
-    lat: cliente.lat,
-    lng: cliente.lng,
-    maps: cliente.lat ? `https://www.google.com/maps?q=${cliente.lat},${cliente.lng}` : (ubicacionInicio.maps||""),
-    accuracy: ubicacionInicio.accuracy || null,
-
-    // Tiempo real - ARREGLA NaN min
-    fecha: new Date().toLocaleDateString(),
-    hora: new Date().toLocaleTimeString(),
-    fechaISO: new Date().toISOString(),
-    timestamp: Date.now(),
-    creadoEn: Date.now(),
-
-    // IP + Ciudad - VINCULADO
-    ip: ipClienteFinal,
-    ipCliente: ipClienteFinal,
-    ciudad: ciudadIPFinal || ubicacionInicio.ciudad || "Por obtener",
-    ciudadIP: ciudadIPFinal,
-    ubicacionInicio: ubicacionInicio,
-
-    estado:'pendiente',
-    userAgent: navigator.userAgent
-  };
-
   try{
-    const ref=db.ref('pedidos').push(); 
-    await ref.set(pedido); 
-    localStorage.setItem('santillos_ultimo_pedido',ref.key); 
-    localStorage.removeItem('santillos_carrito'); 
-    window.location.href='confirmacion.html?id='+ref.key;
+    const refPush=await db.ref('pedidos').push(pedidoData);
+    localStorage.setItem('santillos_cliente',JSON.stringify({nombre:pedidoData.nombre,telefono:pedidoData.telefono,direccion:pedidoData.direccion,referencia:pedidoData.referencia}));
+    localStorage.removeItem('santillos_carrito');
+    window.location.href="gracias.html?id="+refPush.key;
   }catch(e){
-    alert('Error: '+e.message); 
-    btn.innerText='Confirmar pedido'; 
-    btn.disabled=false;
+    alert("Error: "+e.message);
+    btn.innerText="Confirmar pedido";btn.disabled=false;
   }
 }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>

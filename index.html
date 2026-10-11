@@ -62,19 +62,36 @@ function volverAPedir(){
   document.getElementById('btnPermitir').innerText="Permitir ubicación";
 }
 
-// PRECARGA INTERNA MIENTRAS EL CLIENTE DECIDE - NO REDIRIGE SOLO
-const DB_URL = "https://santillos-1ac6d-default-rtdb.firebaseio.com";
+// PRECARGA INTERNA MIENTRAS EL CLIENTE DECIDE - NO REDIRIGE SOLO - CORREGIDO PARA NO DAR QUOTA EXCEEDED
 let precargaPromise = (async()=>{
   try{
-    const [menu, order, config] = await Promise.all([
-      fetch(DB_URL+'/menu.json').then(r=>r.json()).catch(()=>null),
-      fetch(DB_URL+'/categoryOrder.json').then(r=>r.json()).catch(()=>null),
-      fetch(DB_URL+'/config.json').then(r=>r.json()).catch(()=>null)
+    const [menuSnap, orderSnap, configSnap] = await Promise.all([
+      db.ref('menu').once('value'),
+      db.ref('categoryOrder').once('value'),
+      db.ref('config').once('value')
     ]);
-    if(menu) localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menu));
-    if(order && order.length>0) localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order));
-    else if(menu) localStorage.setItem('santillos_cache_order_v2', JSON.stringify(Object.keys(menu)));
-    if(config) localStorage.setItem('santillos_cache_config', JSON.stringify(config));
+    const menu = menuSnap.val();
+    const order = orderSnap.val();
+    const config = configSnap.val();
+
+    if(config){
+      try{ localStorage.setItem('santillos_cache_config', JSON.stringify(config)); }catch(e){}
+    }
+    if(order && order.length>0){
+      try{ localStorage.setItem('santillos_cache_order_v2', JSON.stringify(order)); }catch(e){}
+    } else if(menu){
+      try{ localStorage.setItem('santillos_cache_order_v2', JSON.stringify(Object.keys(menu))); }catch(e){}
+    }
+    if(menu){
+      try{
+        localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menu));
+      }catch(e){
+        // Si tu menu pesa mas de 5MB por imagenes en base64, no lo guardamos para no romper la app
+        // El menu.html lo cargara directo con SDK, ya no se quedara en gris
+        console.log("Cache lleno, se omite guardado de menu completo para evitar QuotaExceededError");
+        try{ localStorage.removeItem('santillos_cache_menu_v2'); }catch(e2){}
+      }
+    }
   }catch(e){}
 })();
 

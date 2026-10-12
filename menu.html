@@ -28,32 +28,31 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 .product-card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;display:flex;overflow:hidden;min-height:108px}
 .product-img-box{width:110px;min-width:110px;height:110px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
 .product-img-box img{width:100%;height:100%;object-fit:cover}
-.product-info{flex:1;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;position:relative;padding-right:110px}
+.product-info{flex:1;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;position:relative;padding-right:115px}
 .product-name{font-weight:700;font-size:14px}
 .product-price{font-weight:800;font-size:16px}
 .product-bottom{display:flex;align-items:center;margin-top:10px}
-.skeleton{background:linear-gradient(90deg,#1c1c1c 25%,#2a2a2a 50%,#1c1c1c 75%);background-size:200% 100%;animation:shim 1.2s infinite}
-@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
-.img-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
-.img-viewer-overlay.show{display:flex}
-.img-viewer-card{position:relative;max-width:90vw;max-height:85vh}
-.img-viewer-card img{width:100%;max-height:80vh;object-fit:contain;border-radius:16px}
-.btn-close-img{position:absolute;top:-10px;right:-10px;background:#fff;color:#111;width:36px;height:36px;border-radius:50%;border:none;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:92%;max-width:460px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:14px 8px;z-index:100;border-radius:28px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+.bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:92%;max-width:460px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:14px 8px;z-index:100;border-radius:28px}
 .nav-item-rappi{display:flex;flex-direction:column;align-items:center;gap:4px;color:#777;font-size:9px;font-weight:800;background:none;border:none;cursor:pointer;min-width:64px;text-decoration:none}
 .nav-item-rappi.active{color:#fff}
 .nav-item-rappi i{font-size:20px}
 .cart-badge{position:absolute;top:-2px;right:10px;background:#ff2e2e;color:#fff;font-size:9px;font-weight:900;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
 .nav-wrap{position:relative}
-.action-right{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center}
-.btn-add{width:42px;height:42px;border-radius:50%;border:none;background:#5e0a28;color:#fff;font-weight:900;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,0.4)}
+.action-right{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;z-index:5}
+.btn-add{width:42px;height:42px;border-radius:50%;border:none;background:#5e0a28;color:#fff;font-weight:900;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .qty-control{display:flex;align-items:center;justify-content:center;background:#2a2a2a;border-radius:24px;padding:4px;gap:8px;min-width:96px}
 .qty-btn{width:32px;height:32px;border-radius:50%;border:none;background:#5e0a28;color:#fff;font-weight:900;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .qty-num{width:22px;text-align:center;font-weight:800;font-size:14px}
+.img-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.img-viewer-overlay.show{display:flex}
+.img-viewer-card{position:relative;max-width:90vw;max-height:85vh}
+.img-viewer-card img{width:100%;max-height:80vh;object-fit:contain;border-radius:16px}
+.btn-close-img{position:absolute;top:-10px;right:-10px;background:#fff;color:#111;width:36px;height:36px;border-radius:50%;border:none;font-weight:900;cursor:pointer}
+.skeleton{background:linear-gradient(90deg,#1c1c1c 25%,#2a2a2a 50%,#1c1c1c 75%);background-size:200% 100%;animation:shim 1.2s infinite}
+@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
 </style>
 </head>
 <body>
-
 <div class="header-portada">
   <img class="portada-img" id="portadaImg" src="">
   <div class="status-neon">● ABIERTO</div>
@@ -63,22 +62,18 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
     <div class="sub-rest">DOLORES HIDALGO - COMIDA RAPIDA</div>
   </div>
 </div>
-
 <div class="categorias" id="categorias"></div>
 <div class="productos" id="productos"></div>
-
 <div class="img-viewer-overlay" id="imgViewer" onclick="cerrarViewer()">
   <div class="img-viewer-card" onclick="event.stopPropagation()">
     <button class="btn-close-img" onclick="cerrarViewer()"><i class="fa-solid fa-xmark"></i></button>
     <img id="viewerImg" src="">
   </div>
 </div>
-
 <div class="bottom-nav">
   <a href="menu.html" class="nav-item-rappi active"><i class="fa-solid fa-house"></i>INICIO</a>
   <div class="nav-wrap"><a href="carrito.html" class="nav-item-rappi"><i class="fa-solid fa-bag-shopping"></i>CARRITO</a><div class="cart-badge" id="cartCount">0</div></div>
 </div>
-
 <script>
 const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
@@ -93,21 +88,9 @@ let cantidades = {}; let carrito = {};
 try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
 try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
 if(Object.keys(carrito).length===0){ cantidades={}; localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades)); }
-const urlParams = new URLSearchParams(window.location.search);
-if(urlParams.get('reset')==='1' || localStorage.getItem('santillos_pedido_finalizado')==='1'){
-  carrito={}; cantidades={};
-  localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
-  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
-  localStorage.removeItem('santillos_pedido_finalizado');
-}
 function actualizarBadge(){ document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0); }
 actualizarBadge();
-function aplicarConfig(c){
- if(!c)return;
- if(c.portada) document.getElementById('portadaImg').src=c.portada;
- if(c.logo&&c.logo.length>20){ document.getElementById('logoImg').src=c.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; }
- if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre;
-}
+function aplicarConfig(c){ if(!c)return; if(c.portada) document.getElementById('portadaImg').src=c.portada; if(c.logo&&c.logo.length>20){ document.getElementById('logoImg').src=c.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; } if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre; }
 if(cacheConfig) aplicarConfig(cacheConfig);
 function renderCategorias(){
  const d=document.getElementById('categorias'); if(!d||!categoryOrder||categoryOrder.length===0) return;
@@ -122,75 +105,73 @@ function renderCategorias(){
   d.appendChild(b);
  });
 }
-function getSafeId(cat, idx){
-  return (cat+'_'+idx).replace(/[^a-zA-Z0-9_-]/g,'_');
-}
 function renderProductos(){
  const cont=document.getElementById('productos'); if(!cont||!menuData||!categoriaActiva) return;
  const lista=menuData[categoriaActiva]||[];
  let html='';
  lista.forEach((p,i)=>{
   if(p.disp===false) return;
-  const idOriginal = categoriaActiva+'_'+i;
-  const safeId = getSafeId(categoriaActiva,i);
-  const cant = cantidades[idOriginal]||0;
-  const safeImg = (p.img||'').replace(/'/g,"\\'");
-  const safeName = (p.name||'').replace(/'/g,"\\'");
-  let accion = '';
-  if(cant===0){
-    accion = `<button class="btn-add" onclick="cambiarQty('${idOriginal}','${safeId}',1,'${safeName}',${p.price},'${safeImg}')">+</button>`;
-  }else{
-    accion = `<div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${idOriginal}','${safeId}',-1,'${safeName}',${p.price},'${safeImg}')">−</button><div class="qty-num" id="num-${safeId}">${cant}</div><button class="qty-btn" onclick="cambiarQty('${idOriginal}','${safeId}',1,'${safeName}',${p.price},'${safeImg}')">+</button></div>`;
-  }
-  html+=`<div class="product-card"><div class="product-img-box" onclick="abrirViewer('${safeImg}')"><img src="${p.img}" loading="lazy"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div><div class="action-right" id="action-${safeId}">${accion}</div></div></div>`;
+  const id = categoriaActiva+'_'+i;
+  const cant = cantidades[id]||0;
+  const accion = cant===0
+ ? `<button class="btn-add" data-action="add" data-id="${id}">+</button>`
+  : `<div class="qty-control"><button class="qty-btn" data-action="sub" data-id="${id}">−</button><div class="qty-num">${cant}</div><button class="qty-btn" data-action="add" data-id="${id}">+</button></div>`;
+  html+=`<div class="product-card" data-pid="${id}"><div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,"")}')"><img src="${p.img}" loading="lazy"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div><div class="action-right">${accion}</div></div></div>`;
  });
  cont.innerHTML=html || '<div style="padding:20px;text-align:center;color:#777">No hay productos</div>';
 }
-if(categoryOrder.length>0){
- document.getElementById('categorias').innerHTML=categoryOrder.map((c,i)=>`<button class="cat-btn ${i==0?'active':''}">${c}</button>`).join('');
- categoriaActiva=categoryOrder[0];
-}
 if(menuData){ renderCategorias(); renderProductos(); }
-else{
- document.getElementById('categorias').innerHTML='<div class="cat-btn skeleton" style="width:80px;height:38px"></div>';
- document.getElementById('productos').innerHTML='<div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div>';
-}
 db.ref('config').once('value').then(s=>{ if(s.val()){ aplicarConfig(s.val()); safeSet('santillos_cache_config', s.val()); }});
 db.ref('categoryOrder').once('value').then(s=>{
  if(s.val()&&s.val().length>0){ categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); if(!categoriaActiva) categoriaActiva=categoryOrder[0]; renderCategorias(); }
  return db.ref('menu').once('value');
 }).then(s=>{
  if(s && s.val()){
-   menuData=s.val();
+   menuData=s.val(); safeSet('santillos_cache_menu_v2', menuData);
    if(!categoryOrder||categoryOrder.length==0){ categoryOrder=Object.keys(menuData); safeSet('santillos_cache_order_v2', categoryOrder); }
    if(!categoriaActiva) categoriaActiva=categoryOrder[0];
    renderCategorias(); renderProductos();
  }
-}).catch(()=>{});
+});
 
-// FIX PRINCIPAL: ya no hace renderProductos() completo, solo actualiza el boton tocado
-function cambiarQty(idOriginal, safeId, delta, nombre, precio, img){
- let a=cantidades[idOriginal]||0;
- a+=delta;
- if(a<0)a=0;
- cantidades[idOriginal]=a;
- if(a===0){ delete carrito[idOriginal]; delete cantidades[idOriginal]; } else carrito[idOriginal]={nombre,precio,img,cant:a};
- actualizarBadge();
- localStorage.setItem('santillos_carrito',JSON.stringify(carrito));
- localStorage.setItem('santillos_cantidades',JSON.stringify(cantidades));
- const actionDiv = document.getElementById('action-'+safeId);
- if(!actionDiv) return;
- if(a===0){
-   actionDiv.innerHTML=`<button class="btn-add" onclick="cambiarQty('${idOriginal}','${safeId}',1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">+</button>`;
- }else{
-   const numEl = document.getElementById('num-'+safeId);
-   if(numEl){
-     numEl.innerText=a;
-   }else{
-     actionDiv.innerHTML=`<div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${idOriginal}','${safeId}',-1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">−</button><div class="qty-num" id="num-${safeId}">${a}</div><button class="qty-btn" onclick="cambiarQty('${idOriginal}','${safeId}',1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">+</button></div>`;
-   }
- }
-}
+// CLICK DELEGADO - YA NO SE ROMPE POR NOMBRES CON COMILLAS
+document.getElementById('productos').addEventListener('click', function(e){
+  const btn = e.target.closest('[data-action]');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const delta = btn.dataset.action==='add'?1:-1;
+  if(!id ||!menuData ||!categoriaActiva) return;
+  const parts = id.split('_');
+  const idx = parseInt(parts.pop());
+  const cat = parts.join('_');
+  const p = menuData[cat]? menuData[cat][idx] : null;
+  if(!p) return;
+
+  let a = cantidades[id]||0;
+  a+=delta;
+  if(a<0)a=0;
+  if(a>99)a=99;
+  cantidades[id]=a;
+  if(a===0){ delete carrito[id]; delete cantidades[id]; } else carrito[id]={nombre:p.name, precio:p.price, img:p.img||'', cant:a};
+  actualizarBadge();
+  localStorage.setItem('santillos_carrito',JSON.stringify(carrito));
+  localStorage.setItem('santillos_cantidades',JSON.stringify(cantidades));
+
+  // Solo actualiza esa tarjeta
+  const card = btn.closest('.product-card');
+  const actionDiv = card? card.querySelector('.action-right') : null;
+  if(!actionDiv) return;
+  if(a===0){
+    actionDiv.innerHTML=`<button class="btn-add" data-action="add" data-id="${id}">+</button>`;
+  }else{
+    const num = actionDiv.querySelector('.qty-num');
+    if(num){ num.innerText=a; }
+    else{
+      actionDiv.innerHTML=`<div class="qty-control"><button class="qty-btn" data-action="sub" data-id="${id}">−</button><div class="qty-num">${a}</div><button class="qty-btn" data-action="add" data-id="${id}">+</button></div>`;
+    }
+  }
+});
+
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
 function cerrarViewer(){ document.getElementById('imgViewer').classList.remove('show'); }
 </script>

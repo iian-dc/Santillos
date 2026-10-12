@@ -98,10 +98,26 @@ body{background:#0f0f0f;color:#fff;padding-bottom:110px;max-width:500px;margin:0
 
 <script>
 let carrito = {}; let cantidades = {};
-try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){}
-try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){}
+try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
+try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
+
+// FIX: Si carrito vacio, limpiar cantidades fantasma
+if(Object.keys(carrito).length===0){
+  cantidades={};
+  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+}else{
+  // sincronizar
+  for(let k in cantidades){ if(!carrito[k]) delete cantidades[k]; }
+  for(let k in carrito){ cantidades[k]=carrito[k].cant; }
+  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+}
 
 let editId = null; let editTempQty = 1;
+
+function syncStorage(){
+  localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
+  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+}
 
 function renderCarrito(){
   const lista = document.getElementById('listaCarrito');
@@ -111,6 +127,9 @@ function renderCarrito(){
     document.getElementById('resumenBox').style.display='none';
     document.getElementById('btnPago').style.display='none';
     document.getElementById('cartCount').innerText='0';
+    // Asegurar que cantidades quede en 0 tambien
+    cantidades={};
+    syncStorage();
     return;
   }
   document.getElementById('resumenBox').style.display='grid';
@@ -158,25 +177,23 @@ function guardarEdicion(){
   if(!editId) return;
   carrito[editId].cant = editTempQty;
   cantidades[editId] = editTempQty;
-  localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
-  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+  syncStorage();
   cerrarModal();
   renderCarrito();
 }
 function eliminarItem(id){
   delete carrito[id]; delete cantidades[id];
-  localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
-  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+  syncStorage();
   renderCarrito();
 }
 function vaciarCarrito(){
   if(!confirm('¿Vaciar carrito?')) return;
   carrito={}; cantidades={};
-  localStorage.setItem('santillos_carrito','{}');
-  localStorage.setItem('santillos_cantidades','{}');
+  syncStorage();
   renderCarrito();
 }
 function irAPagar(){
+  syncStorage();
   window.location.href="resumen.html";
 }
 renderCarrito();

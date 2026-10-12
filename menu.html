@@ -92,9 +92,35 @@ try{cacheConfig=JSON.parse(localStorage.getItem('santillos_cache_config'))}catch
 try{menuData=JSON.parse(localStorage.getItem('santillos_cache_menu_v2'))}catch(e){ if(menuData && JSON.stringify(menuData).length>2000000){ localStorage.removeItem('santillos_cache_menu_v2'); menuData=null; } }
 
 let categoriaActiva = categoryOrder[0] || null;
+
+// --- FIX CARRITO ---
 let cantidades = {}; let carrito = {};
-try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){}
-try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){}
+try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
+try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
+
+// Si el carrito esta vacio, obligamos cantidades a 0 (ESTE ERA EL BUG)
+if(Object.keys(carrito).length===0){
+  cantidades={};
+  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+}else{
+  // Sincronizar cantidades con carrito real
+  let nuevasCantidades={};
+  for(let k in carrito){
+    nuevasCantidades[k]=carrito[k].cant||0;
+  }
+  cantidades=nuevasCantidades;
+  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+}
+
+// Si viene de un pedido recien hecho, tambien limpiamos
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('reset')==='1' || localStorage.getItem('santillos_pedido_finalizado')==='1'){
+  carrito={}; cantidades={};
+  localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
+  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+  localStorage.removeItem('santillos_pedido_finalizado');
+}
+
 document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
 
 function aplicarConfig(c){
@@ -126,7 +152,6 @@ function renderProductos(){
  lista.forEach((p,i)=>{
   if(p.disp===false) return;
   const id=categoriaActiva+'_'+i;
-  if(cantidades[id]===undefined) cantidades[id]=0;
   const cant = cantidades[id]||0;
   let accion = '';
   if(cant===0){
@@ -164,7 +189,7 @@ db.ref('categoryOrder').once('value').then(s=>{
 
 function cambiarQty(id,delta,nombre,precio,img){
  let a=cantidades[id]||0; a+=delta; if(a<0)a=0; cantidades[id]=a;
- if(a===0) delete carrito[id]; else carrito[id]={nombre,precio,img,cant:a};
+ if(a===0){ delete carrito[id]; delete cantidades[id]; } else carrito[id]={nombre,precio,img,cant:a};
  document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
  localStorage.setItem('santillos_carrito',JSON.stringify(carrito));
  localStorage.setItem('santillos_cantidades',JSON.stringify(cantidades));

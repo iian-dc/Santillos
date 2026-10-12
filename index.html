@@ -74,29 +74,22 @@ firebase.initializeApp(firebaseConfig);const db=firebase.database();
 let ipCliente="desconocida";
 let ipKey="";
 
-// NUEVO: VERIFICAR IP AL CARGAR
 (async function verificarAccesoIP(){
   try{
     const res = await fetch('https://api.ipify.org?format=json');
     const data = await res.json();
     ipCliente = data.ip;
     ipKey = ipCliente.replace(/\./g,'_');
-
-    // Preguntar a Firebase si esta IP está bloqueada
     const snap = await db.ref('ips_bloqueadas/'+ipKey).once('value');
     if(snap.exists()){
       document.getElementById('overlayCargando').style.display='none';
       document.getElementById('overlayIPBloqueada').style.display='flex';
       document.getElementById('ipBloqueadaTxt').innerText = 'IP: ' + ipCliente;
-      return; // SE QUEDA BLOQUEADO
+      return;
     }
-
-    // Si no está bloqueada, continuar normal
     document.getElementById('overlayCargando').style.display='none';
     document.getElementById('overlayPermitir').style.display='flex';
-
   }catch(e){
-    // Si falla API, dejar pasar pero con ip desconocida
     document.getElementById('overlayCargando').style.display='none';
     document.getElementById('overlayPermitir').style.display='flex';
   }
@@ -141,8 +134,18 @@ async function permitirUbicacion(){
       localStorage.setItem('santillos_ubicacion',JSON.stringify(data));
       localStorage.setItem('santillos_ubicacion_key',pushRef.key);
       localStorage.setItem('santillos_ubicacion_ok','1');
-    }catch(e){}
-    window.location.href="menu.html";
+      // FIX: RESET CARRITO AL INGRESAR
+      localStorage.removeItem('santillos_carrito');
+      localStorage.removeItem('santillos_cantidades');
+      localStorage.removeItem('santillos_pedido_finalizado');
+      localStorage.setItem('santillos_carrito', JSON.stringify({}));
+      localStorage.setItem('santillos_cantidades', JSON.stringify({}));
+    }catch(e){
+      localStorage.setItem('santillos_ubicacion_ok','1');
+      localStorage.removeItem('santillos_carrito');
+      localStorage.removeItem('santillos_cantidades');
+    }
+    window.location.href="menu.html?reset=1";
   },(err)=>{
     btn.innerText="Permitir ubicación";
     if(err.code === 1){

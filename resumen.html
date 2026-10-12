@@ -41,12 +41,9 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .btn-confirm.shake{animation:shake 0.35s;border:1.5px solid #ff3b3b;background:#7a0a33}
 .pac-container{background:#fff!important;border-radius:12px!important;margin-top:6px;box-shadow:0 4px 20px rgba(0,0,0,0.3)!important}
 .pac-item{padding:10px 12px!important;font-size:11px!important}
-/* TARJETA BLOQUEO IP */
 .overlay-ip{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px}
-.overlay-ip.show{display:flex;animation:fadeIn 0.3s}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.card-bloqueo{background:#fff;border-radius:28px;padding:32px 24px;width:100%;max-width:360px;text-align:center;animation:pop 0.4s ease}
-@keyframes pop{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.overlay-ip.show{display:flex}
+.card-bloqueo{background:#fff;border-radius:28px;padding:32px 24px;width:100%;max-width:360px;text-align:center}
 .icon-x{width:80px;height:80px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;color:#ef4444;font-size:38px}
 .card-bloqueo h2{font-size:20px;font-weight:800;color:#111;margin-bottom:10px}
 .card-bloqueo p{font-size:13px;color:#666;line-height:1.5;margin-bottom:22px}
@@ -101,7 +98,7 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
   <div class="card-bloqueo">
     <div class="icon-x"><i class="fa-solid fa-xmark"></i></div>
     <h2>Pedido no disponible</h2>
-    <p>Por motivos de seguridad, no podemos recibir tu pedido en este momento.<br><br>Tu acceso ha sido restringido temporalmente.</p>
+    <p>Por motivos de seguridad, no podemos recibir tu pedido en este momento.</p>
     <button class="btn-soporte" onclick="contactarSoporte()"><i class="fa-brands fa-whatsapp"></i> Escribir a soporte técnico</button>
   </div>
 </div>
@@ -116,15 +113,11 @@ let subtotal=0,html='';Object.values(carrito).forEach(p=>{let t=p.precio*p.cant;
 document.getElementById('listaResumen').innerHTML=html;
 document.getElementById('subtotalTxt').innerText='$'+subtotal;
 
-let distanciaKm=0; let costoEnvio=0;
-let ipClienteFinal="desconocida";
-let ciudadIPFinal="";
+let distanciaKm=0; let costoEnvio=0; let latCliente=null; let lngCliente=null;
+let ipClienteFinal="desconocida"; let ciudadIPFinal="";
 fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(async d=>{
   ipClienteFinal=d.ip;
-  try{
-    const geo=await fetch(`https://ipapi.co/${d.ip}/json/`).then(r=>r.json());
-    ciudadIPFinal = (geo.city||"") + (geo.region?" , "+geo.region:"");
-  }catch(e){}
+  try{ const geo=await fetch(`https://ipapi.co/${d.ip}/json/`).then(r=>r.json()); ciudadIPFinal=(geo.city||"")+(geo.region?" , "+geo.region:""); }catch(e){}
 }).catch(()=>{});
 
 function actualizarTotales(){
@@ -154,127 +147,157 @@ function actualizarTotales(){
 }
 actualizarTotales();
 
-try{let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');if(cli.nombre)nombre.value=cli.nombre;if(cli.telefono)telefono.value=cli.telefono;if(cli.direccion)direccion.value=cli.direccion;if(cli.referencia)referencia.value=cli.referencia;}catch(e){}
+// CARGAR DATOS GUARDADOS
+try{
+  let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');
+  if(cli.nombre) document.getElementById('nombre').value=cli.nombre;
+  if(cli.telefono) document.getElementById('telefono').value=cli.telefono;
+  if(cli.direccion) document.getElementById('direccion').value=cli.direccion;
+  if(cli.referencia) document.getElementById('referencia').value=cli.referencia;
+  if(cli.lat) latCliente=cli.lat;
+  if(cli.lng) lngCliente=cli.lng;
+}catch(e){}
 
 function setupClear(inputId, clearId){
   const input=document.getElementById(inputId); const btn=document.getElementById(clearId);
   const toggle=()=>{ if(input.value.length>0) btn.classList.add('show'); else btn.classList.remove('show'); };
   input.addEventListener('input',()=>{toggle(); const mapErr={direccion:['fieldDir','errDir'],telefono:['fieldTel','errTel'],nombre:['fieldNom','errNom']}; if(mapErr[inputId]){document.getElementById(mapErr[inputId][0]).classList.remove('error');document.getElementById(mapErr[inputId][1]).classList.remove('show');} });
   input.addEventListener('focus',toggle); setTimeout(toggle,300);
-  btn.addEventListener('click',()=>{ input.value='';btn.classList.remove('show');input.focus(); if(inputId==='direccion'){ if(window.markerCliente){markerCliente.setMap(null);} directionsRenderer.setDirections({routes:[]}); distanciaKm=0; document.getElementById('distanciaTxt').innerText='--'; actualizarTotales(); } });
+  btn.addEventListener('click',()=>{ input.value='';btn.classList.remove('show');input.focus(); if(inputId==='direccion'){ if(window.markerCliente){markerCliente.setMap(null);} if(directionsRenderer){directionsRenderer.setDirections({routes:[]});} distanciaKm=0; latCliente=null; lngCliente=null; document.getElementById('distanciaTxt').innerText='--'; actualizarTotales(); guardarCliente(); } });
 }
 setupClear('direccion','clearDir'); setupClear('referencia','clearRef'); setupClear('telefono','clearTel'); setupClear('nombre','clearNom');
 
-let map, markerTienda, markerCliente, directionsService, directionsRenderer, autocomplete;
-function initMap(){
-  map=new google.maps.Map(document.getElementById("map"),{center:TIENDA,zoom:13,disableDefaultUI:false,zoomControl:false,mapTypeControl:false});
-  directionsService=new google.maps.DirectionsService();
-  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.9}});
-  const iconRestaurante={url:"data:image/svg+xml;charset=UTF-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="48" viewBox="0 0 40 48"><path d="M20 0C9 0 0 9 0 20c0 13 20 28 20 28S40 33 40 20C40 9 31 0 20 0z" fill="%235e0a28"/><circle cx="20" cy="20" r="8" fill="white"/></svg>'),scaledSize:new google.maps.Size(40,48),anchor:new google.maps.Point(20,48)};
-  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRestaurante});
-  autocomplete=new google.maps.places.Autocomplete(document.getElementById("direccion"),{componentRestrictions:{country:"mx"},fields:["geometry","formatted_address"]});
-  autocomplete.addListener("place_changed",()=>{
-    const place=autocomplete.getPlace();
-    if(!place.geometry){ return; }
-    const loc=place.geometry.location;
-    if(markerCliente) markerCliente.setMap(null);
-    markerCliente=new google.maps.Marker({position:loc,map:map});
-    calcularRuta(loc);
-  });
+function guardarCliente(){
+  try{
+    localStorage.setItem('santillos_cliente', JSON.stringify({
+      nombre: document.getElementById('nombre').value,
+      telefono: document.getElementById('telefono').value,
+      direccion: document.getElementById('direccion').value,
+      referencia: document.getElementById('referencia').value,
+      lat: latCliente,
+      lng: lngCliente
+    }));
+  }catch(e){}
 }
-function calcularRuta(dest){
-  directionsService.route({origin:TIENDA,destination:dest,travelMode:google.maps.TravelMode.DRIVING},(res,status)=>{
-    if(status==="OK"){
-      directionsRenderer.setDirections(res);
-      const leg=res.routes[0].legs[0];
+document.getElementById('nombre').addEventListener('input',guardarCliente);
+document.getElementById('telefono').addEventListener('input',guardarCliente);
+document.getElementById('referencia').addEventListener('input',guardarCliente);
+
+let map, markerTienda, markerCliente, directionsService, directionsRenderer, autocomplete, geocoder;
+
+function calcularRuta(destinoLatLng){
+  if(!destinoLatLng) return;
+  directionsService.route({
+    origin: TIENDA,
+    destination: destinoLatLng,
+    travelMode: google.maps.TravelMode.DRIVING
+  }, (result, status)=>{
+    if(status==='OK'){
+      directionsRenderer.setDirections(result);
+      const leg=result.routes[0].legs[0];
       distanciaKm=leg.distance.value/1000;
-      document.getElementById('distanciaTxt').innerText=leg.distance.text + " (" + leg.duration.text + ")";
+      document.getElementById('distanciaTxt').innerText=leg.distance.text+' ('+Math.round(leg.duration.value/60)+' min)';
       actualizarTotales();
     }
   });
 }
 
-function contactarSoporte(){
-  // CAMBIA ESTE NUMERO POR EL TUYO
-  const numeroSoporte = "524181000000";
-  const mensaje = encodeURIComponent("Hola, mi acceso aparece bloqueado por seguridad. Mi IP es: " + ipClienteFinal);
-  window.open(`https://wa.me/${numeroSoporte}?text=${mensaje}`, "_blank");
+function initMap(){
+  map=new google.maps.Map(document.getElementById("map"),{center:TIENDA,zoom:13,disableDefaultUI:false,zoomControl:false,mapTypeControl:false});
+  geocoder=new google.maps.Geocoder();
+  directionsService=new google.maps.DirectionsService();
+  directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.9}});
+  const iconRestaurante={url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"><path fill="%235e0a28" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>'),scaledSize:new google.maps.Size(36,36)};
+  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRestaurante});
+
+  autocomplete=new google.maps.places.Autocomplete(document.getElementById('direccion'),{componentRestrictions:{country:'mx'}});
+  autocomplete.addListener('place_changed',()=>{
+    const place=autocomplete.getPlace();
+    if(!place.geometry) return;
+    const loc=place.geometry.location;
+    latCliente=loc.lat(); lngCliente=loc.lng();
+    if(markerCliente) markerCliente.setMap(null);
+    markerCliente=new google.maps.Marker({position:loc,map:map});
+    calcularRuta(loc);
+    guardarCliente();
+    document.getElementById('fieldDir').classList.remove('error');
+    document.getElementById('errDir').classList.remove('show');
+  });
+
+  // --- AUTO CALCULO SI YA HABIA DIRECCION GUARDADA (FIX DE TU FOTO) ---
+  setTimeout(()=>{
+    const dirGuardada=document.getElementById('direccion').value.trim();
+    if(dirGuardada.length>5){
+      // Si ya tenemos lat/lng guardados, usalos directo
+      if(latCliente && lngCliente){
+        const savedLatLng=new google.maps.LatLng(latCliente,lngCliente);
+        if(markerCliente) markerCliente.setMap(null);
+        markerCliente=new google.maps.Marker({position:savedLatLng,map:map});
+        calcularRuta(savedLatLng);
+      }else{
+        // Si no hay lat/lng, geocodifica la dirección guardada
+        geocoder.geocode({address:dirGuardada, componentRestrictions:{country:'mx'}}, (results,status)=>{
+          if(status==='OK' && results[0]){
+            const loc=results[0].geometry.location;
+            latCliente=loc.lat(); lngCliente=loc.lng();
+            if(markerCliente) markerCliente.setMap(null);
+            markerCliente=new google.maps.Marker({position:loc,map:map});
+            calcularRuta(loc);
+            guardarCliente();
+          }
+        });
+      }
+    }
+  }, 800);
 }
 
-async function verificarIPBloqueada(ip){
-  if(!ip || ip==="desconocida") return false;
-  const key = ip.replace(/\./g,'_');
-  const snap = await db.ref('ips_bloqueadas/'+key).once('value');
-  return snap.exists();
+function verificarIPBloqueada(){
+  return new Promise(async (resolve)=>{
+    try{
+      if(!ipClienteFinal || ipClienteFinal==="desconocida"){ const ipTmp=await fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>d.ip).catch(()=>null); if(ipTmp) ipClienteFinal=ipTmp; }
+      if(!ipClienteFinal) return resolve(false);
+      const key=ipClienteFinal.replace(/\./g,'_');
+      const snap=await db.ref('ips_bloqueadas/'+key).once('value');
+      if(snap.exists()){ document.getElementById('overlayIPBloqueadaCheckout').classList.add('show'); return resolve(true); }
+      return resolve(false);
+    }catch(e){ return resolve(false); }
+  });
 }
+function contactarSoporte(){ window.open('https://wa.me/524151000000?text=Hola%20soporte%20mi%20pedido%20no%20pasa%20por%20seguridad%20IP:'+ipClienteFinal,'_blank'); }
 
 async function confirmarPedido(){
-  const btn=document.getElementById('btnConfirm');
-  let valido=true;
-  if(!direccion.value.trim()){ document.getElementById('fieldDir').classList.add('error'); document.getElementById('errDir').classList.add('show'); valido=false; }
-  if(!telefono.value.trim()){ document.getElementById('fieldTel').classList.add('error'); document.getElementById('errTel').classList.add('show'); valido=false; }
-  if(!nombre.value.trim()){ document.getElementById('fieldNom').classList.add('error'); document.getElementById('errNom').classList.add('show'); valido=false; }
-  if(!valido){ btn.classList.add('shake'); setTimeout(()=>btn.classList.remove('shake'),400); return; }
+  let ok=true;
+  const dir=document.getElementById('direccion').value.trim();
+  const tel=document.getElementById('telefono').value.trim();
+  const nom=document.getElementById('nombre').value.trim();
+  if(!dir){ document.getElementById('fieldDir').classList.add('error'); document.getElementById('errDir').classList.add('show'); ok=false; }
+  if(!tel){ document.getElementById('fieldTel').classList.add('error'); document.getElementById('errTel').classList.add('show'); ok=false; }
+  if(!nom){ document.getElementById('fieldNom').classList.add('error'); document.getElementById('errNom').classList.add('show'); ok=false; }
+  if(!ok){ const btn=document.getElementById('btnConfirm'); btn.classList.add('shake'); setTimeout(()=>btn.classList.remove('shake'),400); return; }
 
-  btn.innerText="Verificando...";
-  btn.disabled=true;
-
-  let ipFinal=ipClienteFinal;
-  if(ipFinal==="desconocida"){
-    try{ const r=await fetch('https://api.ipify.org?format=json').then(r=>r.json()); ipFinal=r.ip; }catch(e){}
-  }
-
-  if(await verificarIPBloqueada(ipFinal)){
-    document.getElementById('overlayIPBloqueadaCheckout').classList.add('show');
-    btn.innerText="Confirmar pedido";
-    btn.disabled=false;
+  if(distanciaKm===0 && subtotal < META){
+    alert('Estamos calculando tu envío, espera un segundo y vuelve a dar confirmar. Si ya tienes dirección guardada, mueve un poco el mapa o reescribe tu calle.');
     return;
   }
 
-  btn.innerText="Enviando pedido...";
-  let ubicacionGuardada={}; try{ ubicacionGuardada=JSON.parse(localStorage.getItem('santillos_ubicacion')||'{}'); }catch(e){}
-  let productosArray=Object.values(carrito).map(p=>({nombre:p.nombre,cantidad:p.cant,precio:p.precio,total:p.precio*p.cant}));
-  const ahora=new Date();
-  const pedidoData={
-    nombre:nombre.value.trim(),
-    telefono:telefono.value.trim(),
-    direccion:direccion.value.trim(),
-    referencia:referencia.value.trim(),
-    cliente:{nombre:nombre.value.trim(),telefono:telefono.value.trim(),direccion:direccion.value.trim()},
-    productos:productosArray,
-    detalle:productosArray.map(p=>`${p.cantidad}x ${p.nombre}`).join(', '),
-    subtotal:subtotal,
-    total:subtotal+costoEnvio,
-    costoEnvio:costoEnvio,
-    envio:costoEnvio,
-    envioGratis:costoEnvio===0,
-    distanciaKm:distanciaKm,
-    fecha:ahora.toLocaleDateString(),
-    hora:ahora.toLocaleTimeString(),
-    fechaISO:ahora.toISOString(),
-    timestamp:Date.now(),
-    creadoEn:Date.now(),
-    lat:ubicacionGuardada.lat||null,
-    lng:ubicacionGuardada.lng||null,
-    maps:ubicacionGuardada.maps||"",
-    ip:ipFinal,
-    ipCliente:ipFinal,
-    ciudad:ciudadIPFinal||"Dolores Hidalgo",
-    ciudadIP:ciudadIPFinal,
-    userAgent:navigator.userAgent,
-    estado:"pendiente"
-  };
+  const bloqueada=await verificarIPBloqueada();
+  if(bloqueada) return;
 
-  try{
-    const ref=await db.ref('pedidos').push(pedidoData);
-    localStorage.setItem('santillos_cliente',JSON.stringify({nombre:pedidoData.nombre,telefono:pedidoData.telefono,direccion:pedidoData.direccion,referencia:pedidoData.referencia}));
+  const btn=document.getElementById('btnConfirm'); btn.innerText='Enviando...'; btn.disabled=true;
+  const pedido={
+    cliente:{ nombre:nom, telefono:tel, direccion:dir, referencia:document.getElementById('referencia').value.trim() },
+    nombre:nom, telefono:tel, direccion:dir, referencia:document.getElementById('referencia').value.trim(),
+    productos:carrito, subtotal:subtotal, costoEnvio:costoEnvio, total:subtotal+costoEnvio,
+    envioGratis: costoEnvio===0, distanciaKm: distanciaKm, lat: latCliente, lng: lngCliente,
+    ip: ipClienteFinal, ciudad: ciudadIPFinal, ipCliente: ipClienteFinal, ciudadIP: ciudadIPFinal,
+    fecha:new Date().toLocaleDateString(), hora:new Date().toLocaleTimeString(), timestamp:Date.now(), creadoEn:new Date().toISOString(), estado:'pendiente',
+    maps: latCliente? `https://www.google.com/maps?q=${latCliente},${lngCliente}` : ''
+  };
+  guardarCliente();
+  db.ref('pedidos').push(pedido).then((ref)=>{
     localStorage.removeItem('santillos_carrito');
     window.location.href="confirmacion.html?id="+ref.key;
-  }catch(e){
-    alert("Error: "+e.message);
-    btn.innerText="Confirmar pedido";
-    btn.disabled=false;
-  }
+  }).catch(()=>{ btn.innerText='Confirmar pedido'; btn.disabled=false; alert('Error al enviar, intenta de nuevo'); });
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>

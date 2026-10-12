@@ -28,7 +28,7 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 .product-card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;display:flex;overflow:hidden;min-height:108px}
 .product-img-box{width:110px;min-width:110px;height:110px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
 .product-img-box img{width:100%;height:100%;object-fit:cover}
-.product-info{flex:1;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;position:relative;padding-right:70px}
+.product-info{flex:1;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;position:relative;padding-right:110px}
 .product-name{font-weight:700;font-size:14px}
 .product-price{font-weight:800;font-size:16px}
 .product-bottom{display:flex;align-items:center;margin-top:10px}
@@ -83,30 +83,16 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
-
-function safeSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ try{ localStorage.removeItem(k); }catch(e2){} } }
-
+function safeSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 let menuData=null; let categoryOrder=[]; let cacheConfig=null;
 try{categoryOrder=JSON.parse(localStorage.getItem('santillos_cache_order_v2'))||[]}catch(e){}
 try{cacheConfig=JSON.parse(localStorage.getItem('santillos_cache_config'))}catch(e){}
 try{menuData=JSON.parse(localStorage.getItem('santillos_cache_menu_v2'))}catch(e){}
-
 let categoriaActiva = categoryOrder[0] || null;
-
 let cantidades = {}; let carrito = {};
 try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
 try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
-
-if(Object.keys(carrito).length===0){
-  cantidades={};
-  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
-}else{
-  let nuevasCantidades={};
-  for(let k in carrito){ nuevasCantidades[k]=carrito[k].cant||0; }
-  cantidades=nuevasCantidades;
-  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
-}
-
+if(Object.keys(carrito).length===0){ cantidades={}; localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades)); }
 const urlParams = new URLSearchParams(window.location.search);
 if(urlParams.get('reset')==='1' || localStorage.getItem('santillos_pedido_finalizado')==='1'){
   carrito={}; cantidades={};
@@ -114,12 +100,8 @@ if(urlParams.get('reset')==='1' || localStorage.getItem('santillos_pedido_finali
   localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
   localStorage.removeItem('santillos_pedido_finalizado');
 }
-
-function actualizarBadge(){
-  document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
-}
+function actualizarBadge(){ document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0); }
 actualizarBadge();
-
 function aplicarConfig(c){
  if(!c)return;
  if(c.portada) document.getElementById('portadaImg').src=c.portada;
@@ -127,7 +109,6 @@ function aplicarConfig(c){
  if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre;
 }
 if(cacheConfig) aplicarConfig(cacheConfig);
-
 function renderCategorias(){
  const d=document.getElementById('categorias'); if(!d||!categoryOrder||categoryOrder.length===0) return;
  if(!categoriaActiva) categoriaActiva=categoryOrder[0];
@@ -141,36 +122,39 @@ function renderCategorias(){
   d.appendChild(b);
  });
 }
-
+function getSafeId(cat, idx){
+  return (cat+'_'+idx).replace(/[^a-zA-Z0-9_-]/g,'_');
+}
 function renderProductos(){
  const cont=document.getElementById('productos'); if(!cont||!menuData||!categoriaActiva) return;
  const lista=menuData[categoriaActiva]||[];
  let html='';
  lista.forEach((p,i)=>{
   if(p.disp===false) return;
-  const id=categoriaActiva+'_'+i;
-  const cant = cantidades[id]||0;
+  const idOriginal = categoriaActiva+'_'+i;
+  const safeId = getSafeId(categoriaActiva,i);
+  const cant = cantidades[idOriginal]||0;
+  const safeImg = (p.img||'').replace(/'/g,"\\'");
+  const safeName = (p.name||'').replace(/'/g,"\\'");
   let accion = '';
   if(cant===0){
-    accion = `<div class="action-right" id="action-${id}"><button class="btn-add" onclick="cambiarQty('${id}',1,'${(p.name||'').replace(/'/g,"\\'")}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">+</button></div>`;
+    accion = `<button class="btn-add" onclick="cambiarQty('${idOriginal}','${safeId}',1,'${safeName}',${p.price},'${safeImg}')">+</button>`;
   }else{
-    accion = `<div class="action-right" id="action-${id}"><div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1,'${(p.name||'').replace(/'/g,"\\'")}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">−</button><div class="qty-num" id="num-${id}">${cant}</div><button class="qty-btn" onclick="cambiarQty('${id}',1,'${(p.name||'').replace(/'/g,"\\'")}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">+</button></div></div>`;
+    accion = `<div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${idOriginal}','${safeId}',-1,'${safeName}',${p.price},'${safeImg}')">−</button><div class="qty-num" id="num-${safeId}">${cant}</div><button class="qty-btn" onclick="cambiarQty('${idOriginal}','${safeId}',1,'${safeName}',${p.price},'${safeImg}')">+</button></div>`;
   }
-  html+=`<div class="product-card" id="card-${id}"><div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,"\\'")}')"><img src="${p.img}" loading="lazy"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div>${accion}</div></div>`;
+  html+=`<div class="product-card"><div class="product-img-box" onclick="abrirViewer('${safeImg}')"><img src="${p.img}" loading="lazy"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div><div class="action-right" id="action-${safeId}">${accion}</div></div></div>`;
  });
  cont.innerHTML=html || '<div style="padding:20px;text-align:center;color:#777">No hay productos</div>';
 }
-
 if(categoryOrder.length>0){
  document.getElementById('categorias').innerHTML=categoryOrder.map((c,i)=>`<button class="cat-btn ${i==0?'active':''}">${c}</button>`).join('');
  categoriaActiva=categoryOrder[0];
 }
 if(menuData){ renderCategorias(); renderProductos(); }
 else{
- document.getElementById('categorias').innerHTML='<div class="cat-btn skeleton" style="width:80px;height:38px"></div><div class="cat-btn skeleton" style="width:110px;height:38px"></div>';
- document.getElementById('productos').innerHTML='<div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div><div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div>';
+ document.getElementById('categorias').innerHTML='<div class="cat-btn skeleton" style="width:80px;height:38px"></div>';
+ document.getElementById('productos').innerHTML='<div style="background:#1c1c1c;height:108px;border-radius:18px" class="skeleton"></div>';
 }
-
 db.ref('config').once('value').then(s=>{ if(s.val()){ aplicarConfig(s.val()); safeSet('santillos_cache_config', s.val()); }});
 db.ref('categoryOrder').once('value').then(s=>{
  if(s.val()&&s.val().length>0){ categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); if(!categoriaActiva) categoriaActiva=categoryOrder[0]; renderCategorias(); }
@@ -184,34 +168,29 @@ db.ref('categoryOrder').once('value').then(s=>{
  }
 }).catch(()=>{});
 
-function cambiarQty(id,delta,nombre,precio,img){
- let a=cantidades[id]||0;
+// FIX PRINCIPAL: ya no hace renderProductos() completo, solo actualiza el boton tocado
+function cambiarQty(idOriginal, safeId, delta, nombre, precio, img){
+ let a=cantidades[idOriginal]||0;
  a+=delta;
  if(a<0)a=0;
- if(a>99)a=99;
-
- cantidades[id]=a;
- if(a===0){ delete carrito[id]; delete cantidades[id]; } else carrito[id]={nombre,precio,img,cant:a};
-
+ cantidades[idOriginal]=a;
+ if(a===0){ delete carrito[idOriginal]; delete cantidades[idOriginal]; } else carrito[idOriginal]={nombre,precio,img,cant:a};
  actualizarBadge();
  localStorage.setItem('santillos_carrito',JSON.stringify(carrito));
  localStorage.setItem('santillos_cantidades',JSON.stringify(cantidades));
-
- // --- FIX VISUAL RAPIDO SIN RE-RENDER TOTAL ---
- const actionDiv = document.getElementById('action-'+id);
+ const actionDiv = document.getElementById('action-'+safeId);
  if(!actionDiv) return;
  if(a===0){
-   actionDiv.innerHTML=`<button class="btn-add" onclick="cambiarQty('${id}',1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">+</button>`;
+   actionDiv.innerHTML=`<button class="btn-add" onclick="cambiarQty('${idOriginal}','${safeId}',1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">+</button>`;
  }else{
-   const num = document.getElementById('num-'+id);
-   if(num){
-     num.innerText=a;
+   const numEl = document.getElementById('num-'+safeId);
+   if(numEl){
+     numEl.innerText=a;
    }else{
-     actionDiv.innerHTML=`<div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">−</button><div class="qty-num" id="num-${id}">${a}</div><button class="qty-btn" onclick="cambiarQty('${id}',1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">+</button></div>`;
+     actionDiv.innerHTML=`<div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${idOriginal}','${safeId}',-1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">−</button><div class="qty-num" id="num-${safeId}">${a}</div><button class="qty-btn" onclick="cambiarQty('${idOriginal}','${safeId}',1,'${nombre.replace(/'/g,"\\'")}',${precio},'${(img||'').replace(/'/g,"\\'")}')">+</button></div>`;
    }
  }
 }
-
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
 function cerrarViewer(){ document.getElementById('imgViewer').classList.remove('show'); }
 </script>

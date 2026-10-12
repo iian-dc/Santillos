@@ -24,56 +24,65 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
 .sidebar-footer{padding:14px;border-top:1px solid rgba(255,255,255,0.12)}
 .btn-logout{width:100%;background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:12px;border-radius:14px;font-weight:700;font-size:12px;cursor:pointer}
 .main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{height:64px;background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:50}
+.topbar{height:56px;background:#fff;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:50}
 .topbar-left{display:flex;align-items:center;gap:12px}
-.btn-menu{display:none;background:#111;color:#fff;border:none;width:40px;height:40px;border-radius:12px;font-size:16px}
-.topbar-title{font-weight:800;font-size:16px}
+.btn-menu{display:none;background:#111;color:#fff;border:none;width:36px;height:36px;border-radius:10px;font-size:15px}
+.topbar-title{font-weight:800;font-size:14px}
 .topbar-right{display:flex;align-items:center;gap:12px}
-.user-badge{background:#111;color:#fff;padding:8px 14px;border-radius:30px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:8px}
-.content{padding:20px}
+.user-badge{background:#111;color:#fff;padding:6px 12px;border-radius:30px;font-size:10px;font-weight:700;display:flex;align-items:center;gap:6px}
+.content{padding:14px}
 .section{display:none}
 .section.active{display:block;animation:fade 0.2s}
-@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.card{background:#fff;border:1px solid #eee;border-radius:18px;padding:18px}
-.pedidos-header{font-size:16px;font-weight:800;margin-bottom:14px}
-.pedido-card{background:#fff;border:1px solid #eee;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
-.pedido-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;border-bottom:1px dashed #eee;padding-bottom:12px;margin-bottom:12px}
-.pedido-id{font-weight:800;font-size:14px}
-.pedido-fecha{font-size:11px;color:#666;font-weight:600}
-.cronometro{padding:6px 14px;border-radius:20px;font-weight:800;font-size:12px;display:flex;align-items:center;gap:6px}
-.crono-verde{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;box-shadow:0 0 10px rgba(34,197,94,0.3)}
-.crono-amarillo{background:#fef9c3;color:#854d0e;border:1px solid #fde68a;box-shadow:0 0 10px rgba(234,179,8,0.3)}
-.crono-rojo{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;box-shadow:0 0 12px rgba(239,68,68,0.4);animation:pulse 1s infinite}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
-.pedido-body{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.pedido-info{font-size:11px}
-.pedido-info b{font-size:12px;color:#111;display:block;margin-bottom:2px}
-.pedido-info.small{color:#777;font-weight:600}
-.ip-box{background:#f8f8f8;border:1px solid #eee;border-radius:10px;padding:8px 10px;margin-top:6px;font-size:10px;font-weight:700;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-.ip-status{padding:3px 8px;border-radius:6px;font-size:9px;font-weight:800}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#fff;border:1px solid #eee;border-radius:14px;padding:14px}
+.pedidos-header{font-size:13px;font-weight:800;margin-bottom:10px;color:#111}
+/* PEDIDO COMPACTO */
+.pedido-card{background:#fff;border:1px solid #e9e9e9;border-radius:14px;padding:10px 12px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+.pedido-top{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #f0f0f0;padding-bottom:8px;margin-bottom:8px}
+.pedido-id{font-weight:800;font-size:11px;color:#111;letter-spacing:0.3px}
+.pedido-fecha{font-size:9px;color:#888;font-weight:600;display:flex;gap:8px;align-items:center;margin-top:2px}
+.pedido-fecha i{font-size:9px}
+.cronometro{padding:4px 9px;border-radius:20px;font-weight:800;font-size:9px;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.crono-verde{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.crono-amarillo{background:#fef9c3;color:#854d0e;border:1px solid #fde68a}
+.crono-rojo{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;animation:pulse 1s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+.pedido-body{display:grid;grid-template-columns:1.4fr 0.6fr;gap:10px}
+.pedido-info{font-size:10px;color:#333;line-height:1.4}
+.pedido-info.line{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.pedido-info.line i{width:12px;font-size:10px;color:#999;text-align:center}
+.pedido-info.line b{font-size:10.5px;color:#111;font-weight:700}
+.ip-box{background:#f9fafb;border:1px solid #efefef;border-radius:8px;padding:6px 8px;margin-top:6px;font-size:9px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.ip-box i{font-size:9px}
+.ip-status{padding:2px 6px;border-radius:20px;font-size:8px;font-weight:800;display:flex;align-items:center;gap:3px}
 .ip-activa{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
 .ip-bloqueada{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
-.pedido-total{font-size:18px;font-weight:900;color:#111}
-.envio-gratis{font-size:10px;font-weight:800;padding:4px 8px;border-radius:8px;display:inline-block;margin-top:4px}
+.productos-box{margin-top:6px;background:#fffbeb;border:1px solid #fef3c7;padding:6px 8px;border-radius:8px;font-size:9.5px;line-height:1.4}
+.productos-box b{font-size:9px;color:#92400e;display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.pedido-total{font-size:14px;font-weight:900;color:#111;text-align:right}
+.envio-gratis{font-size:8.5px;font-weight:800;padding:3px 6px;border-radius:20px;display:inline-block;margin-top:3px}
 .envio-si{background:#dcfce7;color:#166534}
 .envio-no{background:#f3f4f6;color:#374151}
-.pedido-acciones{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
-.btn-estado{border:none;padding:8px 12px;border-radius:20px;font-size:10px;font-weight:800;cursor:pointer;transition:0.2s}
-.btn-estado:hover{transform:scale(1.05)}
+.estado-label{font-size:8px;color:#999;font-weight:700;letter-spacing:0.5px;margin-top:6px;text-align:right}
+.estado-valor{font-size:10px;font-weight:800;color:#5e0a28;text-transform:uppercase;text-align:right}
+.pedido-acciones{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px;padding-top:8px;border-top:1px solid #f5f5f5}
+.btn-estado{border:none;padding:6px 10px;border-radius:20px;font-size:8.5px;font-weight:800;cursor:pointer;transition:0.15s;display:flex;align-items:center;gap:4px}
+.btn-estado:hover{transform:translateY(-1px)}
 .btn-aceptado{background:#22c55e;color:#fff}
 .btn-preparando{background:#eab308;color:#fff}
 .btn-camino{background:#3b82f6;color:#fff}
 .btn-entregado{background:#16a34a;color:#fff}
 .btn-cancelado{background:#ef4444;color:#fff}
-.btn-estado.active{outline:2px solid #111;outline-offset:2px}
+.btn-estado.active{outline:2px solid #111;outline-offset:1px}
 .btn-bloquear{background:#111;color:#fff}
-.btn-desbloquear{background:#fff;color:#111;border:1px solid #111}
+.btn-desbloquear{background:#fff;color:#111;border:1px solid #d1d5db}
 @media(max-width:900px){
- .sidebar{transform:translateX(-100%)}
- .sidebar.open{transform:translateX(0)}
- .main{margin-left:0}
- .btn-menu{display:flex;align-items:center;justify-content:center}
- .pedido-body{grid-template-columns:1fr}
+.sidebar{transform:translateX(-100%)}
+.sidebar.open{transform:translateX(0)}
+.main{margin-left:0}
+.btn-menu{display:flex;align-items:center;justify-content:center}
+.pedido-body{grid-template-columns:1fr}
+.pedido-total,.estado-label,.estado-valor{text-align:left}
 }
 </style>
 </head>
@@ -105,7 +114,7 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
   </div>
   <div class="content">
     <div class="section active" id="sec-pedidos_activos">
-      <div class="pedidos-header">Listado de Pedidos</div>
+      <div class="pedidos-header"><i class="fa-solid fa-receipt"></i> Listado de Pedidos Activos</div>
       <div id="listaPedidosActivos"></div>
     </div>
     <div class="section" id="sec-dashboard"><div class="card">Dashboard - Ruta: login/dashboard/</div></div>
@@ -121,7 +130,7 @@ body{background:#f5f5f7;display:flex;min-height:100vh}
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
@@ -160,135 +169,118 @@ function obtenerInicioPedido(p){
   if(p.timestamp) return new Date(p.timestamp);
   if(p.creadoEn) return new Date(p.creadoEn);
   if(p.fechaISO) return new Date(p.fechaISO);
-  if(p.fecha){
-    const d = new Date(p.fecha);
-    if(!isNaN(d)) return d;
-  }
+  if(p.fecha){ const d=new Date(p.fecha); if(!isNaN(d)) return d; }
   return new Date();
 }
 function calcularMinutos(p){
-  const inicio = obtenerInicioPedido(p);
-  const ahora = new Date();
-  const diff = Math.floor((ahora - inicio)/60000);
-  return diff < 0? 0 : diff;
+  const inicio=obtenerInicioPedido(p);
+  const diff=Math.floor((new Date()-inicio)/60000);
+  return diff<0?0:diff;
 }
 function estadoIP(ip){
   if(!ip) return 'sin_ip';
-  const key = ip.replace(/\./g,'_');
-  return ipsBloqueadasCache[key]? 'bloqueada' : 'activa';
+  const key=ip.replace(/\./g,'_');
+  return ipsBloqueadasCache[key]?'bloqueada':'activa';
 }
 
 function renderPedidos(){
-  const cont = document.getElementById('listaPedidosActivos');
-  if(pedidosCache.length===0){ cont.innerHTML='<div class="card" style="text-align:center;color:#888;padding:30px">No hay pedidos activos</div>'; return; }
+  const cont=document.getElementById('listaPedidosActivos');
+  if(pedidosCache.length===0){ cont.innerHTML='<div class="card" style="text-align:center;color:#999;padding:20px;font-size:11px"><i class="fa-solid fa-inbox"></i><br>No hay pedidos activos</div>'; return; }
 
-  cont.innerHTML = pedidosCache.map((p, index)=>{
-    const minutos = calcularMinutos(p);
-    let cronoClass = 'crono-verde';
+  cont.innerHTML=pedidosCache.map((p,index)=>{
+    const minutos=calcularMinutos(p);
+    let cronoClass='crono-verde';
     if(minutos>=40) cronoClass='crono-rojo';
     else if(minutos>=20) cronoClass='crono-amarillo';
+    const numeroPedido=`ST-${String(index+1).padStart(4,'0')}`;
+    const nombreCliente=p.cliente?.nombre||p.nombre||'Cliente sin nombre';
+    const telefonoCliente=p.cliente?.telefono||p.telefono||'Sin teléfono';
+    const direccionCliente=p.cliente?.direccion||p.direccion||p.ubicacionTexto||'Sin dirección';
 
-    const numeroPedido = `ST-${String(index+1).padStart(4,'0')}`;
-    const nombreCliente = p.cliente?.nombre || p.nombre || p.clienteNombre || 'Cliente sin nombre';
-    const telefonoCliente = p.cliente?.telefono || p.telefono || p.phone || 'Sin teléfono';
-    const direccionCliente = p.cliente?.direccion || p.direccion || p.address || p.ubicacionTexto || 'Sin dirección';
+    let productosTexto='Sin productos';
+    if(Array.isArray(p.productos)){ productosTexto=p.productos.map(pr=>`${pr.cantidad||pr.cant||1}x ${pr.nombre||pr.name}`).join(', '); }
+    else if(typeof p.productos==='object'&&p.productos!==null){ productosTexto=Object.values(p.productos).map(pr=>`${pr.cantidad||pr.cant||1}x ${pr.nombre||''}`).join(', '); }
+    else if(typeof p.productos==='string'&&p.productos.length>0){ productosTexto=p.productos; }
+    else if(p.detalle){ productosTexto=p.detalle; }
 
-    let productosTexto = 'Sin productos';
-    if(Array.isArray(p.productos)){ productosTexto = p.productos.map(pr=>`${pr.cantidad||pr.cant||1}x ${pr.nombre||pr.name}`).join(', '); }
-    else if(typeof p.productos === 'object' && p.productos!==null){ productosTexto = Object.values(p.productos).map(pr=>`${pr.cantidad||pr.cant||1}x ${pr.nombre||pr.name||''}`).join(', '); }
-    else if(typeof p.productos === 'string' && p.productos.length>0){ productosTexto = p.productos; }
-    else if(p.detalle){ productosTexto = p.detalle; }
+    const ipActual=p.ip||p.ipCliente||'';
+    const estIP=estadoIP(ipActual);
+    let ipBadge='';
+    if(estIP==='bloqueada') ipBadge='<span class="ip-status ip-bloqueada"><i class="fa-solid fa-ban"></i> BLOQUEADA</span>';
+    else if(estIP==='activa') ipBadge='<span class="ip-status ip-activa"><i class="fa-solid fa-circle-check"></i> ACTIVA</span>';
+    else ipBadge='<span class="ip-status" style="background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb"><i class="fa-solid fa-triangle-exclamation"></i> SIN IP</span>';
 
-    const ipActual = p.ip || p.ipCliente || '';
-    const estIP = estadoIP(ipActual);
-    let ipBadge = '';
-    if(estIP==='bloqueada') ipBadge = '<span class="ip-status ip-bloqueada">⛔ BLOQUEADA</span>';
-    else if(estIP==='activa') ipBadge = '<span class="ip-status ip-activa">✅ ACTIVA</span>';
-    else ipBadge = '<span class="ip-status" style="background:#eee">IP PENDIENTE</span>';
-
-    const envioTexto = (p.envioGratis===true || p.envio===0 || p.costoEnvio===0)? '<span class="envio-gratis envio-si"><i class="fa-solid fa-truck"></i> Envío Gratis</span>' : `<span class="envio-gratis envio-no">Envío: $${p.costoEnvio||p.envio||0}</span>`;
-    const fechaMostrar = p.fecha || new Date(obtenerInicioPedido(p)).toLocaleDateString();
-    const horaMostrar = p.hora || new Date(obtenerInicioPedido(p)).toLocaleTimeString();
-    const btnBloqueo = estIP==='bloqueada'
-     ? `<button class="btn-estado btn-desbloquear" onclick="desbloquearIP('${ipActual}')"><i class="fa-solid fa-lock-open"></i> Desbloquear IP</button>`
-      : `<button class="btn-estado btn-bloquear" onclick="bloquearIP('${ipActual}','${p.id}')"><i class="fa-solid fa-ban"></i> Bloquear IP</button>`;
+    const envioTexto=(p.envioGratis===true||p.envio===0||p.costoEnvio===0)?'<span class="envio-gratis envio-si"><i class="fa-solid fa-truck"></i> Gratis</span>':`<span class="envio-gratis envio-no"><i class="fa-solid fa-truck"></i> $${p.costoEnvio||p.envio||0}</span>`;
+    const fechaMostrar=p.fecha||new Date(obtenerInicioPedido(p)).toLocaleDateString();
+    const horaMostrar=p.hora||new Date(obtenerInicioPedido(p)).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const btnBloqueo=estIP==='bloqueada'?`<button class="btn-estado btn-desbloquear" onclick="desbloquearIP('${ipActual}')"><i class="fa-solid fa-lock-open"></i> Desbloquear</button>`:`<button class="btn-estado btn-bloquear" onclick="bloquearIP('${ipActual}','${p.id}')"><i class="fa-solid fa-ban"></i> Bloquear IP</button>`;
 
     return `
-    <div class="pedido-card" style="${estIP==='bloqueada'? 'border:2px solid #ef4444; background:#fff5f5' : ''}">
+    <div class="pedido-card" style="${estIP==='bloqueada'?'border:1px solid #fecaca;background:#fff8f8':''}">
       <div class="pedido-top">
         <div>
-          <div class="pedido-id"># PEDIDO ${numeroPedido}</div>
-          <div class="pedido-fecha"><span><i class="fa-regular fa-calendar"></i> ${fechaMostrar}</span> <span><i class="fa-regular fa-clock"></i> ${horaMostrar}</span> <span style="font-size:10px;color:#aaa">ID: ${p.id.slice(0,8)}</span></div>
+          <div class="pedido-id"><i class="fa-solid fa-hashtag" style="color:#999;font-size:10px"></i> ${numeroPedido} <span style="color:#aaa;font-weight:600;font-size:9px">· ${p.id.slice(0,6).toUpperCase()}</span></div>
+          <div class="pedido-fecha"><span><i class="fa-regular fa-calendar"></i> ${fechaMostrar}</span><span><i class="fa-regular fa-clock"></i> ${horaMostrar}</span></div>
         </div>
         <div class="cronometro ${cronoClass}"><i class="fa-solid fa-stopwatch"></i> ${minutos} min</div>
       </div>
       <div class="pedido-body">
         <div class="pedido-info">
-          <b><i class="fa-solid fa-user"></i> ${nombreCliente}</b>
-          <div class="small"><i class="fa-solid fa-phone"></i> ${telefonoCliente}</div>
-          <div class="small"><i class="fa-solid fa-location-dot"></i> ${direccionCliente}</div>
+          <div class="line"><i class="fa-solid fa-user"></i><b>${nombreCliente}</b></div>
+          <div class="line"><i class="fa-solid fa-phone"></i> ${telefonoCliente}</div>
+          <div class="line"><i class="fa-solid fa-location-dot"></i> ${direccionCliente}</div>
           <div class="ip-box">
-            <span><i class="fa-solid fa-globe"></i> ${ipActual || 'IP no vinculada aún'} | ${p.ciudad||p.ciudadIP||'Dolores Hgo'}</span>
+            <span><i class="fa-solid fa-globe"></i> ${ipActual||'IP pendiente'} · ${p.ciudad||p.ciudadIP||'Dolores Hgo'}</span>
             ${ipBadge}
           </div>
-          <div style="margin-top:8px;font-size:11px;background:#fff7ed;border:1px solid #ffedd5;padding:8px;border-radius:10px"><b><i class="fa-solid fa-burger"></i> Productos:</b><br>${productosTexto}</div>
+          <div class="productos-box"><b><i class="fa-solid fa-basket-shopping"></i> Productos</b>${productosTexto}</div>
         </div>
-        <div class="pedido-info" style="text-align:right">
+        <div>
           <div class="pedido-total">$${Number(p.total||0).toLocaleString()}</div>
-          ${envioTexto}
-          <div style="margin-top:8px"><span style="font-size:10px;color:#888;font-weight:700">ESTADO:</span><br><b style="text-transform:uppercase;color:#5e0a28">${p.estado||'pendiente'}</b></div>
+          <div style="text-align:right">${envioTexto}</div>
+          <div class="estado-label">ESTADO</div>
+          <div class="estado-valor"><i class="fa-solid fa-circle-dot" style="font-size:8px"></i> ${p.estado||'pendiente'}</div>
         </div>
       </div>
       <div class="pedido-acciones">
-        <button class="btn-estado btn-aceptado ${p.estado==='aceptado'?'active':''}" onclick="cambiarEstado('${p.id}','aceptado')">Aceptado</button>
-        <button class="btn-estado btn-preparando ${p.estado==='preparando'?'active':''}" onclick="cambiarEstado('${p.id}','preparando')">Preparando</button>
-        <button class="btn-estado btn-camino ${p.estado==='en_camino'?'active':''}" onclick="cambiarEstado('${p.id}','en_camino')">En Camino</button>
-        <button class="btn-estado btn-entregado ${p.estado==='entregado'?'active':''}" onclick="cambiarEstado('${p.id}','entregado')">Entregado</button>
-        <button class="btn-estado btn-cancelado ${p.estado==='cancelado'?'active':''}" onclick="cambiarEstado('${p.id}','cancelado')">Cancelado</button>
-        <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="btn-estado btn-aceptado ${p.estado==='aceptado'?'active':''}" onclick="cambiarEstado('${p.id}','aceptado')"><i class="fa-solid fa-check"></i> Aceptado</button>
+        <button class="btn-estado btn-preparando ${p.estado==='preparando'?'active':''}" onclick="cambiarEstado('${p.id}','preparando')"><i class="fa-solid fa-fire"></i> Preparando</button>
+        <button class="btn-estado btn-camino ${p.estado==='en_camino'?'active':''}" onclick="cambiarEstado('${p.id}','en_camino')"><i class="fa-solid fa-motorcycle"></i> En camino</button>
+        <button class="btn-estado btn-entregado ${p.estado==='entregado'?'active':''}" onclick="cambiarEstado('${p.id}','entregado')"><i class="fa-solid fa-box-open"></i> Entregado</button>
+        <button class="btn-estado btn-cancelado ${p.estado==='cancelado'?'active':''}" onclick="cambiarEstado('${p.id}','cancelado')"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+        <div style="margin-left:auto;display:flex;gap:5px">
           ${btnBloqueo}
-          ${p.maps? `<a href="${p.maps}" target="_blank" class="btn-estado" style="background:#fff;border:1px solid #ddd;text-decoration:none;color:#111"><i class="fa-solid fa-location-dot"></i> Maps</a>` : ''}
+          ${p.maps?`<a href="${p.maps}" target="_blank" class="btn-estado" style="background:#fff;border:1px solid #e5e7eb;text-decoration:none;color:#111"><i class="fa-solid fa-map-location-dot"></i> Maps</a>`:''}
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-window.cambiarEstado = function(id, nuevoEstado){ update(ref(db, 'pedidos/'+id), { estado: nuevoEstado }); }
-
-window.bloquearIP = async function(ip, pedidoId){
-  if(!ip){ alert('Este pedido aún no tiene IP vinculada. Actualiza el checkout con el código que te di.'); return; }
-  if(!confirm('¿Bloquear IP '+ip+'? Ya no podrá entrar a la tienda.')) return;
-  const key = ip.replace(/\./g,'_');
-  await update(ref(db, 'ips_bloqueadas/'+key), { ip: ip, motivo: 'Bloqueada desde pedido '+pedidoId, fecha: new Date().toLocaleString(), timestamp: Date.now(), pedidoId: pedidoId });
-  alert('IP '+ip+' bloqueada con éxito. Ahora si vuelve a entrar le saldrá la tarjeta de Acceso Bloqueado.');
+window.cambiarEstado=function(id,nuevoEstado){ update(ref(db,'pedidos/'+id),{estado:nuevoEstado}); }
+window.bloquearIP=async function(ip,pedidoId){
+  if(!ip){ alert('Este pedido no tiene IP.'); return; }
+  if(!confirm('Bloquear IP '+ip+'?')) return;
+  const key=ip.replace(/\./g,'_');
+  await update(ref(db,'ips_bloqueadas/'+key),{ip:ip,motivo:'Pedido '+pedidoId,fecha:new Date().toLocaleString(),timestamp:Date.now(),pedidoId:pedidoId});
 }
-
-window.desbloquearIP = async function(ip){
-  if(!confirm('¿Desbloquear IP '+ip+'? Podrá volver a entrar.')) return;
-  const key = ip.replace(/\./g,'_');
-  await remove(ref(db, 'ips_bloqueadas/'+key));
-  alert('IP desbloqueada.');
+window.desbloquearIP=async function(ip){
+  if(!confirm('Desbloquear IP '+ip+'?')) return;
+  const key=ip.replace(/\./g,'_');
+  await remove(ref(db,'ips_bloqueadas/'+key));
 }
-
-// Escuchar bloqueadas
-onValue(ref(db, 'ips_bloqueadas'), (snap)=>{
-  ipsBloqueadasCache = snap.val() || {};
+onValue(ref(db,'ips_bloqueadas'),(snap)=>{ ipsBloqueadasCache=snap.val()||{}; renderPedidos(); });
+onValue(ref(db,'pedidos'),(snap)=>{
+  const data=snap.val()||{};
+  let lista=Object.entries(data).map(([k,v])=>({id:k,...v}));
+  lista.sort((a,b)=>new Date(b.timestamp||b.creadoEn||0)-new Date(a.timestamp||a.creadoEn||0));
+  lista=lista.filter(p=>p.estado!=='entregado'&&p.estado!=='cancelado');
+  pedidosCache=lista;
+  document.getElementById('countVivo').style.display=lista.length>0?'inline-block':'none';
+  document.getElementById('countVivo').innerText=lista.length;
   renderPedidos();
 });
-
-onValue(ref(db, 'pedidos'), (snap)=>{
-  const data = snap.val() || {};
-  let lista = Object.entries(data).map(([k,v])=>({id:k,...v}));
-  lista.sort((a,b)=> new Date(b.timestamp||b.creadoEn||b.fechaISO||0) - new Date(a.timestamp||a.creadoEn||a.fechaISO||0));
-  lista = lista.filter(p=>p.estado!=='entregado' && p.estado!=='cancelado');
-  pedidosCache = lista;
-  document.getElementById('countVivo').style.display = lista.length>0? 'inline-block' : 'none';
-  document.getElementById('countVivo').innerText = lista.length;
-  renderPedidos();
-});
-
-setInterval(renderPedidos, 1000);
+setInterval(renderPedidos,1000);
 </script>
 </body>
 </html>

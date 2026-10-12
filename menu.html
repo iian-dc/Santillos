@@ -28,7 +28,7 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 .product-card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:18px;display:flex;overflow:hidden;min-height:108px}
 .product-img-box{width:110px;min-width:110px;height:110px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer}
 .product-img-box img{width:100%;height:100%;object-fit:cover}
-.product-info{flex:1;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;position:relative;padding-right:70px}
+.product-info{flex:1;padding:14px 12px;display:flex;flex-direction:column;justify-content:space-between;position:relative;padding-right:110px}
 .product-name{font-weight:700;font-size:14px}
 .product-price{font-weight:800;font-size:16px}
 .product-bottom{display:flex;align-items:center;margin-top:10px}
@@ -89,30 +89,24 @@ function safeSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e
 let menuData=null; let categoryOrder=[]; let cacheConfig=null;
 try{categoryOrder=JSON.parse(localStorage.getItem('santillos_cache_order_v2'))||[]}catch(e){}
 try{cacheConfig=JSON.parse(localStorage.getItem('santillos_cache_config'))}catch(e){}
-try{menuData=JSON.parse(localStorage.getItem('santillos_cache_menu_v2'))}catch(e){ if(menuData && JSON.stringify(menuData).length>2000000){ localStorage.removeItem('santillos_cache_menu_v2'); menuData=null; } }
+try{menuData=JSON.parse(localStorage.getItem('santillos_cache_menu_v2'))}catch(e){}
 
 let categoriaActiva = categoryOrder[0] || null;
 
-// --- FIX CARRITO ---
 let cantidades = {}; let carrito = {};
 try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
 try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
 
-// Si el carrito esta vacio, obligamos cantidades a 0 (ESTE ERA EL BUG)
 if(Object.keys(carrito).length===0){
   cantidades={};
   localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
 }else{
-  // Sincronizar cantidades con carrito real
   let nuevasCantidades={};
-  for(let k in carrito){
-    nuevasCantidades[k]=carrito[k].cant||0;
-  }
+  for(let k in carrito){ nuevasCantidades[k]=carrito[k].cant||0; }
   cantidades=nuevasCantidades;
   localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
 }
 
-// Si viene de un pedido recien hecho, tambien limpiamos
 const urlParams = new URLSearchParams(window.location.search);
 if(urlParams.get('reset')==='1' || localStorage.getItem('santillos_pedido_finalizado')==='1'){
   carrito={}; cantidades={};
@@ -121,7 +115,10 @@ if(urlParams.get('reset')==='1' || localStorage.getItem('santillos_pedido_finali
   localStorage.removeItem('santillos_pedido_finalizado');
 }
 
-document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
+function actualizarBadge(){
+  document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
+}
+actualizarBadge();
 
 function aplicarConfig(c){
  if(!c)return;
@@ -145,6 +142,14 @@ function renderCategorias(){
  });
 }
 
+function getAccionHTML(id, cant, p){
+  if(cant===0){
+    return `<button class="btn-add" onclick="cambiarQty('${id}',1)">+</button>`;
+  }else{
+    return `<div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1)">−</button><div class="qty-num" id="num-${id}">${cant}</div><button class="qty-btn" onclick="cambiarQty('${id}',1)">+</button></div>`;
+  }
+}
+
 function renderProductos(){
  const cont=document.getElementById('productos'); if(!cont||!menuData||!categoriaActiva) return;
  const lista=menuData[categoriaActiva]||[];
@@ -153,15 +158,22 @@ function renderProductos(){
   if(p.disp===false) return;
   const id=categoriaActiva+'_'+i;
   const cant = cantidades[id]||0;
-  let accion = '';
-  if(cant===0){
-    accion = `<div class="action-right"><button class="btn-add" onclick="cambiarQty('${id}',1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">+</button></div>`;
-  }else{
-    accion = `<div class="action-right"><div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">−</button><div class="qty-num">${cant}</div><button class="qty-btn" onclick="cambiarQty('${id}',1,'${p.name}',${p.price},'${(p.img||'').replace(/'/g,"\\'")}')">+</button></div></div>`;
-  }
-  html+=`<div class="product-card"><div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,"\\'")}')"><img src="${p.img}" loading="lazy" decoding="async"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div>${accion}</div></div>`;
+  const safeImg = (p.img||'').replace(/'/g,"\\'");
+  const safeName = (p.name||'').replace(/'/g,"\\'");
+  html+=`<div class="product-card" id="card-${id}"><div class="product-img-box" onclick="abrirViewer('${safeImg}')"><img src="${p.img}" loading="lazy" decoding="async"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div><div class="action-right" id="action-${id}">${getAccionHTML(id, cant, p)}</div></div></div>`;
+  // Guardamos datos en dataset para no tener que pasar por onclick con comillas
+  setTimeout(()=>{
+    const card = document.getElementById('card-'+id);
+    if(card){ card.dataset.nombre=p.name; card.dataset.precio=p.price; card.dataset.img=p.img||''; }
+  },0);
  });
  cont.innerHTML=html || '<div style="padding:20px;text-align:center;color:#777">No hay productos</div>';
+ // Re-asignar dataset después de innerHTML
+ lista.forEach((p,i)=>{
+  const id=categoriaActiva+'_'+i;
+  const card = document.getElementById('card-'+id);
+  if(card){ card.dataset.nombre=p.name; card.dataset.precio=p.price; card.dataset.img=p.img||''; }
+ });
 }
 
 if(categoryOrder.length>0){
@@ -187,19 +199,55 @@ db.ref('categoryOrder').once('value').then(s=>{
  }
 }).catch(()=>{});
 
-function cambiarQty(id,delta,nombre,precio,img){
- let a=cantidades[id]||0; a+=delta; if(a<0)a=0; cantidades[id]=a;
+function updateSoloUnaCard(id){
+  const cant = cantidades[id]||0;
+  const actionEl = document.getElementById('action-'+id);
+  const numEl = document.getElementById('num-'+id);
+  if(cant===0){
+    if(actionEl) actionEl.innerHTML = `<button class="btn-add" onclick="cambiarQty('${id}',1)">+</button>`;
+  }else{
+    if(numEl){
+      numEl.innerText = cant;
+    }else{
+      if(actionEl) actionEl.innerHTML = `<div class="qty-control"><button class="qty-btn" onclick="cambiarQty('${id}',-1)">−</button><div class="qty-num" id="num-${id}">${cant}</div><button class="qty-btn" onclick="cambiarQty('${id}',1)">+</button></div>`;
+    }
+  }
+}
+
+function cambiarQty(id,delta){
+ const card = document.getElementById('card-'+id);
+ if(!card) return;
+ const nombre = card.dataset.nombre;
+ const precio = parseFloat(card.dataset.precio)||0;
+ const img = card.dataset.img||'';
+
+ let a=cantidades[id]||0;
+ a+=delta;
+ if(a<0)a=0;
+ if(a>99)a=99;
+ cantidades[id]=a;
+
  if(a===0){ delete carrito[id]; delete cantidades[id]; } else carrito[id]={nombre,precio,img,cant:a};
- document.getElementById('cartCount').innerText=Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
+
+ actualizarBadge();
  localStorage.setItem('santillos_carrito',JSON.stringify(carrito));
  localStorage.setItem('santillos_cantidades',JSON.stringify(cantidades));
- renderProductos();
+
+ updateSoloUnaCard(id);
 }
+
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }
 function cerrarViewer(){ document.getElementById('imgViewer').classList.remove('show'); }
 
-db.ref('menu').on('value',s=>{ if(s.val()){ menuData=s.val(); renderCategorias(); renderProductos(); }});
-db.ref('categoryOrder').on('value',s=>{ if(s.val()&&s.val().length>0){ categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); renderCategorias(); }});
+// FIX: No recargar todo el menú con on value, solo si cambia categoría
+db.ref('categoryOrder').on('value',s=>{
+  if(s.val()&&s.val().length>0){
+    const nuevo = JSON.stringify(s.val());
+    if(nuevo!== JSON.stringify(categoryOrder)){
+      categoryOrder=s.val(); safeSet('santillos_cache_order_v2', categoryOrder); renderCategorias(); renderProductos();
+    }
+  }
+});
 </script>
 </body>
 </html>

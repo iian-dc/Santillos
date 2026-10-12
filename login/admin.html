@@ -30,8 +30,6 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 .content{padding:16px}
 .section{display:none}.section.active{display:block}
 .card{background:#fff;border:1px solid #eee;border-radius:14px;padding:14px}
-
-/* DISEÑO IMAGEN - PEDIDO CARD */
 .pedido-card{background:#fff;border:1px solid #ececec;border-radius:20px;padding:14px 16px;margin-bottom:14px;box-shadow:0 4px 18px rgba(0,0,0,0.05)}
 .pedido-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap}
 .pedido-id-pill{background:#fef9e8;border:1px solid #fdecc8;color:#111;padding:6px 14px;border-radius:10px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:6px}
@@ -43,9 +41,7 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 .crono-pill.verde{background:#d6f8e0;color:#0f7a2e}
 .crono-pill.amarillo{background:#fef9c3;color:#8a5a00}
 .crono-pill.rojo{background:#fee2e2;color:#b42318;animation:pulse 1s infinite}
-.crono-pill.arrow{color:#16a34a;font-size:12px;margin-left:4px}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
-
 .pedido-middle{display:grid;grid-template-columns:1.2fr 0.9fr 0.9fr;gap:0;margin-top:12px}
 .col{padding:0 14px;position:relative;border-right:1px solid #f0f0f0}
 .col:last-child{border-right:none}
@@ -55,15 +51,12 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 .col-name i{font-size:13px}
 .col-sub{font-size:11.5px;color:#4b5563;display:flex;gap:7px;margin-bottom:4px;line-height:1.3}
 .col-sub i{font-size:12px;color:#111;margin-top:1px;min-width:14px}
-.col-ip{font-size:11.5px;color:#6b7280}
-.col-ip.ip-num{color:#4b5563;font-weight:600}
 .col-productos-title{color:#b45309;font-weight:800;font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px}
 .col-productos-title i{color:#b45309}
 .col-prod-item{font-size:11.5px;color:#4b5563;margin-bottom:2px}
 .col-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
 .col-total{font-size:22px;font-weight:900;color:#111}
 .badge-estado{background:#fff1f2;color:#e11d48;border:1px solid #ffe4e6;padding:5px 10px;border-radius:20px;font-size:9px;font-weight:800;display:flex;align-items:center;gap:5px}
-
 .pedido-actions{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;flex-wrap:wrap}
 .btn-act{border:none;padding:10px 16px;border-radius:30px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;flex:1;justify-content:center;min-width:110px}
 .btn-acept{background:#22c55e;color:#fff}
@@ -72,8 +65,6 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 .btn-entre{background:#15803d;color:#fff}
 .btn-cancel{background:#ef4444;color:#fff}
 .btn-act.active{outline:2px solid #111;outline-offset:2px}
-
-/* MODALES CENTRADOS */
 .overlay-modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
 .overlay-modal.show{display:flex;animation:fadeIn 0.2s}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -91,7 +82,6 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 .btn-block{width:100%;padding:12px;border-radius:30px;font-weight:800;font-size:13px;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:none}
 .btn-block.bloquear{background:#111;color:#fff}
 .btn-block.desbloquear{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
-
 @media(max-width:900px){
 .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.btn-menu{display:flex;align-items:center;justify-content:center}
 .pedido-middle{grid-template-columns:1fr;gap:10px}
@@ -140,21 +130,18 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
   </div>
 </div>
 
-<!-- MODAL CLIENTE -->
 <div class="overlay-modal" id="modalCliente" onclick="if(event.target===this)cerrarModales()">
   <div class="modal-card">
     <div class="modal-header"><h3><i class="fa-solid fa-user"></i> Datos del Cliente</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="modal-body" id="bodyCliente"></div>
   </div>
 </div>
-<!-- MODAL IP -->
 <div class="overlay-modal" id="modalIP" onclick="if(event.target===this)cerrarModales()">
   <div class="modal-card">
     <div class="modal-header"><h3><i class="fa-solid fa-globe"></i> Información IP</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="modal-body" id="bodyIP"></div>
   </div>
 </div>
-<!-- MODAL PRODUCTOS -->
 <div class="overlay-modal" id="modalProd" onclick="if(event.target===this)cerrarModales()">
   <div class="modal-card">
     <div class="modal-header"><h3><i class="fa-solid fa-bag-shopping"></i> Productos</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div>
@@ -180,14 +167,14 @@ window.goTo=function(id,el){
 }
 window.cerrarSesion=function(){localStorage.clear();window.location.href='./';}
 
-let pedidosCache=[];let ipsBloqueadasCache={};
+let pedidosCache=[];let pedidosTodosCache=[];let ipsBloqueadasCache={};
 function obtenerInicioPedido(p){if(p.timestamp)return new Date(p.timestamp);if(p.creadoEn)return new Date(p.creadoEn);if(p.fechaISO)return new Date(p.fechaISO);return new Date();}
 function calcularMinutos(p){const ini=obtenerInicioPedido(p);return Math.max(0,Math.floor((new Date()-ini)/60000));}
 function estadoIP(ip){if(!ip)return 'sin_ip';const k=ip.replace(/\./g,'_');return ipsBloqueadasCache[k]?'bloqueada':'activa';}
 
 window.cerrarModales=function(){document.querySelectorAll('.overlay-modal').forEach(m=>m.classList.remove('show'));}
 window.abrirCliente=function(id){
-  const p=pedidosCache.find(x=>x.id===id);if(!p)return;
+  const p=pedidosCache.find(x=>x.id===id)||pedidosTodosCache.find(x=>x.id===id);if(!p)return;
   const nombre=p.cliente?.nombre||p.nombre||'Sin nombre';
   const dir=p.cliente?.direccion||p.direccion||'Sin dirección';
   const tel=p.cliente?.telefono||p.telefono||'';
@@ -200,7 +187,7 @@ window.abrirCliente=function(id){
   document.getElementById('modalCliente').classList.add('show');
 }
 window.abrirIP=function(id){
-  const p=pedidosCache.find(x=>x.id===id);if(!p)return;
+  const p=pedidosCache.find(x=>x.id===id)||pedidosTodosCache.find(x=>x.id===id);if(!p)return;
   const ip=p.ip||p.ipCliente||'Sin IP';const ciudad=p.ciudad||p.ciudadIP||'Dolores Hidalgo';const est=estadoIP(p.ip||p.ipCliente||'');
   const esBloq=est==='bloqueada';
   document.getElementById('bodyIP').innerHTML=`
@@ -212,8 +199,8 @@ window.abrirIP=function(id){
   document.getElementById('modalIP').classList.add('show');
 }
 window.abrirProductos=function(id){
-  const p=pedidosCache.find(x=>x.id===id);if(!p)return;
-  let lista='';let totalProd=0;
+  const p=pedidosCache.find(x=>x.id===id)||pedidosTodosCache.find(x=>x.id===id);if(!p)return;
+  let lista='';
   if(Array.isArray(p.productos)){ lista=p.productos.map(pr=>`<div class='modal-line' style='justify-content:space-between'><span>${pr.cantidad||pr.cant||1}x ${pr.nombre||''}</span><b>$${(pr.precio||0)*(pr.cantidad||pr.cant||1)}</b></div>`).join(''); }
   else if(typeof p.productos==='object'&&p.productos!==null){ lista=Object.values(p.productos).map(pr=>`<div class='modal-line' style='justify-content:space-between'><span>${pr.cantidad||pr.cant||1}x ${pr.nombre||''}</span><b>$${(pr.precio||0)*(pr.cantidad||pr.cant||1)}</b></div>`).join(''); }
   else { lista=`<div class='modal-line'><span>${p.detalle||'Sin detalle'}</span></div>`; }
@@ -223,7 +210,6 @@ window.abrirProductos=function(id){
       <div class="modal-line" style="justify-content:space-between"><span>Subtotal</span><b>$${p.subtotal||p.total||0}</b></div>
       <div class="modal-line" style="justify-content:space-between"><span>Envío</span><b>${p.envioGratis?'Gratis':'$'+(p.costoEnvio||p.envio||0)}</b></div>
       <div class="modal-line" style="justify-content:space-between;font-size:14px"><b>Total</b><b>$${p.total||0}</b></div>
-      ${p.maps?`<a href="${p.maps}" target="_blank" class="btn-call" style="text-decoration:none;background:#fff;color:#111;border:1px solid #e5e7eb"><i class="fa-solid fa-map-location-dot"></i> Ver en Maps</a>`:''}
     </div>`;
   document.getElementById('modalProd').classList.add('show');
 }
@@ -231,10 +217,11 @@ window.abrirProductos=function(id){
 function renderPedidos(){
   const cont=document.getElementById('listaPedidosActivos');
   if(pedidosCache.length===0){cont.innerHTML='<div class="card" style="text-align:center;color:#999;padding:24px;font-size:12px"><i class="fa-solid fa-inbox"></i><br>No hay pedidos activos</div>';return;}
-  cont.innerHTML=pedidosCache.map((p,index)=>{
+  cont.innerHTML=pedidosCache.map((p)=>{
     const minutos=calcularMinutos(p);
     let cronoClass='verde';if(minutos>=40)cronoClass='rojo';else if(minutos>=20)cronoClass='amarillo';
-    const numeroPedido=`ST-${String(index+1).padStart(4,'0')}`;
+    // NUMERO FIJO QUE NUNCA SE RECICLA
+    const numeroPedido = p.numero || `ST-${String(p.correlativo||0).padStart(4,'0')}`;
     const nombre=p.cliente?.nombre||p.nombre||'Sin nombre';
     const telefono=p.cliente?.telefono||p.telefono||'';
     const direccion=p.cliente?.direccion||p.direccion||p.ubicacionTexto||'Sin dirección';
@@ -288,9 +275,34 @@ window.cambiarEstado=function(id,nuevoEstado){update(ref(db,'pedidos/'+id),{esta
 window.bloquearIP=async function(ip,pedidoId){if(!ip)return alert('Sin IP');if(!confirm('Bloquear '+ip+'?'))return;const key=ip.replace(/\./g,'_');await update(ref(db,'ips_bloqueadas/'+key),{ip:ip,fecha:new Date().toLocaleString(),timestamp:Date.now(),pedidoId:pedidoId});}
 window.desbloquearIP=async function(ip){if(!confirm('Desbloquear '+ip+'?'))return;const key=ip.replace(/\./g,'_');await remove(ref(db,'ips_bloqueadas/'+key));}
 onValue(ref(db,'ips_bloqueadas'),snap=>{ipsBloqueadasCache=snap.val()||{};renderPedidos();});
+
 onValue(ref(db,'pedidos'),snap=>{
-  const data=snap.val()||{};let lista=Object.entries(data).map(([k,v])=>({id:k,...v}));lista.sort((a,b)=>new Date(b.timestamp||b.creadoEn||0)-new Date(a.timestamp||a.creadoEn||0));lista=lista.filter(p=>p.estado!=='entregado'&&p.estado!=='cancelado');
-  pedidosCache=lista;document.getElementById('countVivo').style.display=lista.length>0?'inline-block':'none';document.getElementById('countVivo').innerText=lista.length;renderPedidos();
+  const data=snap.val()||{};
+  let todas=Object.entries(data).map(([k,v])=>({id:k,...v}));
+  // Ordenar todas por correlativo si existe, si no por timestamp asc para asignar numero estable a viejos
+  todas.sort((a,b)=>{
+    if(a.correlativo && b.correlativo) return a.correlativo - b.correlativo;
+    if(a.correlativo) return -1;
+    if(b.correlativo) return 1;
+    return (a.timestamp||0) - (b.timestamp||0);
+  });
+  // Asignar numero correlativo virtual a los viejos que no lo tienen (solo visual, no escribe en DB)
+  todas.forEach((p,idx)=>{
+    if(!p.correlativo){
+      p.correlativo = idx+1;
+      if(!p.numero) p.numero = `ST-${String(idx+1).padStart(4,'0')}`;
+    }
+    if(!p.numero && p.correlativo){
+      p.numero = `ST-${String(p.correlativo).padStart(4,'0')}`;
+    }
+  });
+  pedidosTodosCache=todas;
+  let activas=todas.filter(p=>p.estado!=='entregado'&&p.estado!=='cancelado');
+  activas.sort((a,b)=> (b.timestamp||0) - (a.timestamp||0));
+  pedidosCache=activas;
+  document.getElementById('countVivo').style.display=activas.length>0?'inline-block':'none';
+  document.getElementById('countVivo').innerText=activas.length;
+  renderPedidos();
 });
 setInterval(renderPedidos,1000);
 </script>

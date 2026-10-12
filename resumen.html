@@ -147,7 +147,6 @@ function actualizarTotales(){
 }
 actualizarTotales();
 
-// CARGAR DATOS GUARDADOS
 try{
   let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');
   if(cli.nombre) document.getElementById('nombre').value=cli.nombre;
@@ -161,7 +160,7 @@ try{
 function setupClear(inputId, clearId){
   const input=document.getElementById(inputId); const btn=document.getElementById(clearId);
   const toggle=()=>{ if(input.value.length>0) btn.classList.add('show'); else btn.classList.remove('show'); };
-  input.addEventListener('input',()=>{toggle(); const mapErr={direccion:['fieldDir','errDir'],telefono:['fieldTel','errTel'],nombre:['fieldNom','errNom']}; if(mapErr[inputId]){document.getElementById(mapErr[inputId][0]).classList.remove('error');document.getElementById(mapErr[inputId][1]).classList.remove('show');} });
+  input.addEventListener('input',()=>{toggle(); const mapErr={direccion:['fieldDir','errDir'],telefono:['fieldTel','errTel'],nombre:['fieldNom','errNom']}; if(mapErr[inputId]){document.getElementById(mapErr[inputId][0]).classList.remove('error');document.getElementById(mapErr[inputId][1]).classList.remove('show');} guardarCliente(); });
   input.addEventListener('focus',toggle); setTimeout(toggle,300);
   btn.addEventListener('click',()=>{ input.value='';btn.classList.remove('show');input.focus(); if(inputId==='direccion'){ if(window.markerCliente){markerCliente.setMap(null);} if(directionsRenderer){directionsRenderer.setDirections({routes:[]});} distanciaKm=0; latCliente=null; lngCliente=null; document.getElementById('distanciaTxt').innerText='--'; actualizarTotales(); guardarCliente(); } });
 }
@@ -198,6 +197,7 @@ function calcularRuta(destinoLatLng){
       distanciaKm=leg.distance.value/1000;
       document.getElementById('distanciaTxt').innerText=leg.distance.text+' ('+Math.round(leg.duration.value/60)+' min)';
       actualizarTotales();
+      guardarCliente();
     }
   });
 }
@@ -209,7 +209,6 @@ function initMap(){
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.9}});
   const iconRestaurante={url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"><path fill="%235e0a28" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>'),scaledSize:new google.maps.Size(36,36)};
   markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRestaurante});
-
   autocomplete=new google.maps.places.Autocomplete(document.getElementById('direccion'),{componentRestrictions:{country:'mx'}});
   autocomplete.addListener('place_changed',()=>{
     const place=autocomplete.getPlace();
@@ -219,23 +218,19 @@ function initMap(){
     if(markerCliente) markerCliente.setMap(null);
     markerCliente=new google.maps.Marker({position:loc,map:map});
     calcularRuta(loc);
-    guardarCliente();
     document.getElementById('fieldDir').classList.remove('error');
     document.getElementById('errDir').classList.remove('show');
   });
 
-  // --- AUTO CALCULO SI YA HABIA DIRECCION GUARDADA (FIX DE TU FOTO) ---
   setTimeout(()=>{
     const dirGuardada=document.getElementById('direccion').value.trim();
     if(dirGuardada.length>5){
-      // Si ya tenemos lat/lng guardados, usalos directo
       if(latCliente && lngCliente){
         const savedLatLng=new google.maps.LatLng(latCliente,lngCliente);
         if(markerCliente) markerCliente.setMap(null);
         markerCliente=new google.maps.Marker({position:savedLatLng,map:map});
         calcularRuta(savedLatLng);
       }else{
-        // Si no hay lat/lng, geocodifica la dirección guardada
         geocoder.geocode({address:dirGuardada, componentRestrictions:{country:'mx'}}, (results,status)=>{
           if(status==='OK' && results[0]){
             const loc=results[0].geometry.location;
@@ -243,12 +238,11 @@ function initMap(){
             if(markerCliente) markerCliente.setMap(null);
             markerCliente=new google.maps.Marker({position:loc,map:map});
             calcularRuta(loc);
-            guardarCliente();
           }
         });
       }
     }
-  }, 800);
+  }, 900);
 }
 
 function verificarIPBloqueada(){
@@ -274,30 +268,50 @@ async function confirmarPedido(){
   if(!tel){ document.getElementById('fieldTel').classList.add('error'); document.getElementById('errTel').classList.add('show'); ok=false; }
   if(!nom){ document.getElementById('fieldNom').classList.add('error'); document.getElementById('errNom').classList.add('show'); ok=false; }
   if(!ok){ const btn=document.getElementById('btnConfirm'); btn.classList.add('shake'); setTimeout(()=>btn.classList.remove('shake'),400); return; }
-
   if(distanciaKm===0 && subtotal < META){
-    alert('Estamos calculando tu envío, espera un segundo y vuelve a dar confirmar. Si ya tienes dirección guardada, mueve un poco el mapa o reescribe tu calle.');
+    alert('Estamos calculando tu envío, espera 2 segundos y vuelve a dar confirmar.');
     return;
   }
-
   const bloqueada=await verificarIPBloqueada();
   if(bloqueada) return;
+  const btn=document.getElementById('btnConfirm'); btn.innerText='Generando pedido...'; btn.disabled=true;
 
-  const btn=document.getElementById('btnConfirm'); btn.innerText='Enviando...'; btn.disabled=true;
-  const pedido={
-    cliente:{ nombre:nom, telefono:tel, direccion:dir, referencia:document.getElementById('referencia').value.trim() },
-    nombre:nom, telefono:tel, direccion:dir, referencia:document.getElementById('referencia').value.trim(),
-    productos:carrito, subtotal:subtotal, costoEnvio:costoEnvio, total:subtotal+costoEnvio,
-    envioGratis: costoEnvio===0, distanciaKm: distanciaKm, lat: latCliente, lng: lngCliente,
-    ip: ipClienteFinal, ciudad: ciudadIPFinal, ipCliente: ipClienteFinal, ciudadIP: ciudadIPFinal,
-    fecha:new Date().toLocaleDateString(), hora:new Date().toLocaleTimeString(), timestamp:Date.now(), creadoEn:new Date().toISOString(), estado:'pendiente',
-    maps: latCliente? `https://www.google.com/maps?q=${latCliente},${lngCliente}` : ''
-  };
-  guardarCliente();
-  db.ref('pedidos').push(pedido).then((ref)=>{
+  try{
+    const contadorRef=db.ref('config/contadorPedidos');
+    let correlativoFinal=1;
+    await contadorRef.transaction((current)=>{
+      if(current===null) return 1;
+      return current+1;
+    }, (error, committed, snapshot)=>{
+      if(committed){ correlativoFinal=snapshot.val(); }
+    });
+    if(!correlativoFinal){
+      const snap=await contadorRef.once('value');
+      correlativoFinal=snap.val()||1;
+    }
+    const numeroFijo='ST-'+String(correlativoFinal).padStart(4,'0');
+
+    const pedido={
+      numero: numeroFijo,
+      correlativo: correlativoFinal,
+      cliente:{ nombre:nom, telefono:tel, direccion:dir, referencia:document.getElementById('referencia').value.trim() },
+      nombre:nom, telefono:tel, direccion:dir, referencia:document.getElementById('referencia').value.trim(),
+      productos:carrito, subtotal:subtotal, costoEnvio:costoEnvio, total:subtotal+costoEnvio,
+      envioGratis: costoEnvio===0, distanciaKm: distanciaKm, lat: latCliente, lng: lngCliente,
+      ip: ipClienteFinal, ciudad: ciudadIPFinal, ipCliente: ipClienteFinal, ciudadIP: ciudadIPFinal,
+      fecha:new Date().toLocaleDateString(), hora:new Date().toLocaleTimeString(), timestamp:Date.now(), creadoEn:new Date().toISOString(), estado:'pendiente',
+      maps: latCliente? `https://www.google.com/maps?q=${latCliente},${lngCliente}` : ''
+    };
+    guardarCliente();
+    const ref=db.ref('pedidos').push();
+    await ref.set(pedido);
     localStorage.removeItem('santillos_carrito');
     window.location.href="confirmacion.html?id="+ref.key;
-  }).catch(()=>{ btn.innerText='Confirmar pedido'; btn.disabled=false; alert('Error al enviar, intenta de nuevo'); });
+  }catch(e){
+    console.error(e);
+    btn.innerText='Confirmar pedido'; btn.disabled=false;
+    alert('Error al generar número de pedido, intenta de nuevo');
+  }
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>

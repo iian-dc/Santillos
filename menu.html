@@ -57,20 +57,30 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 <div class="img-viewer-overlay" id="imgViewer" onclick="cerrarViewer()"><div class="img-viewer-card" onclick="event.stopPropagation()"><button class="btn-close-img" onclick="cerrarViewer()"><i class="fa-solid fa-xmark"></i></button><img id="viewerImg" src=""></div></div>
 <div class="bottom-nav"><a href="menu.html" class="nav-item-rappi active"><i class="fa-solid fa-house"></i>INICIO</a><div class="nav-wrap"><a href="carrito.html" class="nav-item-rappi"><i class="fa-solid fa-bag-shopping"></i>CARRITO</a><div class="cart-badge" id="cartCount">0</div></div></div>
 <script>
-const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
+// NUEVA BASE SOLO PARA MENU - SANTILLOS-MENU
+const firebaseConfig={
+  apiKey:"AIzaSyCvnHeXuZZ-2IOF3Oas09VNYJK_HLLkau8",
+  authDomain:"santillos-menu.firebaseapp.com",
+  databaseURL:"https://santillos-menu-default-rtdb.firebaseio.com",
+  projectId:"santillos-menu",
+  storageBucket:"santillos-menu.firebasestorage.app",
+  messagingSenderId:"913879229999",
+  appId:"1:913879229999:web:bff40819ea0f91d040c8da"
+};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
+
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
+
 let menuData=null; let categoryOrder=[]; let cacheConfig=null;
 try{categoryOrder=JSON.parse(localStorage.getItem('santillos_cache_order_v2'))||[]}catch(e){}
 try{cacheConfig=JSON.parse(localStorage.getItem('santillos_cache_config'))}catch(e){}
 try{menuData=JSON.parse(localStorage.getItem('santillos_cache_menu_v2'))}catch(e){}
 let categoriaActiva = categoryOrder[0] || null;
 
-// FIX QUOTA: Limpiar carrito viejo que tenia imagenes pesadas
 try{
   let test = JSON.parse(localStorage.getItem('santillos_carrito')||'{}');
   let size = JSON.stringify(test).length;
-  if(size>500000){ // si pasa 500KB, lo limpiamos
+  if(size>500000){
     localStorage.removeItem('santillos_carrito');
     localStorage.removeItem('santillos_cantidades');
   }
@@ -84,6 +94,7 @@ function actualizarBadge(){ document.getElementById('cartCount').innerText=Objec
 actualizarBadge();
 function aplicarConfig(c){ if(!c)return; if(c.portada) document.getElementById('portadaImg').src=c.portada; if(c.logo&&c.logo.length>20){ document.getElementById('logoImg').src=c.logo; document.getElementById('logoImg').style.display='block'; document.getElementById('logoTxt').style.display='none'; } if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre; }
 if(cacheConfig) aplicarConfig(cacheConfig);
+
 function renderCategorias(){
  const d=document.getElementById('categorias'); if(!d||!categoryOrder||categoryOrder.length===0) return;
  if(!categoriaActiva) categoriaActiva=categoryOrder[0];
@@ -97,36 +108,66 @@ function renderCategorias(){
   d.appendChild(b);
  });
 }
+
 function renderProductos(){
  const cont=document.getElementById('productos'); if(!cont||!menuData||!categoriaActiva) return;
  const lista=menuData[categoriaActiva]||[];
  let html='';
  lista.forEach((p,i)=>{
   if(p.disp===false) return;
-  const id = categoriaActiva+'_'+i;
+  const id = categoriaActiva+'_'+i+'_'+(p.idReal||'');
   const cant = cantidades[id]||0;
   const accion = cant===0
- ? `<button class="btn-add" data-action="add" data-id="${id}">+</button>`
+? `<button class="btn-add" data-action="add" data-id="${id}">+</button>`
   : `<div class="qty-control"><button class="qty-btn" data-action="sub" data-id="${id}">−</button><div class="qty-num">${cant}</div><button class="qty-btn" data-action="add" data-id="${id}">+</button></div>`;
-  html+=`<div class="product-card" data-pid="${id}"><div class="product-img-box" onclick="abrirViewer('${(p.img||'')}')"><img src="${p.img}" loading="lazy"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div><div class="action-right">${accion}</div></div></div>`;
+  html+=`<div class="product-card" data-pid="${id}"><div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,'')}')"><img src="${p.img}" loading="lazy"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div><div class="action-right">${accion}</div></div></div>`;
  });
  cont.innerHTML=html;
 }
 if(menuData){ renderCategorias(); renderProductos(); }
+
+function transformarProductosFirebase(data){
+  let agrupado = {};
+  let cats = new Set();
+  Object.entries(data).forEach(([idReal, val])=>{
+    const cat = val.categoria || val.cat || 'Extras';
+    if(!agrupado[cat]) agrupado[cat]=[];
+    agrupado[cat].push({
+      idReal: idReal,
+      name: val.nombre || val.name || 'Sin nombre',
+      price: val.precio || val.price || 0,
+      img: val.imagen || val.img || '',
+      disp: val.disponible!==false
+    });
+    cats.add(cat);
+  });
+  return { agrupado, cats: Array.from(cats) };
+}
+
 db.ref('config').once('value').then(s=>{ if(s.val()){ aplicarConfig(s.val()); localStorage.setItem('santillos_cache_config', JSON.stringify(s.val())); }});
-db.ref('categoryOrder').once('value').then(s=>{
- if(s.val()&&s.val().length>0){ categoryOrder=s.val(); localStorage.setItem('santillos_cache_order_v2', JSON.stringify(categoryOrder)); if(!categoriaActiva) categoriaActiva=categoryOrder[0]; renderCategorias(); }
- return db.ref('menu').once('value');
-}).then(s=>{
- if(s && s.val()){
-   menuData=s.val(); try{localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menuData));}catch(e){}
-   if(!categoryOrder||categoryOrder.length==0){ categoryOrder=Object.keys(menuData); }
-   if(!categoriaActiva) categoriaActiva=categoryOrder[0];
-   renderCategorias(); renderProductos();
- }
+
+db.ref('productos').on('value', snap=>{
+  if(!snap.exists()){
+    document.getElementById('productos').innerHTML='<div style="text-align:center;padding:30px;color:#999">No hay productos en santillos-menu. Agregalos en Productos.</div>';
+    return;
+  }
+  const res = transformarProductosFirebase(snap.val());
+  menuData = res.agrupado;
+  categoryOrder = res.cats;
+  if(categoryOrder.includes('Todos')) categoryOrder = categoryOrder.filter(c=>c!=='Todos');
+  if(categoryOrder.length>0 &&!categoryOrder.includes('Todos')){
+    let ordenPreferido = ["Comidas","Bebidas","Postres","Promociones","Extras"];
+    let ordenado = [];
+    ordenPreferido.forEach(o=>{ if(categoryOrder.includes(o)) ordenado.push(o); });
+    categoryOrder.forEach(c=>{ if(!ordenado.includes(c)) ordenado.push(c); });
+    categoryOrder = ordenado;
+  }
+  localStorage.setItem('santillos_cache_order_v2', JSON.stringify(categoryOrder));
+  try{localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menuData));}catch(e){}
+  if(!categoriaActiva) categoriaActiva=categoryOrder[0];
+  renderCategorias(); renderProductos();
 });
 
-// CLICK DELEGADO SIN IMAGENES PESADAS
 document.getElementById('productos').addEventListener('click', function(e){
   const btn = e.target.closest('[data-action]');
   if(!btn) return;
@@ -134,6 +175,7 @@ document.getElementById('productos').addEventListener('click', function(e){
   const delta = btn.dataset.action==='add'?1:-1;
   if(!id ||!menuData) return;
   const parts = id.split('_');
+  const realId = parts.pop();
   const idx = parseInt(parts.pop());
   const cat = parts.join('_');
   const p = menuData[cat]? menuData[cat][idx] : null;
@@ -145,16 +187,13 @@ document.getElementById('productos').addEventListener('click', function(e){
   if(a>99)a=99;
   cantidades[id]=a;
 
-  // FIX QUOTA: NO GUARDAMOS LA FOTO, SOLO NOMBRE Y PRECIO
-  if(a===0){ delete carrito[id]; delete cantidades[id]; } else carrito[id]={nombre:p.name, precio:p.price, cant:a};
+  if(a===0){ delete carrito[id]; delete cantidades[id]; } else carrito[id]={nombre:p.name, precio:p.price, cant:a, idReal:p.idReal};
 
   actualizarBadge();
   try{
     localStorage.setItem('santillos_carrito',JSON.stringify(carrito));
     localStorage.setItem('santillos_cantidades',JSON.stringify(cantidades));
-  }catch(err){
-    console.log('Storage lleno, limpiando imagenes');
-  }
+  }catch(err){ console.log('Storage lleno'); }
 
   const card = btn.closest('.product-card');
   const actionDiv = card? card.querySelector('.action-right') : null;

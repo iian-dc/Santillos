@@ -150,15 +150,16 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, update, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// NUEVA BASE SOLO PARA PEDIDOS - ACTUALIZADA
+// ===== CORREGIDO: MISMA BASE QUE USA RESUMEN Y CONFIRMAR =====
+// santillos-pedidos = prepedido + pedidos
 const firebaseConfig = {
-  apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
-  authDomain: "santillos-pedidos.firebaseapp.com",
-  databaseURL: "https://santillos-pedidos-default-rtdb.firebaseio.com",
-  projectId: "santillos-pedidos",
-  storageBucket: "santillos-pedidos.firebasestorage.app",
-  messagingSenderId: "341477805263",
-  appId: "1:341477805263:web:b86bc36da92854650afbba"
+  apiKey: "AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
+  authDomain: "santillos-1ac6d.firebaseapp.com",
+  databaseURL: "https://santillos-1ac6d-default-rtdb.firebaseio.com",
+  projectId: "santillos-1ac6d",
+  storageBucket: "santillos-1ac6d.firebasestorage.app",
+  messagingSenderId: "285600299102",
+  appId: "1:285600299102:web:9590597c2b3d8888821ccf"
 };
 
 const app=initializeApp(firebaseConfig);const db=getDatabase(app);
@@ -183,7 +184,7 @@ window.cerrarSesion=function(){localStorage.clear();window.location.href='./';}
 
 let pedidosCache=[];let pedidosTodosCache=[];let ipsBloqueadasCache={};
 let idsVistos=new Set(); let primerCarga=true; let nuevosIds=new Set();
-function obtenerInicioPedido(p){if(p.timestamp)return new Date(p.timestamp);if(p.creadoEn)return new Date(p.creadoEn);if(p.fechaISO)return new Date(p.fechaISO);return new Date();}
+function obtenerInicioPedido(p){if(p.timestamp)return new Date(p.timestamp);if(p.creadoEn)return new Date(p.creadoEn);if(p.fechaISO)return new Date(p.fechaISO);if(p.fecha)return new Date(p.fecha);return new Date();}
 function calcularMinutos(p){const ini=obtenerInicioPedido(p);return Math.max(0,Math.floor((new Date()-ini)/60000));}
 function estadoIP(ip){if(!ip)return 'sin_ip';const k=ip.replace(/\./g,'_');return ipsBloqueadasCache[k]?'bloqueada':'activa';}
 
@@ -227,9 +228,9 @@ window.abrirProductos=function(id){
     ${lista}
     <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px">
       <div class="modal-line" style="justify-content:space-between"><span>Subtotal</span><b>$${p.subtotal||p.total||0}</b></div>
-      <div class="modal-line" style="justify-content:space-between"><span>Envío</span><b>${p.envioGratis?'Gratis':'$'+(p.costoEnvio||p.envio||0)}</b></div>
+      <div class="modal-line" style="justify-content:space-between"><span>Envío</span><b>${Number(p.envio||0)===0?'Gratis':'$'+(p.costoEnvio||p.envio||0)}</b></div>
       <div class="modal-line" style="justify-content:space-between;font-size:14px"><b>Total</b><b>$${p.total||0}</b></div>
-      ${p.maps?`<a href="${p.maps}" target="_blank" class="btn-call" style="text-decoration:none;background:#fff;color:#111;border:1px solid #e5e7eb"><i class="fa-solid fa-map-location-dot"></i> Ver en Maps</a>`:''}
+      ${p.cliente?.lat?`<a href="https://www.google.com/maps?q=${p.cliente.lat},${p.cliente.lng}" target="_blank" class="btn-call" style="text-decoration:none;background:#fff;color:#111;border:1px solid #e5e7eb"><i class="fa-solid fa-map-location-dot"></i> Ver en Maps</a>`:''}
     </div>`;
   document.getElementById('modalProd').classList.add('show');
 }

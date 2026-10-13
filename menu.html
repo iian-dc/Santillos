@@ -57,7 +57,7 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 <div class="img-viewer-overlay" id="imgViewer" onclick="cerrarViewer()"><div class="img-viewer-card" onclick="event.stopPropagation()"><button class="btn-close-img" onclick="cerrarViewer()"><i class="fa-solid fa-xmark"></i></button><img id="viewerImg" src=""></div></div>
 <div class="bottom-nav"><a href="menu.html" class="nav-item-rappi active"><i class="fa-solid fa-house"></i>INICIO</a><div class="nav-wrap"><a href="carrito.html" class="nav-item-rappi"><i class="fa-solid fa-bag-shopping"></i>CARRITO</a><div class="cart-badge" id="cartCount">0</div></div></div>
 <script>
-// ===== DOS FIREBASES - ORGANIZADO =====
+// ===== DOS FIREBASES - POSICIONES ORIGINALES =====
 const firebaseConfigMenu={
   apiKey:"AIzaSyCvnHeXuZZ-2IOF3Oas09VNYJK_HLLkau8",
   authDomain:"santillos-menu.firebaseapp.com",
@@ -67,8 +67,6 @@ const firebaseConfigMenu={
   messagingSenderId:"913879229999",
   appId:"1:913879229999:web:bff40819ea0f91d040c8da"
 };
-
-// >>>>>> PEGA AQUÍ TU CONFIG REAL DE santillos-pedidos <<<<<<
 const firebaseConfigPedidos={
   apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
   authDomain:"santillos-1ac6d.firebaseapp.com",
@@ -86,7 +84,6 @@ const dbPedidos = appPedidos.database();
 
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
 
-// SESION UNICA PARA PREPEDIDO
 let sessionId = localStorage.getItem('santillos_session_id');
 if(!sessionId){
   sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
@@ -143,6 +140,7 @@ function renderProductos(){
  cont.innerHTML=html;
 }
 
+// === CORREGIDO - CONTEO EN TIEMPO REAL ===
 window.sumar = function(idReal){
   let p=null;
   for(let cat in menuData){
@@ -155,44 +153,42 @@ window.sumar = function(idReal){
   if(cant>99) cant=99;
   cantidades[idReal]=cant;
   carrito[idReal]={nombre:p.name, precio:p.price, cant:cant, idReal:idReal, img:p.img};
-  guardar();
   let act = document.getElementById('act-'+idReal);
   if(act){
-    if(cant===1){
-      act.innerHTML=`<div class="qty-control"><button class="qty-btn" onclick="restar('${idReal}')">−</button><div class="qty-num" id="num-${idReal}">${cant}</div><button class="qty-btn" onclick="sumar('${idReal}')">+</button></div>`;
-    } else {
-      let num = document.getElementById('num-${idReal}');
-      if(num) num.innerText=cant;
-    }
+    act.innerHTML = `<div class="qty-control"><button class="qty-btn" onclick="restar('${idReal}')">−</button><div class="qty-num" id="num-${idReal}">${cant}</div><button class="qty-btn" onclick="sumar('${idReal}')">+</button></div>`;
   }
+  guardar();
 }
 
 window.restar = function(idReal){
   let cant = cantidades[idReal]||0;
   cant--;
+  let act = document.getElementById('act-'+idReal);
   if(cant<=0){
     delete cantidades[idReal];
     delete carrito[idReal];
-    let act = document.getElementById('act-'+idReal);
     if(act) act.innerHTML=`<button class="btn-add" onclick="sumar('${idReal}')">+</button>`;
   } else {
     cantidades[idReal]=cant;
-    carrito[idReal].cant=cant;
-    let num = document.getElementById('num-'+idReal);
-    if(num) num.innerText=cant;
+    if(carrito[idReal]) carrito[idReal].cant=cant;
+    if(act){
+      let numEl = document.getElementById('num-'+idReal);
+      if(numEl){
+        numEl.innerText = cant;
+      } else {
+        act.innerHTML = `<div class="qty-control"><button class="qty-btn" onclick="restar('${idReal}')">−</button><div class="qty-num" id="num-${idReal}">${cant}</div><button class="qty-btn" onclick="sumar('${idReal}')">+</button></div>`;
+      }
+    }
   }
   guardar();
 }
 
 function guardar(){
-  // 1. Local
   localStorage.setItem('santillos_carrito_v3', JSON.stringify(carrito));
   localStorage.setItem('santillos_cantidades_v3', JSON.stringify(cantidades));
   localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
   localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
   actualizarBadge();
-
-  // 2. En santillos-pedidos /prepedido / sessionId
   try{
     dbPedidos.ref('prepedido/'+sessionId).set({
       carrito: carrito,
@@ -200,7 +196,7 @@ function guardar(){
       fecha: new Date().toISOString(),
       totalItems: Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0)
     });
-  }catch(e){ console.log("error prepedido", e); }
+  }catch(e){}
 }
 
 function transformar(data){
@@ -220,7 +216,6 @@ function transformar(data){
   return {agrupado,cats};
 }
 
-// Productos desde santillos-menu
 dbMenu.ref('productos').on('value', snap=>{
   if(!snap.exists()){
     document.getElementById('productos').innerHTML='<div style="text-align:center;padding:30px;color:#999">No hay productos</div>';
@@ -238,7 +233,6 @@ dbMenu.ref('productos').on('value', snap=>{
   renderProductos();
 });
 
-// Logo y portada desde santillos-menu /config
 dbMenu.ref('config').on('value', snap=>{
   if(!snap.exists()) return;
   const cfg = snap.val();

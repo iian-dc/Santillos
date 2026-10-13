@@ -29,7 +29,8 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .resumen{margin:16px;background:#1c1c1c;border-radius:18px;padding:16px;border:1px solid #2a2a2a}
 .fila-resumen{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;color:#aaa}
 .fila-resumen.total{color:#fff;font-weight:800;font-size:16px;border-top:1px solid #2a2a2a;margin-top:8px;padding-top:12px}
-.btn-pedir{width:calc(100% - 32px);margin:16px;background:#5e0a28;color:#fff;border:none;padding:16px;border-radius:25px;font-weight:800;font-size:16px;cursor:pointer;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);max-width:468px}
+/* BOTON CENTRADO CORREGIDO */
+.btn-pedir{width:92%;max-width:468px;background:#5e0a28;color:#fff;border:none;padding:16px;border-radius:25px;font-weight:800;font-size:16px;cursor:pointer;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);margin:0;z-index:101}
 .bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:92%;max-width:460px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:14px 8px;z-index:100;border-radius:28px}
 .nav-item-rappi{display:flex;flex-direction:column;align-items:center;gap:4px;color:#777;font-size:9px;font-weight:800;background:none;border:none;cursor:pointer;min-width:64px;text-decoration:none}
 .nav-item-rappi.active{color:#fff}
@@ -98,6 +99,35 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 </div>
 
 <script>
+// ===== DOS FIREBASES - ORGANIZADO =====
+const firebaseConfigMenu={
+  apiKey:"AIzaSyCvnHeXuZZ-2IOF3Oas09VNYJK_HLLkau8",
+  authDomain:"santillos-menu.firebaseapp.com",
+  databaseURL:"https://santillos-menu-default-rtdb.firebaseio.com",
+  projectId:"santillos-menu",
+  storageBucket:"santillos-menu.firebasestorage.app",
+  messagingSenderId:"913879229999",
+  appId:"1:913879229999:web:bff40819ea0f91d040c8da"
+};
+const firebaseConfigPedidos={
+  apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
+  authDomain:"santillos-1ac6d.firebaseapp.com",
+  databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",
+  projectId:"santillos-1ac6d",
+  storageBucket:"santillos-1ac6d.firebasestorage.app",
+  messagingSenderId:"285600299102",
+  appId:"1:285600299102:web:9590597c2b3d8888821ccf"
+};
+const appMenu = firebase.initializeApp(firebaseConfigMenu, "menuApp");
+const appPedidos = firebase.initializeApp(firebaseConfigPedidos, "pedidosApp");
+const dbPedidos = appPedidos.database();
+
+let sessionId = localStorage.getItem('santillos_session_id');
+if(!sessionId){
+  sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+  localStorage.setItem('santillos_session_id', sessionId);
+}
+
 let carrito = {}; let cantidades = {};
 let modalId = null; let modalTempCant = 1;
 
@@ -120,6 +150,19 @@ function guardarCarrito(){
   localStorage.setItem('santillos_carrito_v3', JSON.stringify(carrito));
   localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
   localStorage.setItem('santillos_cantidades_v3', JSON.stringify(cantidades));
+  // Guardar en prepedido en santillos-pedidos
+  try{
+    if(Object.keys(carrito).length===0){
+      dbPedidos.ref('prepedido/'+sessionId).remove();
+    } else {
+      dbPedidos.ref('prepedido/'+sessionId).set({
+        carrito: carrito,
+        cantidades: cantidades,
+        fecha: new Date().toISOString(),
+        totalItems: Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0)
+      });
+    }
+  }catch(e){}
 }
 
 function renderCarrito(){
@@ -159,6 +202,24 @@ function renderCarrito(){
 }
 
 renderCarrito();
+
+// También escucha prepedido en tiempo real por si viene de menu.html
+try{
+  dbPedidos.ref('prepedido/'+sessionId).on('value', snap=>{
+    if(snap.exists()){
+      const data = snap.val();
+      if(data.carrito){
+        // Solo actualiza si local está vacío o diferente
+        if(Object.keys(carrito).length===0){
+          carrito = data.carrito;
+          cantidades = data.cantidades||{};
+          guardarCarrito();
+          renderCarrito();
+        }
+      }
+    }
+  });
+}catch(e){}
 
 function editarItem(id){
   modalId=id;

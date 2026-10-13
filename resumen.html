@@ -104,16 +104,8 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 </div>
 
 <script>
-// ===== DOS FIREBASES =====
-const firebaseConfigMenu={
-  apiKey:"AIzaSyCvnHeXuZZ-2IOF3Oas09VNYJK_HLLkau8",
-  authDomain:"santillos-menu.firebaseapp.com",
-  databaseURL:"https://santillos-menu-default-rtdb.firebaseio.com",
-  projectId:"santillos-menu",
-  storageBucket:"santillos-menu.firebasestorage.app",
-  messagingSenderId:"913879229999",
-  appId:"1:913879229999:web:bff40819ea0f91d040c8da"
-};
+// ===== TU FLUJO ORGANIZADO =====
+// santillos-menu = productos | santillos-pedidos = prepedido y pedidos
 const firebaseConfigPedidos={
   apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
   authDomain:"santillos-1ac6d.firebaseapp.com",
@@ -123,17 +115,13 @@ const firebaseConfigPedidos={
   messagingSenderId:"285600299102",
   appId:"1:285600299102:web:9590597c2b3d8888821ccf"
 };
-const appMenu = firebase.initializeApp(firebaseConfigMenu, "menuApp");
-const appPedidos = firebase.initializeApp(firebaseConfigPedidos, "pedidosApp");
-const dbPedidos = appPedidos.database();
+firebase.initializeApp(firebaseConfigPedidos);
+const db=firebase.database();
 
 const META=200; const PRECIO_KM=12; const TIENDA={lat:21.1560,lng:-100.9340};
 
 let sessionId = localStorage.getItem('santillos_session_id');
-if(!sessionId){
-  sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
-  localStorage.setItem('santillos_session_id', sessionId);
-}
+if(!sessionId){ sessionId='sess_'+Date.now(); localStorage.setItem('santillos_session_id',sessionId); }
 
 let carrito={};
 try{
@@ -143,30 +131,30 @@ try{
 }catch(e){ carrito={}; }
 
 if(Object.keys(carrito).length===0){
-  // Intenta cargar del prepedido en santillos-pedidos
-  dbPedidos.ref('prepedido/'+sessionId+'/carrito').once('value').then(snap=>{
-    if(snap.exists()){
-      carrito = snap.val();
+  // Si viene vacío, intenta del prepedido
+  db.ref('prepedido/'+sessionId+'/carrito').once('value').then(s=>{
+    if(s.exists()){
+      carrito=s.val();
       localStorage.setItem('santillos_carrito_v3', JSON.stringify(carrito));
-      iniciarResumen();
+      iniciar();
     } else {
       location.href="carrito.html";
     }
   });
 } else {
-  iniciarResumen();
+  iniciar();
 }
 
 let subtotal=0;
-function iniciarResumen(){
+function iniciar(){
   if(Object.keys(carrito).length===0){ location.href="carrito.html"; return; }
   let html='';
   subtotal=0;
   Object.values(carrito).forEach(p=>{
     let t=Number(p.precio||0)*Number(p.cant||0);
     subtotal+=t;
-    let img = p.img || 'https://via.placeholder.com/80';
-    html+=`<div class="resumen-item"><img src="${img}" style="width:38px;height:38px;border-radius:8px;object-fit:cover" onerror="this.src='https://via.placeholder.com/38'"><div style="flex:1"><div style="font-size:11px;font-weight:700">${p.nombre} x${p.cant}</div></div><div style="font-size:11px;font-weight:800">$${t}</div></div>`;
+    let img=p.img||'https://via.placeholder.com/80';
+    html+=`<div class="resumen-item"><img src="${img}" style="width:38px;height:38px;border-radius:8px;object-fit:cover"><div style="flex:1"><div style="font-size:11px;font-weight:700">${p.nombre} x${p.cant}</div></div><div style="font-size:11px;font-weight:800">$${t}</div></div>`;
   });
   document.getElementById('listaResumen').innerHTML=html;
   document.getElementById('subtotalTxt').innerText='$'+subtotal;
@@ -177,11 +165,10 @@ let distanciaKm=0; let costoEnvio=0; let latCliente=null; let lngCliente=null;
 let ipClienteFinal="desconocida"; let ciudadIPFinal="";
 fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(async d=>{
   ipClienteFinal=d.ip;
-  try{ const geo=await fetch(`https://ipapi.co/${d.ip}/json/`).then(r=>r.json()); ciudadIPFinal=(geo.city||"")+(geo.region?", "+geo.region:""); }catch(e){}
-  // verificar IP bloqueada en santillos-pedidos
+  try{ const geo=await fetch(`https://ipapi.co/${d.ip}/json/`).then(r=>r.json()); ciudadIPFinal=(geo.city||"")+(geo.region?" , "+geo.region:""); }catch(e){}
   try{
-    const b = await dbPedidos.ref('ips_bloqueadas/'+d.ip.replace(/\./g,'_')).once('value');
-    if(b.exists()){ document.getElementById('overlayIPBloqueadaCheckout').classList.add('show'); }
+    const bloq = await db.ref('ips_bloqueadas/'+d.ip.replace(/\./g,'_')).once('value');
+    if(bloq.exists()){ document.getElementById('overlayIPBloqueadaCheckout').classList.add('show'); }
   }catch(e){}
 }).catch(()=>{});
 
@@ -271,25 +258,40 @@ function initMap(){
   geocoder=new google.maps.Geocoder();
   directionsService=new google.maps.DirectionsService();
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:4,strokeOpacity:0.9}});
-  const iconRestaurante={url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="18" fill="#5e0a28" stroke="white" stroke-width="2"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="20" font-weight="bold">S</text></svg>'),scaledSize:new google.maps.Size(40,40)};
-  markerTienda=new google.maps.Marker({position:TIENDA,map:map,icon:iconRestaurante});
-  const inputDir=document.getElementById('direccion');
-  autocomplete=new google.maps.places.Autocomplete(inputDir,{types:['geocode'],componentRestrictions:{country:'mx'}});
+  const iconRestaurante={url:"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#5e0a28" stroke="white" stroke-width="3"/><text x="20" y="26" text-anchor="middle" fill="white" font-size="18" font-weight="900">S</text></svg>'), scaledSize:new google.maps.Size(40,40)};
+  markerTienda=new google.maps.Marker({position:TIENDA, map:map, icon:iconRestaurante, title:"Santillos"});
+  const inputDir = document.getElementById('direccion');
+  autocomplete=new google.maps.places.Autocomplete(inputDir,{types:['geocode'], componentRestrictions:{country:'mx'}});
   autocomplete.addListener('place_changed',()=>{
     const place=autocomplete.getPlace();
-    if(!place.geometry) return;
-    const loc=place.geometry.location;
-    latCliente=loc.lat(); lngCliente=loc.lng();
-    document.getElementById('direccion').value=place.formatted_address||inputDir.value;
+    if(!place.geometry){ return; }
+    latCliente=place.geometry.location.lat();
+    lngCliente=place.geometry.location.lng();
     if(markerCliente) markerCliente.setMap(null);
-    markerCliente=new google.maps.Marker({position:{lat:latCliente,lng:lngCliente},map:map});
-    map.panTo({lat:latCliente,lng:lngCliente});
+    markerCliente=new google.maps.Marker({position:{lat:latCliente,lng:lngCliente}, map:map});
     calcularRuta({lat:latCliente,lng:lngCliente});
     guardarCliente();
   });
+  map.addListener('click', (e)=>{
+    latCliente=e.latLng.lat(); lngCliente=e.latLng.lng();
+    if(markerCliente) markerCliente.setMap(null);
+    markerCliente=new google.maps.Marker({position:{lat:latCliente,lng:lngCliente}, map:map});
+    geocoder.geocode({location:{lat:latCliente,lng:lngCliente}}, (results,status)=>{
+      if(status==='OK' && results[0]){
+        document.getElementById('direccion').value=results[0].formatted_address;
+        document.getElementById('clearDir').classList.add('show');
+      }
+    });
+    calcularRuta({lat:latCliente,lng:lngCliente});
+    guardarCliente();
+  });
+  if(latCliente && lngCliente){
+    markerCliente=new google.maps.Marker({position:{lat:latCliente,lng:lngCliente}, map:map});
+    calcularRuta({lat:latCliente,lng:lngCliente});
+  }
 }
 
-function validar(){
+function validarCampos(){
   let ok=true;
   const dir=document.getElementById('direccion').value.trim();
   const tel=document.getElementById('telefono').value.trim();
@@ -297,59 +299,62 @@ function validar(){
   if(!dir){ document.getElementById('fieldDir').classList.add('error'); document.getElementById('errDir').classList.add('show'); ok=false; }
   if(!tel){ document.getElementById('fieldTel').classList.add('error'); document.getElementById('errTel').classList.add('show'); ok=false; }
   if(!nom){ document.getElementById('fieldNom').classList.add('error'); document.getElementById('errNom').classList.add('show'); ok=false; }
-  if(!ok){ document.getElementById('btnConfirm').classList.add('shake'); setTimeout(()=>document.getElementById('btnConfirm').classList.remove('shake'),400); }
+  if(!ok){
+    const btn=document.getElementById('btnConfirm');
+    btn.classList.add('shake');
+    setTimeout(()=>btn.classList.remove('shake'),400);
+  }
   return ok;
 }
 
 function confirmarPedido(){
-  if(!validar()) return;
+  if(!validarCampos()) return;
   const btn=document.getElementById('btnConfirm');
   btn.innerText='Enviando...'; btn.disabled=true;
 
-  const cliente={
-    nombre: document.getElementById('nombre').value.trim(),
-    telefono: document.getElementById('telefono').value.trim(),
-    direccion: document.getElementById('direccion').value.trim(),
-    referencia: document.getElementById('referencia').value.trim(),
-    lat: latCliente, lng: lngCliente
-  };
-
-  const pedidoFinal={
-    cliente: cliente,
+  const pedido={
+    cliente:{
+      nombre: document.getElementById('nombre').value.trim(),
+      telefono: document.getElementById('telefono').value.trim(),
+      direccion: document.getElementById('direccion').value.trim(),
+      referencia: document.getElementById('referencia').value.trim(),
+      lat: latCliente,
+      lng: lngCliente
+    },
     productos: carrito,
     subtotal: subtotal,
     envio: costoEnvio,
     total: subtotal + costoEnvio,
     distanciaKm: distanciaKm,
-    fecha: new Date().toISOString(),
-    fecha_timestamp: firebase.database.ServerValue.TIMESTAMP,
-    estado: "nuevo",
     ip: ipClienteFinal,
-    ciudadIP: ciudadIPFinal,
+    ciudad: ciudadIPFinal,
+    fecha: new Date().toISOString(),
+    estado: 'pendiente',
     sessionId: sessionId
   };
 
-  // 1. Mover de prepedido -> pedidos en santillos-pedidos
-  dbPedidos.ref('pedidos').push(pedidoFinal).then(()=>{
-    // 2. Guardar contador y limpiar prepedido
-    return dbPedidos.ref('prepedido/'+sessionId).remove();
+  db.ref('pedidos').push(pedido).then(()=>{
+    // Borrar prepedido y carrito local
+    return db.ref('prepedido/'+sessionId).remove();
   }).then(()=>{
-    localStorage.removeItem('santillos_carrito_v3');
-    localStorage.removeItem('santillos_cantidades_v3');
     localStorage.removeItem('santillos_carrito');
+    localStorage.removeItem('santillos_carrito_v3');
     localStorage.removeItem('santillos_cantidades');
-    guardarCliente();
+    localStorage.removeItem('santillos_cantidades_v3');
     location.href='gracias.html';
   }).catch(e=>{
-    alert('Error al enviar pedido: '+e.message);
-    btn.innerText='Confirmar pedido'; btn.disabled=false;
+    console.error(e);
+    btn.innerText='Confirmar pedido';
+    btn.disabled=false;
+    alert('Error al enviar, intenta de nuevo');
   });
 }
 
 function contactarSoporte(){
-  window.open('https://wa.me/524151000000?text=Soporte%20pedido%20Santillos','_blank');
+  let msg = `Soporte Santillos - IP ${ipClienteFinal} bloqueada`;
+  window.open(`https://wa.me/524151139383?text=${encodeURIComponent(msg)}`,'_blank');
 }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCBe5uH8d1v9b4y4eX7zZ8Qw9xX0y1z2a3b&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>

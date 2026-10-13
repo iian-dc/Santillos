@@ -150,7 +150,6 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, update, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// ===== CORREGIDO: SANTILLOS-PEDIDOS EXCLUSIVO =====
 const firebaseConfig = {
   apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
   authDomain: "santillos-pedidos.firebaseapp.com",
@@ -240,7 +239,8 @@ function renderPedidos(){
   cont.innerHTML=pedidosCache.map((p)=>{
     const minutos=calcularMinutos(p);
     let cronoClass='verde';if(minutos>=40)cronoClass='rojo';else if(minutos>=20)cronoClass='amarillo';
-    const numeroPedido = p.numero || `ST-${String(p.correlativo||0).padStart(4,'0')}`;
+    // ORDEN REAL ST-0001 SIN AZAR
+    const numeroPedido = p.numero ? p.numero : `ST-${String(p.correlativo||0).padStart(4,'0')}`;
     const nombre=p.cliente?.nombre||p.nombre||'Sin nombre';
     const telefono=p.cliente?.telefono||p.telefono||'';
     const direccion=p.cliente?.direccion||p.direccion||p.ubicacionTexto||'Sin dirección';
@@ -322,18 +322,11 @@ window.addEventListener('load', ()=>{ setTimeout(()=>{ initAudio(); },500); });
 
 onValue(ref(db,'ips_bloqueadas'),snap=>{ipsBloqueadasCache=snap.val()||{};renderPedidos();});
 
-// CORREGIDO: faltaba un parentesis, ahora si carga de santillos-pedidos
 onValue(query(ref(db,'pedidos'), limitToLast(100)), (snap)=>{
   const data=snap.val()||{};
   let todas=Object.entries(data).map(([k,v])=>({id:k,...v}));
-  todas.sort((a,b)=>{
-    const ca=a.correlativo||0; const cb=b.correlativo||0;
-    if(ca && cb) return ca-cb;
-    if(ca) return -1;
-    if(cb) return 1;
-    return (a.timestamp||a.creadoEn||0)-(b.timestamp||b.creadoEn||0);
-  });
-  todas.forEach((p,idx)=>{ if(!p.correlativo){p.correlativo=idx+1; if(!p.numero) p.numero=`ST-${String(idx+1).padStart(4,'0')}`;} if(!p.numero) p.numero=`ST-${String(p.correlativo).padStart(4,'0')}`; });
+  // ORDENAR POR CORRELATIVO REAL, NO POR FECHA RANDOM
+  todas.sort((a,b)=> (a.correlativo||0)-(b.correlativo||0));
   pedidosTodosCache=todas;
   let activas=todas.filter(p=>p.estado!=='entregado'&&p.estado!=='cancelado');
   activas.sort((a,b)=>(a.correlativo||0)-(b.correlativo||0));

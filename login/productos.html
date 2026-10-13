@@ -45,7 +45,6 @@ body{background:#fff;min-height:100vh}
 .switch{width:44px;height:26px;background:#e5e7eb;border-radius:30px;position:relative;cursor:pointer;transition:0.2s}
 .switch.on{background:#5e0a28}
 .switch-dot{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
-.switch.on.switch-dot{left:21px}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:99;display:none;align-items:center;justify-content:center;padding:14px}
 .overlay.show{display:flex}
 .modal{background:#fff;border-radius:20px;width:100%;max-width:420px;max-height:90vh;overflow:auto}
@@ -88,10 +87,8 @@ body{background:#fff;min-height:100vh}
 </div>
 
 <div class="filters" id="filtros"></div>
-
 <div class="list" id="lista"></div>
 
-<!-- MODAL PRODUCTO -->
 <div class="overlay" id="modalProd" onclick="if(event.target===this)cerrarModales()">
   <div class="modal">
     <div class="modal-h"><h3 id="tituloModal">Agregar producto</h3><button onclick="cerrarModales()" style="border:none;background:#f3f4f6;width:28px;height:28px;border-radius:50%;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div>
@@ -102,7 +99,7 @@ body{background:#fff;min-height:100vh}
         <input id="p_precio" class="input" type="number" placeholder="Precio *">
       </div>
       <input id="p_imagen" class="input" placeholder="Link imagen (https://...) *">
-      <small style="font-size:11px;color:#6b7280">Pega el link de Firebase Storage aquí. Para subir ve a Firebase Console > Storage > Subir archivo > Copiar URL</small>
+      <small style="font-size:11px;color:#6b7280">Pega el link de Storage. Ej: https://firebasestorage...</small>
       <div class="row2" style="margin-top:10px">
         <label style="font-size:12px;font-weight:700">Disponible <input id="p_disp" type="checkbox" checked style="margin-left:6px"></label>
         <label style="font-size:12px;font-weight:700">Destacado <input id="p_dest" type="checkbox" style="margin-left:6px"></label>
@@ -113,7 +110,6 @@ body{background:#fff;min-height:100vh}
   </div>
 </div>
 
-<!-- MODAL CATEGORIA -->
 <div class="overlay" id="modalCat" onclick="if(event.target===this)cerrarModales()">
   <div class="modal">
     <div class="modal-h"><h3>Agregar categoría</h3><button onclick="cerrarModales()" style="border:none;background:#f3f4f6;width:28px;height:28px;border-radius:50%;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div>
@@ -135,54 +131,82 @@ const app=initializeApp(firebaseConfig);
 const db=getDatabase(app);
 
 let productosCache = [];
-let categoriasCache = ["Todos","Comidas","Bebidas","Postres","Promociones"];
+let categoriasDeProductos = new Set();
+let categoriasExtras = [];
 let categoriaActiva = "Todos";
 let editId = null;
 
-// CATEGORIAS DESDE FIREBASE
+function obtenerCategoriasFinales(){
+  let todas = ["Todos"];
+  let combinadas = [...categoriasExtras,...Array.from(categoriasDeProductos)];
+  combinadas = [...new Set(combinadas.filter(Boolean))];
+  return [...todas,...combinadas];
+}
+
+function renderFiltros(){
+  let cats = obtenerCategoriasFinales();
+  document.getElementById('filtros').innerHTML = cats.map(c=>`<button class="f-chip ${c===categoriaActiva?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+}
+window.setCat=(c)=>{ categoriaActiva=c; renderFiltros(); filtrar(); }
+
+function renderSelectCat(){
+  let cats = obtenerCategoriasFinales().filter(c=>c!=="Todos");
+  if(cats.length===0) cats=["Comidas","Bebidas","Postres","Promociones","Extras"];
+  document.getElementById('p_categoria').innerHTML = cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+function renderListaCats(){
+  let cats = obtenerCategoriasFinales().filter(c=>c!=="Todos");
+  document.getElementById('listaCats').innerHTML = cats.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:600">${c}<button onclick="borrarCat('${c}')" style="border:none;background:#fee2e2;color:#b42318;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">Borrar</button></div>`).join('');
+}
+
+// CATEGORIAS EXTRAS DESDE FIREBASE
 onValue(ref(db,'categorias'), snap=>{
   if(snap.exists()){
-    let cats = Object.values(snap.val()).map(c=>c.nombre);
-    if(cats.length>0){
-      categoriasCache = ["Todos",...cats];
-    }
-  }
+    categoriasExtras = Object.values(snap.val()).map(c=>c.nombre||c);
+  }else{ categoriasExtras=[]; }
   renderFiltros();
   renderSelectCat();
   renderListaCats();
 });
 
-function renderFiltros(){
-  document.getElementById('filtros').innerHTML = categoriasCache.map(c=>`<button class="f-chip ${c===categoriaActiva?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
-}
-window.setCat=(c)=>{ categoriaActiva=c; renderFiltros(); filtrar(); }
-
-function renderSelectCat(){
-  let soloCats = categoriasCache.filter(c=>c!=="Todos");
-  document.getElementById('p_categoria').innerHTML = soloCats.map(c=>`<option value="${c}">${c}</option>`).join('');
-}
-function renderListaCats(){
-  let soloCats = categoriasCache.filter(c=>c!=="Todos");
-  document.getElementById('listaCats').innerHTML = soloCats.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:600">${c}<button onclick="borrarCat('${c}')" style="border:none;background:#fee2e2;color:#b42318;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">Borrar</button></div>`).join('');
-}
-
-// PRODUCTOS DESDE FIREBASE
+// PRODUCTOS VINCULADOS DESDE TU FIREBASE - AQUI ES DONDE TRAE TUS PRODUCTOS
 onValue(ref(db,'productos'), snap=>{
-  if(!snap.exists()){ productosCache=[]; render(); return; }
-  productosCache = Object.entries(snap.val()).map(([id,val])=>({id,...val}));
+  const cont = document.getElementById('lista');
+  if(!snap.exists()){
+    productosCache=[];
+    categoriasDeProductos = new Set();
+    cont.innerHTML=`<div style="text-align:center;padding:30px;color:#999;font-size:13px">Aún no hay productos en Firebase en /productos</div>`;
+    renderFiltros();
+    return;
+  }
+  productosCache = Object.entries(snap.val()).map(([id,val])=>{
+    // normalizamos por si tus campos vienen con otro nombre
+    return {
+      id,
+      nombre: val.nombre || val.name || val.titulo || 'Sin nombre',
+      categoria: val.categoria || val.categoría || val.cat || 'Extras',
+      precio: val.precio || val.price || 0,
+      imagen: val.imagen || val.img || val.image || val.foto || '',
+      disponible: val.disponible!== undefined? val.disponible : (val.disponible===false?false:true),
+      destacado: val.destacado||false,
+      timestamp: val.timestamp||0
+    }
+  });
   productosCache.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
-  render();
-});
 
-function render(){
+  // SACAMOS LAS CATEGORIAS REALES DE TUS PRODUCTOS DE FIREBASE
+  categoriasDeProductos = new Set(productosCache.map(p=>p.categoria).filter(Boolean));
+
+  renderFiltros();
+  renderSelectCat();
   filtrar();
-}
+});
 
 window.filtrar=()=>{
   const txt = document.getElementById('buscador').value.toLowerCase();
   let lista = productosCache.filter(p=>{
     let matchCat = categoriaActiva==="Todos" || p.categoria===categoriaActiva;
-    let matchTxt =!txt || p.nombre.toLowerCase().includes(txt);
+    let matchTxt =!txt || p.nombre.toLowerCase().includes(txt) || (p.categoria||'').toLowerCase().includes(txt);
     return matchCat && matchTxt;
   });
   const cont = document.getElementById('lista');
@@ -202,10 +226,10 @@ window.filtrar=()=>{
           <button class="btn-icon" onclick="toggleMenu(this)"><i class="fa-solid fa-ellipsis-vertical"></i></button>
           <div class="dot-menu">
             <button onclick="editarProd('${p.id}')"><i class="fa-solid fa-pen"></i> Editar</button>
-            <button class="del" onclick="eliminarProd('${p.id}')"><i class="fa-solid fa-trash"></i> Eliminar</button>
+            <button style="color:#ef4444" onclick="eliminarProd('${p.id}')"><i class="fa-solid fa-trash"></i> Eliminar</button>
           </div>
         </div>
-        <div class="switch ${p.disponible!==false?'on':''}" onclick="toggleDisp('${p.id}', ${p.disponible!==false})"><div class="switch-dot"></div></div>
+        <div class="switch ${p.disponible!==false?'on':''}" onclick="toggleDisp('${p.id}', ${p.disponible!==false})"><div class="switch-dot" style="left:${p.disponible!==false?'21px':'3px'}"></div></div>
       </div>
     </div>
   `).join('');
@@ -217,7 +241,6 @@ window.toggleMenu=(btn)=>{
 }
 document.addEventListener('click', e=>{ if(!e.target.closest('.menu-dot')) document.querySelectorAll('.dot-menu').forEach(m=>m.classList.remove('show')) })
 
-// ACCIONES
 window.abrirModalProducto=()=>{
   editId=null;
   document.getElementById('tituloModal').innerText="Agregar producto";
@@ -239,7 +262,7 @@ window.editarProd=(id)=>{
   document.getElementById('p_disp').checked = p.disponible!==false;
   document.getElementById('p_dest').checked = p.destacado||false;
   renderSelectCat();
-  document.getElementById('p_categoria').value=p.categoria||categoriasCache[1];
+  document.getElementById('p_categoria').value=p.categoria;
   document.getElementById('modalProd').classList.add('show');
 }
 window.guardarProducto=async()=>{
@@ -251,11 +274,7 @@ window.guardarProducto=async()=>{
   const destacado = document.getElementById('p_dest').checked;
   if(!nombre||!precio||!imagen){ alert('Nombre, precio e imagen con link son obligatorios'); return; }
   const data = { nombre, categoria, precio, imagen, disponible, destacado, timestamp: Date.now() };
-  if(editId){
-    await update(ref(db,'productos/'+editId), data);
-  }else{
-    await push(ref(db,'productos'), data);
-  }
+  if(editId){ await update(ref(db,'productos/'+editId), data); }else{ await push(ref(db,'productos'), data); }
   cerrarModales();
 }
 window.eliminarProd=async(id)=>{ if(!confirm('¿Eliminar producto?')) return; await remove(ref(db,'productos/'+id)); }
@@ -269,21 +288,18 @@ window.abrirModalCategoria=()=>{
 window.guardarCategoria=async()=>{
   const nombre = document.getElementById('c_nombre').value.trim();
   if(!nombre) return alert('Escribe nombre');
-  if(categoriasCache.includes(nombre)) return alert('Ya existe');
   await push(ref(db,'categorias'), { nombre, timestamp: Date.now() });
   document.getElementById('c_nombre').value="";
 }
 window.borrarCat=async(nombre)=>{
-  if(!confirm('Borrar categoria '+nombre+'?')) return;
-  // buscar key
+  if(!confirm('Borrar categoria '+nombre+'? Se borrara de la lista pero no borrara productos')) return;
   onValue(ref(db,'categorias'), async snap=>{
     if(!snap.exists()) return;
     let entries = Object.entries(snap.val());
-    let found = entries.find(([k,v])=>v.nombre===nombre);
+    let found = entries.find(([k,v])=>(v.nombre||v)===nombre);
     if(found){ await remove(ref(db,'categorias/'+found[0])); }
   }, {onlyOnce:true});
 }
-
 window.cerrarModales=()=>{ document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show')) }
 </script>
 </body>

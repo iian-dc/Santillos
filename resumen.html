@@ -105,7 +105,6 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 </div>
 
 <script>
-// ===== SOLO SANTILLOS-PEDIDOS PARA PREPEDIDO Y PEDIDOS =====
 const firebaseConfigPedidos={
   apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
   authDomain:"santillos-1ac6d.firebaseapp.com",
@@ -173,7 +172,6 @@ function actualizarTotales(){
   document.getElementById('totalFinal').innerText='$'+(subtotal+costoEnvio);
 }
 
-// Cargar cliente guardado
 try{
   let cli=JSON.parse(localStorage.getItem('santillos_cliente')||'{}');
   if(cli.nombre) document.getElementById('nombre').value=cli.nombre;
@@ -184,7 +182,6 @@ try{
   if(cli.lng) lngCliente=cli.lng;
 }catch(e){}
 
-// Clear buttons
 function setupClear(inputId, clearId){
   const input=document.getElementById(inputId); const btn=document.getElementById(clearId);
   const toggle=()=>{ if(input.value.length>0) btn.classList.add('show'); else btn.classList.remove('show'); };
@@ -236,17 +233,13 @@ function initMap(){
   directionsService=new google.maps.DirectionsService();
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:5,strokeOpacity:0.9}});
 
-  // PIN RESTAURANTE - COMO LO TENIAS
   markerTienda=new google.maps.Marker({
     position:TIENDA,
     map:map,
     title:"Santillos",
-    icon:{
-      url:"https://maps.google.com/mapfiles/ms/icons/red-dot.png"
-    }
+    icon:{ url:"https://maps.google.com/mapfiles/ms/icons/red-dot.png" }
   });
 
-  // AUTOCOMPLETE CONECTADO AL INPUT
   const inputDir=document.getElementById('direccion');
   autocomplete=new google.maps.places.Autocomplete(inputDir,{
     componentRestrictions:{country:"mx"},
@@ -267,7 +260,6 @@ function initMap(){
     guardarCliente();
   });
 
-  // Si ya tenía lat/lng guardado, pintarlo
   if(latCliente && lngCliente){
     const pos={lat:latCliente,lng:lngCliente};
     markerCliente=new google.maps.Marker({position:pos,map:map,icon:"https://maps.google.com/mapfiles/ms/icons/blue-dot.png"});
@@ -275,7 +267,6 @@ function initMap(){
   }
 }
 
-// Inicializa carrito al inicio
 if(Object.keys(carrito).length===0){
   db.ref('prepedido/'+sessionId+'/carrito').once('value').then(s=>{
     if(s.exists()){
@@ -340,15 +331,17 @@ async function confirmarPedido(){
   };
 
   try{
-    await db.ref('pedidos').push(pedido);
+    const nuevoRef = await db.ref('pedidos').push(pedido);
+    localStorage.setItem('santillos_ultimo_pedido_id', nuevoRef.key);
+    localStorage.setItem('santillos_ultimo_pedido', JSON.stringify(pedido));
     await db.ref('prepedido/'+sessionId).remove();
     localStorage.removeItem('santillos_carrito');
     localStorage.removeItem('santillos_carrito_v3');
     localStorage.removeItem('santillos_cantidades');
     localStorage.removeItem('santillos_cantidades_v3');
-    // Mensaje whatsapp opcional
-    location.href="pedido_exitoso.html";
+    location.href="confirmar.html";
   }catch(e){
+    console.error(e);
     alert("Error al enviar pedido");
     btn.innerText="Confirmar pedido"; btn.disabled=false;
   }
@@ -358,7 +351,6 @@ function contactarSoporte(){
   window.open('https://wa.me/5210000000000?text=Hola%20soporte%20Santillos','_blank');
 }
 </script>
-<!-- GOOGLE MAPS - USA TU MISMA API KEY QUE TENIAS -->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
 </body>
 </html>

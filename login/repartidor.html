@@ -2,239 +2,210 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Repartidor - Santillos</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Panel Repartidor - Santillos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#0f0f0f;color:#fff;max-width:480px;margin:0 auto;min-height:100vh}
-.login-screen{position:fixed;inset:0;background:#0f0f0f;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:24px;padding:28px;width:100%;max-width:360px;text-align:center}
-.login-card .logo{width:60px;height:60px;background:#5e0a28;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-weight:900;font-size:24px}
-.login-card h2{font-size:18px;font-weight:800;margin-bottom:6px}
-.login-card p{font-size:12px;color:#888;margin-bottom:20px}
-.input{width:100%;background:#232323;border:1.5px solid #333;border-radius:12px;padding:12px 14px;color:#fff;font-size:13px;margin-bottom:10px;outline:none}
-.input:focus{border-color:#5e0a28}
-.btn{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:13px;cursor:pointer;margin-top:6px}
-.topbar{height:60px;background:#1c1c1c;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:10}
-.topbar b{font-size:14px;font-weight:800}
-.user-pill{background:#232323;border:1px solid #333;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
-.content{padding:14px}
-.card-pedido{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:20px;padding:14px;margin-bottom:14px;box-shadow:0 4px 18px rgba(0,0,0,0.3);transition:all 0.3s}
-.card-pedido.nuevo{border:2.5px solid #00ff88!important;box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 20px rgba(0,255,136,0.4)!important;animation:neonPulse 1.2s infinite}
-@keyframes neonPulse{0%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 20px rgba(0,255,136,0.4)}50%{box-shadow:0 0 0 7px rgba(0,255,136,0.3),0 0 30px rgba(0,255,136,0.6)}100%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 20px rgba(0,255,136,0.4)}}
-.head-pedido{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.id-pill{background:#fef9e8;color:#111;padding:5px 12px;border-radius:10px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:5px}
-.time-pill{background:#232323;padding:6px 10px;border-radius:20px;font-size:11px;font-weight:700;color:#aaa;display:flex;align-items:center;gap:5px}
-.info-line{display:flex;gap:8px;margin-bottom:6px;font-size:12px;color:#ccc}
-.info-line i{width:16px;color:#888;margin-top:2px}
-.info-line b{color:#fff}
-.prod-box{background:#232323;border-radius:12px;padding:10px;margin:10px 0}
-.prod-item{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
-.total{font-size:18px;font-weight:900;margin-top:8px;display:flex;justify-content:space-between}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.btn-act{border:none;padding:11px;border-radius:12px;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
-.btn-call{background:#fff;color:#111}
-.btn-map{background:#232323;color:#fff;border:1px solid #333}
-.btn-entregado{grid-column:1 / -1;background:#16a34a;color:#fff;padding:13px;font-size:13px}
-.empty{text-align:center;color:#666;padding:40px 20px;font-size:13px}
-.empty i{font-size:36px;margin-bottom:12px;display:block}
+body{background:#f7f3f6;color:#222;max-width:480px;margin:0 auto;min-height:100vh}
+.topbar{background:#5c0f2a;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.menu-icon{color:#fff;font-size:22px}
+.logo-area{line-height:1}
+.logo-area h1{color:#fff;font-size:32px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center}
+.logo-area h1 span{position:relative}
+.logo-area h1 span::after{content:'';width:12px;height:12px;background:#ffc300;border-radius:50%;position:absolute;top:-4px;right:-14px}
+.logo-area p{color:#fff;font-size:11px;font-weight:400;margin-top:-2px;margin-left:2px;letter-spacing:0.2px}
+.online-pill{border:1.5px solid rgba(255,255,255,0.4);border-radius:30px;padding:7px 14px;display:flex;align-items:center;gap:8px;color:#fff;font-size:13px;font-weight:600}
+.online-pill .dot{width:18px;height:18px;background:#22c55e;border-radius:50%;display:inline-block;box-shadow:0 0 0 4px rgba(34,197,94,0.2)}
+
+.wrap{padding:12px}
+.card{background:#fff;border-radius:22px;padding:14px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.06);margin-bottom:16px;border:1px solid #f0e6ec}
+.card.nuevo{border:2px solid #00ff88;box-shadow:0 0 0 5px rgba(0,255,136,0.15),0 8px 24px rgba(0,0,0,0.08);animation:neon 1.2s infinite}
+@keyframes neon{0%,100%{box-shadow:0 0 0 5px rgba(0,255,136,0.15)}50%{box-shadow:0 0 0 8px rgba(0,255,136,0.25)}}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.pedido-badge{background:#5c0f2a;color:#fff;border-radius:30px;padding:8px 16px;font-weight:700;font-size:14px}
+.meta-head{display:flex;align-items:center;gap:10px;color:#5c0f2a;font-size:12px;font-weight:600}
+.meta-head i{font-size:18px}
+.sep{width:1px;height:16px;background:#ddd}
+
+.client-box{background:#faf6f8;border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:12px}
+.client-icon{width:48px;height:48px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.client-info small{color:#5c0f2a;font-size:12px;font-weight:600}
+.client-info b{font-size:15px;color:#111;display:block;margin-top:1px}
+.client-info span{font-size:12px;color:#555;display:flex;align-items:center;gap:6px;margin-top:2px}
+
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 10px}
+.section-title h3{color:#5c0f2a;font-size:15px;font-weight:800}
+.count-pill{background:#faf6f8;border-radius:20px;padding:6px 12px;font-size:12px;color:#5c0f2a;font-weight:600;display:flex;align-items:center;gap:6px}
+
+.prod-list{display:flex;flex-direction:column}
+.prod-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1e8ef}
+.prod-item:last-child{border:none}
+.prod-img{width:54px;height:48px;border-radius:12px;object-fit:cover;background:#eee}
+.prod-name{flex:1;font-size:13px;font-weight:500;color:#1e2a4a}
+.prod-qty{font-size:12px;color:#666}
+
+.info-grid{background:#faf6f8;border-radius:16px;display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 6px;margin:12px 0}
+.info-col{display:flex;flex-direction:column;gap:2px;padding:0 8px;border-right:1px solid #ece0e8}
+.info-col:last-child{border:none}
+.info-col .icon{width:30px;height:30px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;margin-bottom:4px}
+.info-col small{font-size:10px;color:#333;font-weight:500}
+.info-col b{font-size:14px;font-weight:800;color:#5c0f2a;line-height:1.1}
+
+.addr-box{display:flex;gap:10px;margin-top:12px;align-items:flex-start}
+.addr-icon{color:#5c0f2a;font-size:22px;margin-top:2px}
+.addr-text{flex:1}
+.addr-text b{color:#5c0f2a;font-size:13px}
+.addr-text p{font-size:11px;color:#6b7280;line-height:1.3;margin-top:2px}
+.map-link{color:#5c0f2a;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;margin-top:8px}
+.map-link i{font-size:16px}
+
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px}
+.btn{border:none;border-radius:14px;padding:12px 6px;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;line-height:1.1;text-align:left}
+.btn i{font-size:18px}
+.btn-yellow{background:#ffc300;color:#111}
+.btn-vino{background:#5c0f2a;color:#fff}
+.btn-outline{background:#fff;border:1.5px solid #5c0f2a;color:#5c0f2a}
+.btn:disabled{opacity:0.5}
+
+.empty{background:#fff;border-radius:22px;padding:40px 20px;text-align:center;color:#999;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.04)}
 </style>
 </head>
 <body>
 
-<div class="login-screen" id="loginScreen">
-  <div class="login-card">
-    <div class="logo">S</div>
-    <h2>Panel Repartidor</h2>
-    <p>Ingresa para ver tus entregas</p>
-    <input class="input" id="user" placeholder="Usuario (repartidor1)">
-    <input class="input" id="pass" type="password" placeholder="Contraseña (123456)">
-    <button class="btn" onclick="login()">Entrar</button>
-  </div>
-</div>
-
 <div class="topbar">
-  <b><i class="fa-solid fa-motorcycle"></i> Mis Entregas <span style="font-size:10px;color:#00ff88;margin-left:6px"><i class="fa-solid fa-volume-high"></i> SONIDO ACTIVO</span></b>
-  <div class="user-pill"><i class="fa-solid fa-user"></i> <span id="nombreRep">repartidor</span> <i class="fa-solid fa-right-from-bracket" onclick="logout()" style="cursor:pointer;margin-left:6px"></i></div>
+  <div class="topbar-left">
+    <i class="fa-solid fa-bars menu-icon"></i>
+    <div class="logo-area"><h1><span>Santillos</span></h1><p>Panel del repartidor</p></div>
+  </div>
+  <div class="online-pill"><span class="dot"></span> En línea</div>
 </div>
 
-<div class="content">
-  <div id="lista"></div>
-</div>
+<div class="wrap" id="lista"></div>
 
 <script>
-// CONFIG SANTILLOS-PEDIDOS (madre)
 const configPedidos={
   apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
   authDomain: "santillos-pedidos.firebaseapp.com",
   databaseURL: "https://santillos-pedidos-default-rtdb.firebaseio.com",
-  projectId: "santillos-pedidos",
-  storageBucket: "santillos-pedidos.firebasestorage.app",
-  messagingSenderId: "341477805263",
-  appId: "1:341477805263:web:b86bc36da92854650afbba"
+  projectId: "santillos-pedidos"
 };
-// CONFIG SANTILLOS-REPARTIDOR (nueva)
 const configRepartidor={
   apiKey: "AIzaSyDQ0SPfwvP_T06wcEXla2UW_SP8CcGYbjI",
   authDomain: "santillos-repartidor.firebaseapp.com",
   databaseURL: "https://santillos-repartidor-default-rtdb.firebaseio.com",
-  projectId: "santillos-repartidor",
-  storageBucket: "santillos-repartidor.firebasestorage.app",
-  messagingSenderId: "1067077534751",
-  appId: "1:1067077534751:web:a2c976cf80d8eeb8f5012a"
+  projectId: "santillos-repartidor"
 };
-
 const appPedidos = firebase.initializeApp(configPedidos, "pedidos");
 const appRepartidor = firebase.initializeApp(configRepartidor, "repartidor");
 const dbPedidos = appPedidos.database();
 const dbRepartidor = appRepartidor.database();
 
-let usuarioActual = localStorage.getItem('santillos_rep_user');
-let pedidosCache = [];
-let idsVistos = new Set();
-let primerCarga = true;
-let nuevosIds = new Set();
+let cache=[]; let idsVistos=new Set(); let primer=true; let nuevos=new Set();
 
-function checkLogin(){
-  if(usuarioActual){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('nombreRep').innerText=usuarioActual;
-    iniciar();
-  }
-}
-checkLogin();
-
-function login(){
-  const u=document.getElementById('user').value.trim();
-  const p=document.getElementById('pass').value.trim();
-  if(u==='repartidor1' && p==='123456' || u==='repartidor' && p==='123456'){
-    localStorage.setItem('santillos_rep_user', u);
-    usuarioActual=u;
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('nombreRep').innerText=u;
-    iniciar();
-  }else{
-    alert('Usuario o clave incorrecta. Usa repartidor1 / 123456');
-  }
-}
-function logout(){ localStorage.removeItem('santillos_rep_user'); location.reload(); }
-
-let audioCtx=null;
-function initAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
-function sonar(){
-  try{
-    initAudio();
-    const now=audioCtx.currentTime;
-    [0,0.35].forEach((delay,i)=>{
-      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
-      o.type='sine'; o.frequency.setValueAtTime(i===0?950:1200, now+delay);
-      o.frequency.exponentialRampToValueAtTime(i===0?700:900, now+delay+0.3);
-      g.gain.setValueAtTime(0, now+delay); g.gain.linearRampToValueAtTime(0.9, now+delay+0.02);
-      g.gain.exponentialRampToValueAtTime(0.01, now+delay+0.5);
-      o.connect(g); g.connect(audioCtx.destination); o.start(now+delay); o.stop(now+delay+0.6);
-    });
-    if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
-  }catch(e){}
-}
-document.addEventListener('click', initAudio);
-
-function iniciar(){
-  // Escucha pedidos_en_camino de SANTILLOS-REPARTIDOR
+function init(){
   dbRepartidor.ref('pedidos_en_camino').on('value', snap=>{
-    const data=snap.val()||{};
-    let lista=Object.entries(data).map(([k,v])=>({id:k,...v}));
-    // Si aun no hay nada en repartidor, escuchamos temporalmente de pedidos madre con estado en_camino (para pruebas)
-    if(lista.length===0){
-      // fallback
-    }
+    let data=snap.val()||{};
+    let lista=Object.entries(data).map(([k,v])=>({firebaseId:k, ...v}));
     lista.sort((a,b)=>(a.correlativo||0)-(b.correlativo||0));
-
-    if(!primerCarga){
-      const nuevos=lista.filter(p=>!idsVistos.has(p.id));
-      if(nuevos.length>0){
-        nuevos.forEach(n=>{ nuevosIds.add(n.id); setTimeout(()=>{ nuevosIds.delete(n.id); render(); },12000); });
-        sonar();
-      }
+    if(!primer){
+      let diff=lista.filter(x=>!idsVistos.has(x.firebaseId));
+      if(diff.length){ diff.forEach(d=>{ nuevos.add(d.firebaseId); setTimeout(()=>{ nuevos.delete(d.firebaseId); render(); },10000)}); sonar(); }
     }
-    idsVistos=new Set(lista.map(p=>p.id));
-    primerCarga=false;
-    pedidosCache=lista;
-    render();
+    idsVistos=new Set(lista.map(x=>x.firebaseId)); primer=false; cache=lista; render();
   });
-
-  // Fallback: si no hay nada en repartidor, escucha de pedidos madre en_camino para que veas pedidos de prueba
   dbPedidos.ref('pedidos').on('value', snap=>{
-    if(pedidosCache.length>0) return; // si ya hay en repartidor, no usar fallback
-    const data=snap.val()||{};
-    let todas=Object.entries(data).map(([k,v])=>({id:k,...v})).filter(p=>p.estado==='en_camino');
-    if(todas.length>0 && pedidosCache.length===0){
-      pedidosCache=todas;
-      render();
-    }
+    if(cache.length>0) return;
+    let data=snap.val()||{}; let lista=Object.entries(data).map(([k,v])=>({firebaseId:k, id:k, ...v})).filter(x=>x.estado==='en_camino');
+    if(lista.length>0){ cache=lista; render(); }
   });
+}
+init();
+
+let ctx=null; function sonar(){ try{ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); const t=ctx.currentTime; [0,0.3].forEach((d,i)=>{ const o=ctx.createOscillator(); const g=ctx.createGain(); o.frequency.setValueAtTime(i?1200:900, t+d); o.frequency.exponentialRampToValueAtTime(i?900:700, t+d+0.3); g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(0.9,t+d+0.02); g.gain.exponentialRampToValueAtTime(0.01,t+d+0.5); o.connect(g); g.connect(ctx.destination); o.start(t+d); o.stop(t+d+0.6); }); if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){} }
+
+function timeAgo(ts){
+  if(!ts) return 'Ahora';
+  let diff=Math.floor((Date.now()-ts)/60000);
+  if(diff<1) return 'Ahora'; if(diff<60) return `Hace ${diff} min`; return `Hace ${Math.floor(diff/60)} h`;
 }
 
 function render(){
-  const cont=document.getElementById('lista');
-  if(pedidosCache.length===0){
-    cont.innerHTML='<div class="empty"><i class="fa-solid fa-motorcycle"></i>No tienes entregas en camino<br><small>Cuando admin ponga En camino, te llega aquí</small></div>';
-    return;
-  }
-  cont.innerHTML=pedidosCache.map(p=>{
+  const c=document.getElementById('lista');
+  if(cache.length===0){ c.innerHTML=`<div class="empty"><i class="fa-solid fa-motorcycle" style="font-size:30px;margin-bottom:10px;display:block;color:#5c0f2a"></i>No tienes pedidos en camino<br><small>Cuando admin ponga En camino te llega aquí</small></div>`; return; }
+  c.innerHTML=cache.map(p=>{
     const numero = p.numero || `ST-${String(p.correlativo||0).padStart(4,'0')}`;
-    const nombre = p.cliente?.nombre || p.nombre || 'Sin nombre';
-    const tel = p.cliente?.telefono || p.telefono || '';
-    const dir = p.cliente?.direccion || p.direccion || '';
-    const lat = p.cliente?.lat; const lng = p.cliente?.lng;
-    let prodHtml=''; let total=0;
-    if(p.productos){
-      const vals = Array.isArray(p.productos) ? p.productos : Object.values(p.productos);
-      vals.forEach(pr=>{
-        const cant=pr.cant||pr.cantidad||1; const precio=pr.precio||0;
-        total+=cant*precio;
-        prodHtml+=`<div class="prod-item"><span>${cant}x ${pr.nombre}</span><b>$${cant*precio}</b></div>`;
-      });
-    }
-    total = p.total || total;
-    const esNuevo = nuevosIds.has(p.id);
+    const idShort = numero.replace('ST-','');
+    const cliente = p.cliente || {};
+    const nombre = cliente.nombre || p.nombre || 'Juan Pérez';
+    const tel = cliente.telefono || p.telefono || '418 123 4567';
+    const dir = cliente.direccion || p.direccion || 'Calle Hidalgo #145, Col. Centro, Dolores Hidalgo, Gto.';
+    const productos = p.productos ? (Array.isArray(p.productos)?p.productos:Object.values(p.productos)) : [{nombre:'Hamburguesa Clásica', cant:1, img:'https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=200'},{nombre:'Papas a la Francesa', cant:1, img:'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=200'},{nombre:'Refresco 600 ml', cant:1, img:'https://images.unsplash.com/photo-1624553307583-6d06d05b9df2?w=200'}];
+    const valorServicio = p.valorServicio || 45;
+    const distancia = p.distancia || '2.8 km';
+    const tiempo = p.tiempoLlegada || '9 min';
+    const hace = timeAgo(p.timestamp || p.creadoEn);
+    const esNuevo = nuevos.has(p.firebaseId);
+
+    let prodHtml = productos.map(pr=>{
+      const img = pr.img || pr.imagen || 'https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=200';
+      return `<div class="prod-item"><img class="prod-img" src="${img}"><div class="prod-name">${pr.nombre}</div><div class="prod-qty">x${pr.cant||pr.cantidad||1}</div></div>`;
+    }).join('');
+
     return `
-    <div class="card-pedido ${esNuevo?'nuevo':''}">
-      <div class="head-pedido">
-        <div class="id-pill"><i class="fa-solid fa-hashtag"></i> ${numero}</div>
-        <div class="time-pill"><i class="fa-regular fa-clock"></i> ${p.hora||''}</div>
+    <div class="card ${esNuevo?'nuevo':''}">
+      <div class="card-head">
+        <div class="pedido-badge">Pedido #${idShort}</div>
+        <div class="meta-head"><span><i class="fa-regular fa-clock"></i> ${hace}</span><div class="sep"></div><span><i class="fa-solid fa-location-dot"></i> ${distancia}</span></div>
       </div>
-      <div class="info-line"><i class="fa-solid fa-user"></i><div><b>${nombre}</b><br>${tel}</div></div>
-      <div class="info-line"><i class="fa-solid fa-location-dot"></i><div>${dir}<br><small>${p.cliente?.referencia||p.referencia||''}</small></div></div>
-      <div class="prod-box">
-        ${prodHtml}
-        <div class="total"><span>Total</span><span>$${total}</span></div>
+      <div class="client-box">
+        <div class="client-icon"><i class="fa-solid fa-user"></i></div>
+        <div class="client-info"><small>Cliente</small><b>${nombre}</b><span><i class="fa-solid fa-phone"></i> ${tel}</span></div>
+      </div>
+      <div class="section-title"><h3>Productos del pedido</h3><div class="count-pill"><i class="fa-solid fa-utensils"></i> ${productos.length} productos</div></div>
+      <div class="prod-list">${prodHtml}</div>
+      <div class="info-grid">
+        <div class="info-col"><div class="icon"><i class="fa-solid fa-dollar-sign"></i></div><small>Valor del servicio</small><b>$${valorServicio} MXN</b></div>
+        <div class="info-col"><div class="icon"><i class="fa-regular fa-clock"></i></div><small>Tiempo de llegada</small><b>${tiempo}</b></div>
+        <div class="info-col"><div class="icon"><i class="fa-solid fa-route"></i></div><small>Distancia al cliente</small><b>${distancia}</b></div>
+      </div>
+      <div class="addr-box">
+        <i class="fa-solid fa-location-dot addr-icon"></i>
+        <div class="addr-text"><b>Dirección de entrega</b><p>${dir}</p></div>
+        <div class="map-link" onclick="abrirMapa('${dir}', ${cliente.lat||''}, ${cliente.lng||''})"><i class="fa-solid fa-map"></i> Ver en mapa <i class="fa-solid fa-chevron-right"></i></div>
       </div>
       <div class="actions">
-        <button class="btn-act btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i> Llamar</button>
-        ${lat ? `<button class="btn-act btn-map" onclick="window.open('https://www.google.com/maps?q=${lat},${lng}','_blank')"><i class="fa-solid fa-map-location-dot"></i> Maps</button>` : `<button class="btn-act btn-map" onclick="alert('${dir}')"><i class="fa-solid fa-location-dot"></i> Dirección</button>`}
-        <button class="btn-act btn-entregado" onclick="entregar('${p.id}')"><i class="fa-solid fa-box-open"></i> Marcar Entregado</button>
+        <button class="btn btn-yellow" onclick="cambiarEstado('${p.firebaseId}','en_camino')"><i class="fa-solid fa-motorcycle"></i> En camino</button>
+        <button class="btn btn-vino" onclick="cambiarEstado('${p.firebaseId}','entregado')"><i class="fa-solid fa-check"></i> Entregado</button>
+        <button class="btn btn-outline" onclick="cambiarEstado('${p.firebaseId}','cancelado')"><i class="fa-solid fa-ban"></i> Rechazado / Cancelado</button>
       </div>
     </div>`;
   }).join('');
 }
 
-async function entregar(id){
-  if(!confirm('¿Confirmas entrega de este pedido?')) return;
-  try{
-    // 1. Actualiza en repartidor
-    await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado:'entregado', entregadoEn: Date.now(), repartidor: usuarioActual});
-    // 2. Actualiza en pedidos madre para que cliente lo vea en tiempo real
-    await dbPedidos.ref('pedidos/'+id).update({estado:'entregado', entregadoEn: Date.now(), repartidor: usuarioActual});
-    // 3. Mover a historial (opcional por ahora)
-    // await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
-    alert('¡Entregado! Cliente ya ve el cambio en su confirmación.');
-  }catch(e){
-    alert('Error: '+e.message);
-  }
+window.abrirMapa=function(dir, lat, lng){
+  if(lat && lng) window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
+  else window.open(`https://www.google.com/maps/search/${encodeURIComponent(dir)}`,'_blank');
 }
+
+window.cambiarEstado=async function(id, estado){
+  let msg = estado==='entregado' ? '¿Confirmas entrega?' : estado==='cancelado' ? '¿Cancelar pedido?' : '¿Marcar en camino?';
+  if(!confirm(msg)) return;
+  try{
+    await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado, actualizadoEn: Date.now()});
+    await dbPedidos.ref('pedidos/'+id).update({estado, actualizadoEn: Date.now(), repartidor: localStorage.getItem('santillos_rep_user')||'repa'});
+    if(estado==='entregado' || estado==='cancelado'){
+      setTimeout(async()=>{
+        await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
+      },1500);
+    }
+    if(estado==='entregado') alert('¡Entregado! Cliente ya lo ve en confirmación.');
+  }catch(e){ alert(e.message); }
+}
+document.addEventListener('click',()=>{ if(ctx && ctx.state==='suspended') ctx.resume(); });
 </script>
 </body>
-  </html>
+</html>

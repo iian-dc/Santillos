@@ -32,7 +32,6 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
 .direccion i{color:#22c55e;margin-top:2px}
 .productos{margin-top:12px;border-top:1px solid #2a2a2a;padding-top:10px}
 .prod{font-size:11px;color:#ccc;margin:3px 0;display:flex;justify-content:space-between}
-
 .timeline-title{font-size:14px;font-weight:800;margin-bottom:18px}
 .step{display:flex;gap:12px;position:relative;padding-bottom:22px}
 .step:last-child{padding-bottom:0}
@@ -43,7 +42,6 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
 .step-info b{font-size:13px;display:block}
 .step-info span{font-size:11px;color:#888}
 .step{opacity:0.5} .step.active{opacity:1}
-
 .btns{display:flex;gap:12px;margin-top:16px}
 .btn{flex:1;padding:14px;border-radius:16px;border:none;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
 .btn-gray{background:#2a2a2a;color:#fff;border:1px solid #333}
@@ -72,7 +70,6 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
 
 <div class="card">
   <div class="timeline-title">Estado en tiempo real</div>
-  
   <div class="step active" id="stepRecibido">
     <div class="step-line"></div>
     <div class="step-icon"><i class="fa-solid fa-file-lines"></i></div>
@@ -100,14 +97,15 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
 </div>
 
 <script>
+// ===== CORREGIDO: SANTILLOS-PEDIDOS EXCLUSIVO =====
 const firebaseConfigPedidos={
-  apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
-  authDomain:"santillos-1ac6d.firebaseapp.com",
-  databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",
-  projectId:"santillos-1ac6d",
-  storageBucket:"santillos-1ac6d.firebasestorage.app",
-  messagingSenderId:"285600299102",
-  appId:"1:285600299102:web:9590597c2b3d8888821ccf"
+  apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
+  authDomain: "santillos-pedidos.firebaseapp.com",
+  databaseURL: "https://santillos-pedidos-default-rtdb.firebaseio.com",
+  projectId: "santillos-pedidos",
+  storageBucket: "santillos-pedidos.firebasestorage.app",
+  messagingSenderId: "341477805263",
+  appId: "1:341477805263:web:b86bc36da92854650afbba"
 };
 firebase.initializeApp(firebaseConfigPedidos);
 const db=firebase.database();
@@ -119,7 +117,6 @@ if(urlParams.get('id')) pedidoId = urlParams.get('id');
 let pedidoLocal = null;
 try{ pedidoLocal = JSON.parse(localStorage.getItem('santillos_ultimo_pedido')||'null'); }catch(e){}
 
-// CONFETI PIÑATA COMO LO TENIAS
 function lanzarConfeti(){
   var duration = 2500;
   var end = Date.now() + duration;
@@ -133,21 +130,22 @@ setTimeout(lanzarConfeti, 300);
 
 function pintarPedido(data){
   if(!data) return;
-  document.getElementById('nombreCliente').innerText = '#'+(data.cliente?.nombre || 'CLIENTE').toUpperCase();
+  document.getElementById('nombreCliente').innerText = '#'+(data.cliente?.nombre || data.nombre || 'CLIENTE').toUpperCase();
   document.getElementById('subtotal').innerText = '$'+(data.subtotal||0);
   document.getElementById('total').innerText = '$'+(data.total||0);
-  if(Number(data.envio||0)===0){
+  let env = data.envio!=null ? data.envio : data.costoEnvio;
+  if(Number(env||0)===0){
     document.getElementById('envio').innerText='GRATIS';
     document.getElementById('envio').className='envio-free';
   }else{
-    document.getElementById('envio').innerText='$'+data.envio;
+    document.getElementById('envio').innerText='$'+env;
     document.getElementById('envio').className='';
   }
-  document.getElementById('direccionTxt').innerText = (data.cliente?.direccion||'') + (data.cliente?.referencia ? ' - '+data.cliente.referencia : '');
+  document.getElementById('direccionTxt').innerText = (data.cliente?.direccion||data.direccion||'') + (data.cliente?.referencia||data.referencia ? ' - '+(data.cliente?.referencia||data.referencia) : '');
   let html='';
   if(data.productos){
     Object.values(data.productos).forEach(p=>{
-      html+=`<div class="prod"><span>${p.nombre} x${p.cant}</span><span>$${Number(p.precio||0)*Number(p.cant||0)}</span></div>`;
+      html+=`<div class="prod"><span>${p.nombre} x${p.cant||p.cantidad||1}</span><span>$${Number(p.precio||0)*Number(p.cant||p.cantidad||1)}</span></div>`;
     });
   }
   document.getElementById('listaProductos').innerHTML=html;
@@ -160,7 +158,7 @@ function actualizarEstado(estado){
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('stepRecibido').classList.add('active');
   badge.innerText='PENDIENTE'; badge.className='badge';
-  if(estado==='preparando'){
+  if(estado==='aceptado' || estado==='preparando'){
     document.getElementById('stepPreparando').classList.add('active');
     badge.innerText='PREPARANDO'; badge.className='badge preparando';
   }

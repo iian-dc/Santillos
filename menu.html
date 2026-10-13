@@ -57,8 +57,8 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 <div class="img-viewer-overlay" id="imgViewer" onclick="cerrarViewer()"><div class="img-viewer-card" onclick="event.stopPropagation()"><button class="btn-close-img" onclick="cerrarViewer()"><i class="fa-solid fa-xmark"></i></button><img id="viewerImg" src=""></div></div>
 <div class="bottom-nav"><a href="menu.html" class="nav-item-rappi active"><i class="fa-solid fa-house"></i>INICIO</a><div class="nav-wrap"><a href="carrito.html" class="nav-item-rappi"><i class="fa-solid fa-bag-shopping"></i>CARRITO</a><div class="cart-badge" id="cartCount">0</div></div></div>
 <script>
-// SOLO MENU - SANTILLOS-MENU
-const firebaseConfig={
+// ===== DOS FIREBASES - ORGANIZADO =====
+const firebaseConfigMenu={
   apiKey:"AIzaSyCvnHeXuZZ-2IOF3Oas09VNYJK_HLLkau8",
   authDomain:"santillos-menu.firebaseapp.com",
   databaseURL:"https://santillos-menu-default-rtdb.firebaseio.com",
@@ -67,14 +67,31 @@ const firebaseConfig={
   messagingSenderId:"913879229999",
   appId:"1:913879229999:web:bff40819ea0f91d040c8da"
 };
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
+
+// >>>>>> PEGA AQUÍ TU CONFIG REAL DE santillos-pedidos <<<<<<
+const firebaseConfigPedidos={
+  apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
+  authDomain:"santillos-1ac6d.firebaseapp.com",
+  databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",
+  projectId:"santillos-1ac6d",
+  storageBucket:"santillos-1ac6d.firebasestorage.app",
+  messagingSenderId:"285600299102",
+  appId:"1:285600299102:web:9590597c2b3d8888821ccf"
+};
+
+const appMenu = firebase.initializeApp(firebaseConfigMenu, "menuApp");
+const appPedidos = firebase.initializeApp(firebaseConfigPedidos, "pedidosApp");
+const dbMenu = appMenu.database();
+const dbPedidos = appPedidos.database();
 
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
 
-// BORRAR CACHE VIEJO
-localStorage.removeItem('santillos_cache_menu_v2');
-localStorage.removeItem('santillos_cache_order_v2');
+// SESION UNICA PARA PREPEDIDO
+let sessionId = localStorage.getItem('santillos_session_id');
+if(!sessionId){
+  sessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);
+  localStorage.setItem('santillos_session_id', sessionId);
+}
 
 let menuData={};
 let categoryOrder=[];
@@ -82,8 +99,8 @@ let categoriaActiva=null;
 let carrito={};
 let cantidades={};
 
-try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
-try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
+try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito_v3')|| localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
+try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades_v3')|| localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
 
 function actualizarBadge(){
   let total=0;
@@ -144,7 +161,7 @@ window.sumar = function(idReal){
     if(cant===1){
       act.innerHTML=`<div class="qty-control"><button class="qty-btn" onclick="restar('${idReal}')">−</button><div class="qty-num" id="num-${idReal}">${cant}</div><button class="qty-btn" onclick="sumar('${idReal}')">+</button></div>`;
     } else {
-      let num = document.getElementById('num-'+idReal);
+      let num = document.getElementById('num-${idReal}');
       if(num) num.innerText=cant;
     }
   }
@@ -168,9 +185,22 @@ window.restar = function(idReal){
 }
 
 function guardar(){
+  // 1. Local
+  localStorage.setItem('santillos_carrito_v3', JSON.stringify(carrito));
+  localStorage.setItem('santillos_cantidades_v3', JSON.stringify(cantidades));
   localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
   localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
   actualizarBadge();
+
+  // 2. En santillos-pedidos /prepedido / sessionId
+  try{
+    dbPedidos.ref('prepedido/'+sessionId).set({
+      carrito: carrito,
+      cantidades: cantidades,
+      fecha: new Date().toISOString(),
+      totalItems: Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0)
+    });
+  }catch(e){ console.log("error prepedido", e); }
 }
 
 function transformar(data){
@@ -182,7 +212,7 @@ function transformar(data){
     agrupado[cat].push({
       idReal:idReal,
       name:val.nombre||val.name||'Sin nombre',
-      price: Number(val.precio||0),
+      price: Number(val.precio||val.price||0),
       img: val.imagen||val.img||'',
       disp: val.disponible!==false
     });
@@ -190,14 +220,14 @@ function transformar(data){
   return {agrupado,cats};
 }
 
-db.ref('productos').on('value', snap=>{
+// Productos desde santillos-menu
+dbMenu.ref('productos').on('value', snap=>{
   if(!snap.exists()){
     document.getElementById('productos').innerHTML='<div style="text-align:center;padding:30px;color:#999">No hay productos</div>';
     return;
   }
   let res = transformar(snap.val());
   menuData=res.agrupado;
-  // ordenar categorias bonito
   let pref=["Comidas","Bebidas","Postres","Promociones","Extras"];
   let ord=[];
   pref.forEach(p=>{ if(res.cats.includes(p)) ord.push(p); });
@@ -206,6 +236,21 @@ db.ref('productos').on('value', snap=>{
   if(!categoriaActiva) categoriaActiva=categoryOrder[0];
   renderCategorias();
   renderProductos();
+});
+
+// Logo y portada desde santillos-menu /config
+dbMenu.ref('config').on('value', snap=>{
+  if(!snap.exists()) return;
+  const cfg = snap.val();
+  if(cfg.logo && cfg.logo.length>10){
+    document.getElementById('logoImg').src=cfg.logo;
+    document.getElementById('logoImg').style.display='block';
+    document.getElementById('logoTxt').style.display='none';
+  }
+  if(cfg.portada && cfg.portada.length>10){
+    document.getElementById('portadaImg').src=cfg.portada;
+  }
+  if(cfg.nombre) document.getElementById('nombreRest').innerText=cfg.nombre;
 });
 
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Repartidor - Santillos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:#0f0f0f;color:#fff;max-width:480px;margin:0 auto;min-height:100vh}
+.login-screen{position:fixed;inset:0;background:#0f0f0f;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:24px;padding:28px;width:100%;max-width:360px;text-align:center}
+.login-card .logo{width:60px;height:60px;background:#5e0a28;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-weight:900;font-size:24px}
+.login-card h2{font-size:18px;font-weight:800;margin-bottom:6px}
+.login-card p{font-size:12px;color:#888;margin-bottom:20px}
+.input{width:100%;background:#232323;border:1.5px solid #333;border-radius:12px;padding:12px 14px;color:#fff;font-size:13px;margin-bottom:10px;outline:none}
+.input:focus{border-color:#5e0a28}
+.btn{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:13px;cursor:pointer;margin-top:6px}
+.topbar{height:60px;background:#1c1c1c;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:10}
+.topbar b{font-size:14px;font-weight:800}
+.user-pill{background:#232323;border:1px solid #333;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
+.content{padding:14px}
+.card-pedido{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:20px;padding:14px;margin-bottom:14px;box-shadow:0 4px 18px rgba(0,0,0,0.3);transition:all 0.3s}
+.card-pedido.nuevo{border:2.5px solid #00ff88!important;box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 20px rgba(0,255,136,0.4)!important;animation:neonPulse 1.2s infinite}
+@keyframes neonPulse{0%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 20px rgba(0,255,136,0.4)}50%{box-shadow:0 0 0 7px rgba(0,255,136,0.3),0 0 30px rgba(0,255,136,0.6)}100%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 20px rgba(0,255,136,0.4)}}
+.head-pedido{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.id-pill{background:#fef9e8;color:#111;padding:5px 12px;border-radius:10px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:5px}
+.time-pill{background:#232323;padding:6px 10px;border-radius:20px;font-size:11px;font-weight:700;color:#aaa;display:flex;align-items:center;gap:5px}
+.info-line{display:flex;gap:8px;margin-bottom:6px;font-size:12px;color:#ccc}
+.info-line i{width:16px;color:#888;margin-top:2px}
+.info-line b{color:#fff}
+.prod-box{background:#232323;border-radius:12px;padding:10px;margin:10px 0}
+.prod-item{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.total{font-size:18px;font-weight:900;margin-top:8px;display:flex;justify-content:space-between}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.btn-act{border:none;padding:11px;border-radius:12px;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-call{background:#fff;color:#111}
+.btn-map{background:#232323;color:#fff;border:1px solid #333}
+.btn-entregado{grid-column:1 / -1;background:#16a34a;color:#fff;padding:13px;font-size:13px}
+.empty{text-align:center;color:#666;padding:40px 20px;font-size:13px}
+.empty i{font-size:36px;margin-bottom:12px;display:block}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="logo">S</div>
+    <h2>Panel Repartidor</h2>
+    <p>Ingresa para ver tus entregas</p>
+    <input class="input" id="user" placeholder="Usuario (repartidor1)">
+    <input class="input" id="pass" type="password" placeholder="Contraseña (123456)">
+    <button class="btn" onclick="login()">Entrar</button>
+  </div>
+</div>
+
+<div class="topbar">
+  <b><i class="fa-solid fa-motorcycle"></i> Mis Entregas <span style="font-size:10px;color:#00ff88;margin-left:6px"><i class="fa-solid fa-volume-high"></i> SONIDO ACTIVO</span></b>
+  <div class="user-pill"><i class="fa-solid fa-user"></i> <span id="nombreRep">repartidor</span> <i class="fa-solid fa-right-from-bracket" onclick="logout()" style="cursor:pointer;margin-left:6px"></i></div>
+</div>
+
+<div class="content">
+  <div id="lista"></div>
+</div>
+
+<script>
+// CONFIG SANTILLOS-PEDIDOS (madre)
+const configPedidos={
+  apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
+  authDomain: "santillos-pedidos.firebaseapp.com",
+  databaseURL: "https://santillos-pedidos-default-rtdb.firebaseio.com",
+  projectId: "santillos-pedidos",
+  storageBucket: "santillos-pedidos.firebasestorage.app",
+  messagingSenderId: "341477805263",
+  appId: "1:341477805263:web:b86bc36da92854650afbba"
+};
+// CONFIG SANTILLOS-REPARTIDOR (nueva)
+const configRepartidor={
+  apiKey: "AIzaSyDQ0SPfwvP_T06wcEXla2UW_SP8CcGYbjI",
+  authDomain: "santillos-repartidor.firebaseapp.com",
+  databaseURL: "https://santillos-repartidor-default-rtdb.firebaseio.com",
+  projectId: "santillos-repartidor",
+  storageBucket: "santillos-repartidor.firebasestorage.app",
+  messagingSenderId: "1067077534751",
+  appId: "1:1067077534751:web:a2c976cf80d8eeb8f5012a"
+};
+
+const appPedidos = firebase.initializeApp(configPedidos, "pedidos");
+const appRepartidor = firebase.initializeApp(configRepartidor, "repartidor");
+const dbPedidos = appPedidos.database();
+const dbRepartidor = appRepartidor.database();
+
+let usuarioActual = localStorage.getItem('santillos_rep_user');
+let pedidosCache = [];
+let idsVistos = new Set();
+let primerCarga = true;
+let nuevosIds = new Set();
+
+function checkLogin(){
+  if(usuarioActual){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('nombreRep').innerText=usuarioActual;
+    iniciar();
+  }
+}
+checkLogin();
+
+function login(){
+  const u=document.getElementById('user').value.trim();
+  const p=document.getElementById('pass').value.trim();
+  if(u==='repartidor1' && p==='123456' || u==='repartidor' && p==='123456'){
+    localStorage.setItem('santillos_rep_user', u);
+    usuarioActual=u;
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('nombreRep').innerText=u;
+    iniciar();
+  }else{
+    alert('Usuario o clave incorrecta. Usa repartidor1 / 123456');
+  }
+}
+function logout(){ localStorage.removeItem('santillos_rep_user'); location.reload(); }
+
+let audioCtx=null;
+function initAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
+function sonar(){
+  try{
+    initAudio();
+    const now=audioCtx.currentTime;
+    [0,0.35].forEach((delay,i)=>{
+      const o=audioCtx.createOscillator(); const g=audioCtx.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(i===0?950:1200, now+delay);
+      o.frequency.exponentialRampToValueAtTime(i===0?700:900, now+delay+0.3);
+      g.gain.setValueAtTime(0, now+delay); g.gain.linearRampToValueAtTime(0.9, now+delay+0.02);
+      g.gain.exponentialRampToValueAtTime(0.01, now+delay+0.5);
+      o.connect(g); g.connect(audioCtx.destination); o.start(now+delay); o.stop(now+delay+0.6);
+    });
+    if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+  }catch(e){}
+}
+document.addEventListener('click', initAudio);
+
+function iniciar(){
+  // Escucha pedidos_en_camino de SANTILLOS-REPARTIDOR
+  dbRepartidor.ref('pedidos_en_camino').on('value', snap=>{
+    const data=snap.val()||{};
+    let lista=Object.entries(data).map(([k,v])=>({id:k,...v}));
+    // Si aun no hay nada en repartidor, escuchamos temporalmente de pedidos madre con estado en_camino (para pruebas)
+    if(lista.length===0){
+      // fallback
+    }
+    lista.sort((a,b)=>(a.correlativo||0)-(b.correlativo||0));
+
+    if(!primerCarga){
+      const nuevos=lista.filter(p=>!idsVistos.has(p.id));
+      if(nuevos.length>0){
+        nuevos.forEach(n=>{ nuevosIds.add(n.id); setTimeout(()=>{ nuevosIds.delete(n.id); render(); },12000); });
+        sonar();
+      }
+    }
+    idsVistos=new Set(lista.map(p=>p.id));
+    primerCarga=false;
+    pedidosCache=lista;
+    render();
+  });
+
+  // Fallback: si no hay nada en repartidor, escucha de pedidos madre en_camino para que veas pedidos de prueba
+  dbPedidos.ref('pedidos').on('value', snap=>{
+    if(pedidosCache.length>0) return; // si ya hay en repartidor, no usar fallback
+    const data=snap.val()||{};
+    let todas=Object.entries(data).map(([k,v])=>({id:k,...v})).filter(p=>p.estado==='en_camino');
+    if(todas.length>0 && pedidosCache.length===0){
+      pedidosCache=todas;
+      render();
+    }
+  });
+}
+
+function render(){
+  const cont=document.getElementById('lista');
+  if(pedidosCache.length===0){
+    cont.innerHTML='<div class="empty"><i class="fa-solid fa-motorcycle"></i>No tienes entregas en camino<br><small>Cuando admin ponga En camino, te llega aquí</small></div>';
+    return;
+  }
+  cont.innerHTML=pedidosCache.map(p=>{
+    const numero = p.numero || `ST-${String(p.correlativo||0).padStart(4,'0')}`;
+    const nombre = p.cliente?.nombre || p.nombre || 'Sin nombre';
+    const tel = p.cliente?.telefono || p.telefono || '';
+    const dir = p.cliente?.direccion || p.direccion || '';
+    const lat = p.cliente?.lat; const lng = p.cliente?.lng;
+    let prodHtml=''; let total=0;
+    if(p.productos){
+      const vals = Array.isArray(p.productos) ? p.productos : Object.values(p.productos);
+      vals.forEach(pr=>{
+        const cant=pr.cant||pr.cantidad||1; const precio=pr.precio||0;
+        total+=cant*precio;
+        prodHtml+=`<div class="prod-item"><span>${cant}x ${pr.nombre}</span><b>$${cant*precio}</b></div>`;
+      });
+    }
+    total = p.total || total;
+    const esNuevo = nuevosIds.has(p.id);
+    return `
+    <div class="card-pedido ${esNuevo?'nuevo':''}">
+      <div class="head-pedido">
+        <div class="id-pill"><i class="fa-solid fa-hashtag"></i> ${numero}</div>
+        <div class="time-pill"><i class="fa-regular fa-clock"></i> ${p.hora||''}</div>
+      </div>
+      <div class="info-line"><i class="fa-solid fa-user"></i><div><b>${nombre}</b><br>${tel}</div></div>
+      <div class="info-line"><i class="fa-solid fa-location-dot"></i><div>${dir}<br><small>${p.cliente?.referencia||p.referencia||''}</small></div></div>
+      <div class="prod-box">
+        ${prodHtml}
+        <div class="total"><span>Total</span><span>$${total}</span></div>
+      </div>
+      <div class="actions">
+        <button class="btn-act btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i> Llamar</button>
+        ${lat ? `<button class="btn-act btn-map" onclick="window.open('https://www.google.com/maps?q=${lat},${lng}','_blank')"><i class="fa-solid fa-map-location-dot"></i> Maps</button>` : `<button class="btn-act btn-map" onclick="alert('${dir}')"><i class="fa-solid fa-location-dot"></i> Dirección</button>`}
+        <button class="btn-act btn-entregado" onclick="entregar('${p.id}')"><i class="fa-solid fa-box-open"></i> Marcar Entregado</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function entregar(id){
+  if(!confirm('¿Confirmas entrega de este pedido?')) return;
+  try{
+    // 1. Actualiza en repartidor
+    await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado:'entregado', entregadoEn: Date.now(), repartidor: usuarioActual});
+    // 2. Actualiza en pedidos madre para que cliente lo vea en tiempo real
+    await dbPedidos.ref('pedidos/'+id).update({estado:'entregado', entregadoEn: Date.now(), repartidor: usuarioActual});
+    // 3. Mover a historial (opcional por ahora)
+    // await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
+    alert('¡Entregado! Cliente ya ve el cambio en su confirmación.');
+  }catch(e){
+    alert('Error: '+e.message);
+  }
+}
+</script>
+</body>
+  </html>

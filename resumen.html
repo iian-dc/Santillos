@@ -105,14 +105,15 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 </div>
 
 <script>
+// ===== CORREGIDO: AHORA ES SANTILLOS-PEDIDOS EXCLUSIVO =====
 const firebaseConfigPedidos={
-  apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
-  authDomain:"santillos-1ac6d.firebaseapp.com",
-  databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",
-  projectId:"santillos-1ac6d",
-  storageBucket:"santillos-1ac6d.firebasestorage.app",
-  messagingSenderId:"285600299102",
-  appId:"1:285600299102:web:9590597c2b3d8888821ccf"
+  apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
+  authDomain: "santillos-pedidos.firebaseapp.com",
+  databaseURL: "https://santillos-pedidos-default-rtdb.firebaseio.com",
+  projectId: "santillos-pedidos",
+  storageBucket: "santillos-pedidos.firebasestorage.app",
+  messagingSenderId: "341477805263",
+  appId: "1:341477805263:web:b86bc36da92854650afbba"
 };
 firebase.initializeApp(firebaseConfigPedidos);
 const db=firebase.database();
@@ -301,13 +302,18 @@ async function confirmarPedido(){
   const btn=document.getElementById('btnConfirm');
   btn.innerText="Enviando..."; btn.disabled=true;
 
-  let ipClienteFinal="desconocida"; let ciudadIPFinal="";
+  let ipClienteFinal="desconocida"; let ciudadIPFinal="Dolores Hidalgo"; let ciudadFinal="";
   try{
     const ipData=await fetch('https://api.ipify.org?format=json').then(r=>r.json());
     ipClienteFinal=ipData.ip;
-    try{ const geo=await fetch(`https://ipapi.co/${ipData.ip}/json/`).then(r=>r.json()); ciudadIPFinal=(geo.city||"")+(geo.region?", "+geo.region:""); }catch(e){}
+    try{
+      const geo=await fetch(`https://ipapi.co/${ipData.ip}/json/`).then(r=>r.json());
+      ciudadFinal=(geo.city||"Dolores Hidalgo");
+      ciudadIPFinal=(geo.city||"Dolores Hidalgo")+(geo.region?", "+geo.region:"")+(geo.country?", "+geo.country:"");
+    }catch(e){}
   }catch(e){}
 
+  const ahora = new Date();
   const pedido={
     cliente:{
       nombre:document.getElementById('nombre').value.trim(),
@@ -317,32 +323,47 @@ async function confirmarPedido(){
       lat:latCliente,
       lng:lngCliente
     },
+    //Compatibilidad con admin
+    nombre:document.getElementById('nombre').value.trim(),
+    telefono:document.getElementById('telefono').value.trim(),
+    direccion:document.getElementById('direccion').value.trim(),
+    referencia:document.getElementById('referencia').value.trim(),
     productos:carrito,
     subtotal:subtotal,
     envio:costoEnvio,
+    costoEnvio:costoEnvio,
+    envioGratis: costoEnvio===0,
     total:subtotal+costoEnvio,
     distancia:distanciaKm,
     distanciaTxt:document.getElementById('distanciaTxt').innerText,
-    ip:ipClienteFinal,
-    ciudadIP:ciudadIPFinal,
+    // Datos solicitados para santillos-pedidos
+    ciudad: ciudadFinal,
+    ciudadIP: ciudadIPFinal,
+    ip: ipClienteFinal,
+    ipCliente: ipClienteFinal,
+    correlativo: Date.now(),
+    creadoEn: Date.now(),
+    timestamp: Date.now(),
+    fechaISO: ahora.toISOString(),
+    fecha: ahora.toLocaleDateString(),
+    hora: ahora.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:true}),
     sessionId:sessionId,
-    fecha:new Date().toISOString(),
     estado:"nuevo"
   };
 
   try{
     const nuevoRef = await db.ref('pedidos').push(pedido);
     localStorage.setItem('santillos_ultimo_pedido_id', nuevoRef.key);
-    localStorage.setItem('santillos_ultimo_pedido', JSON.stringify(pedido));
-    await db.ref('prepedido/'+sessionId).remove();
+    localStorage.setItem('santillos_ultimo_pedido', JSON.stringify({...pedido, id:nuevoRef.key}));
+    await db.ref('prepedido/'+sessionId).remove().catch(()=>{});
     localStorage.removeItem('santillos_carrito');
     localStorage.removeItem('santillos_carrito_v3');
     localStorage.removeItem('santillos_cantidades');
     localStorage.removeItem('santillos_cantidades_v3');
-    location.href="confirmacion.html";
+    location.href="confirmacion.html?id="+nuevoRef.key;
   }catch(e){
     console.error(e);
-    alert("Error al enviar pedido");
+    alert("Error al enviar pedido a santillos-pedidos: "+e.message);
     btn.innerText="Confirmar pedido"; btn.disabled=false;
   }
 }

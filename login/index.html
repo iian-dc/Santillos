@@ -13,14 +13,12 @@ body{background:#ffffff;color:#fff;min-height:100vh;display:flex;align-items:cen
 .logo-wrap img{width:70%;height:70%;object-fit:contain}
 .logo-wrap span{font-size:32px;font-weight:900;color:#5e0a28}
 .login-title{text-align:center;font-size:18px;font-weight:800;margin-bottom:20px;letter-spacing:0.3px}
-
 .input-group{position:relative;margin-bottom:16px}
 .input-group .icon-left{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#777;font-size:14px}
 .input-group input{width:100%;background:#232323;border:1.5px solid #2a2a2a;color:#fff;border-radius:16px;padding:14px 40px 14px 40px;font-size:13px;font-weight:600;outline:none;transition:0.2s}
 .input-group input:focus{border-color:#5e0a28}
 .clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.08);border:none;color:#888;width:26px;height:26px;border-radius:50%;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:12px}
 .clear-btn.show{display:flex}
-
 .btn-login{width:100%;background:#5e0a28;color:#fff;border:none;border-radius:22px;padding:15px;font-weight:800;font-size:14px;cursor:pointer;margin-top:8px;transition:0.2s}
 .btn-login:active{transform:scale(0.98)}
 .btn-login:disabled{opacity:0.6}
@@ -32,9 +30,7 @@ body{background:#ffffff;color:#fff;min-height:100vh;display:flex;align-items:cen
 
 <div class="login-card">
   <div class="logo-wrap">
-    <!-- Si tienes logo.png ponlo aquí, por ahora dejo la S -->
     <span>S</span>
-    <!-- <img src="../logo.png" alt="Santillos"> -->
   </div>
   <div class="login-title">Panel de Administración</div>
 
@@ -73,11 +69,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Función para crear el usuario admin si no existe - YO LO ORGANIZO
-async function asegurarUsuarioAdmin(){
+// YO LO ORGANIZO - crea admin y repa si no existen
+async function asegurarUsuarios(){
   const dbRef = ref(db);
-  const snap = await get(child(dbRef, 'usuarios/admin'));
-  if(!snap.exists()){
+  const snapAdmin = await get(child(dbRef, 'usuarios/admin'));
+  if(!snapAdmin.exists()){
     await set(ref(db, 'usuarios/admin'), {
       usuario: "admin",
       password: "1234",
@@ -86,10 +82,21 @@ async function asegurarUsuarioAdmin(){
       activo: true,
       creado: new Date().toISOString()
     });
-    console.log("Usuario admin creado automáticamente");
+  }
+  const snapRepa = await get(child(dbRef, 'usuarios/repa'));
+  if(!snapRepa.exists()){
+    await set(ref(db, 'usuarios/repa'), {
+      usuario: "repa",
+      password: "1234",
+      rol: "repartidor",
+      nombre: "Repartidor Santillos",
+      activo: true,
+      creado: new Date().toISOString()
+    });
+    console.log("Usuario repa creado automáticamente");
   }
 }
-asegurarUsuarioAdmin();
+asegurarUsuarios();
 
 window.toggleClear = function(id){
   const val = document.getElementById(id).value;
@@ -128,16 +135,20 @@ window.hacerLogin = async function(){
       error.innerText = 'Usuario o contraseña incorrectos';
       error.classList.add('show'); btn.innerText='Ingresar'; btn.disabled=false; return;
     }
-    if(data.rol !== 'administrador'){
-      error.innerText = 'No tienes permiso de administrador';
-      error.classList.add('show'); btn.innerText='Ingresar'; btn.disabled=false; return;
-    }
 
     localStorage.setItem('santillos_admin_login', 'true');
     localStorage.setItem('santillos_admin_user', JSON.stringify(data));
-    
-    // AQUÍ LO MANDAMOS A ADMIN.HTML
-    window.location.href = './admin.html';
+    localStorage.setItem('santillos_admin_usuario', data.usuario);
+    localStorage.setItem('santillos_rol', data.rol);
+
+    // SI ES REPARTIDOR LO MANDAMOS A REPARTIDOR.HTML
+    if(data.rol === 'repartidor'){
+      localStorage.setItem('santillos_rep_user', data.usuario);
+      window.location.href = './repartidor.html';
+    } else {
+      // SI ES ADMINISTRADOR A ADMIN.HTML
+      window.location.href = './admin.html';
+    }
 
   }catch(e){
     error.innerText = 'Error de conexión';

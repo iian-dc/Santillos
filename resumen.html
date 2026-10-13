@@ -104,12 +104,51 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 </div>
 
 <script>
-const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
-firebase.initializeApp(firebaseConfig);const db=firebase.database();
+// ====== 2 FIREBASES SEPARADOS ======
+// 1. MENU (solo para config si quieres, pero no para pedidos)
+const firebaseConfigMenu={
+  apiKey:"AIzaSyCvnHeXuZZ-2IOF3Oas09VNYJK_HLLkau8",
+  authDomain:"santillos-menu.firebaseapp.com",
+  databaseURL:"https://santillos-menu-default-rtdb.firebaseio.com",
+  projectId:"santillos-menu",
+  storageBucket:"santillos-menu.firebasestorage.app",
+  messagingSenderId:"913879229999",
+  appId:"1:913879229999:web:bff40819ea0f91d040c8da"
+};
+// 2. PEDIDOS - REEMPLAZA ESTO CON TU CONFIG REAL DE santillos-pedidos
+const firebaseConfigPedidos={
+  apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
+  authDomain:"santillos-1ac6d.firebaseapp.com",
+  databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",
+  projectId:"santillos-1ac6d",
+  storageBucket:"santillos-1ac6d.firebasestorage.app",
+  messagingSenderId:"285600299102",
+  appId:"1:285600299102:web:9590597c2b3d8888821ccf"
+};
+// Si tu proyecto santillos-pedidos tiene otro nombre, pega aquí su config real
+
+const appMenu = firebase.initializeApp(firebaseConfigMenu, "menuApp");
+const appPedidos = firebase.initializeApp(firebaseConfigPedidos, "pedidosApp");
+const dbPedidos = appPedidos.database();
+
 const META=200; const PRECIO_KM=12; const TIENDA={lat:21.1560,lng:-100.9340};
-let carrito={};try{carrito=JSON.parse(localStorage.getItem('santillos_carrito')||'{}')}catch(e){}
+
+let carrito={};
+try{
+  let c1 = localStorage.getItem('santillos_carrito_v3');
+  let c2 = localStorage.getItem('santillos_carrito');
+  carrito = JSON.parse(c1 || c2 || '{}');
+}catch(e){ carrito={}; }
+
 if(Object.keys(carrito).length===0) location.href="carrito.html";
-let subtotal=0,html='';Object.values(carrito).forEach(p=>{let t=p.precio*p.cant;subtotal+=t;html+=`<div class="resumen-item"><img src="${p.img}" style="width:38px;height:38px;border-radius:8px"><div style="flex:1"><div style="font-size:11px;font-weight:700">${p.nombre} x${p.cant}</div></div><div style="font-size:11px;font-weight:800">$${t}</div></div>`});
+
+let subtotal=0,html='';
+Object.values(carrito).forEach(p=>{
+  let t=Number(p.precio||0)*Number(p.cant||0);
+  subtotal+=t;
+  let img = p.img || p.imagen || 'https://via.placeholder.com/80x80?text=S';
+  html+=`<div class="resumen-item"><img src="${img}" style="width:38px;height:38px;border-radius:8px;object-fit:cover" onerror="this.src='https://via.placeholder.com/38'"><div style="flex:1"><div style="font-size:11px;font-weight:700">${p.nombre} x${p.cant}</div></div><div style="font-size:11px;font-weight:800">$${t}</div></div>`;
+});
 document.getElementById('listaResumen').innerHTML=html;
 document.getElementById('subtotalTxt').innerText='$'+subtotal;
 
@@ -251,7 +290,7 @@ function verificarIPBloqueada(){
       if(!ipClienteFinal || ipClienteFinal==="desconocida"){ const ipTmp=await fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>d.ip).catch(()=>null); if(ipTmp) ipClienteFinal=ipTmp; }
       if(!ipClienteFinal) return resolve(false);
       const key=ipClienteFinal.replace(/\./g,'_');
-      const snap=await db.ref('ips_bloqueadas/'+key).once('value');
+      const snap=await dbPedidos.ref('ips_bloqueadas/'+key).once('value');
       if(snap.exists()){ document.getElementById('overlayIPBloqueadaCheckout').classList.add('show'); return resolve(true); }
       return resolve(false);
     }catch(e){ return resolve(false); }
@@ -277,7 +316,7 @@ async function confirmarPedido(){
   const btn=document.getElementById('btnConfirm'); btn.innerText='Generando pedido...'; btn.disabled=true;
 
   try{
-    const contadorRef=db.ref('config/contadorPedidos');
+    const contadorRef=dbPedidos.ref('config/contadorPedidos');
     let correlativoFinal=1;
     await contadorRef.transaction((current)=>{
       if(current===null) return 1;
@@ -303,21 +342,25 @@ async function confirmarPedido(){
       maps: latCliente? `https://www.google.com/maps?q=${latCliente},${lngCliente}` : ''
     };
     guardarCliente();
-    const ref=db.ref('pedidos').push();
+    const ref=dbPedidos.ref('pedidos').push();
     await ref.set(pedido);
-    // FIX DEFINITIVO: BORRAR TODO DESPUES DE PEDIR
+    // BORRAR CARRITO COMPLETO - TODAS LAS VERSIONES
     try{
       localStorage.setItem('santillos_pedido_finalizado','1');
       localStorage.removeItem('santillos_carrito');
       localStorage.removeItem('santillos_cantidades');
+      localStorage.removeItem('santillos_carrito_v3');
+      localStorage.removeItem('santillos_cantidades_v3');
       localStorage.setItem('santillos_carrito', JSON.stringify({}));
       localStorage.setItem('santillos_cantidades', JSON.stringify({}));
+      localStorage.setItem('santillos_carrito_v3', JSON.stringify({}));
+      localStorage.setItem('santillos_cantidades_v3', JSON.stringify({}));
     }catch(e){}
     window.location.href="confirmacion.html?id="+ref.key;
   }catch(e){
     console.error(e);
     btn.innerText='Confirmar pedido'; btn.disabled=false;
-    alert('Error al generar número de pedido, intenta de nuevo');
+    alert('Error al generar pedido: '+e.message);
   }
 }
 </script>

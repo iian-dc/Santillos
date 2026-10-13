@@ -2,269 +2,289 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Productos - Santillos Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Panel de productos - Santillos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#0f0f0f;color:#fff;max-width:900px;margin:0 auto;padding:16px}
-.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #222;margin-bottom:16px;position:sticky;top:0;background:#0f0f0f;z-index:10}
-.btn{padding:10px 16px;border-radius:10px;border:none;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.btn-primary{background:#5e0a28;color:#fff}
-.btn-dark{background:#1c1c1c;color:#fff;border:1px solid #333}
-.btn-sm{padding:6px 10px;font-size:12px}
-.card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;padding:16px;margin-bottom:16px}
-input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;margin:6px 0}
-label{font-size:11px;color:#aaa;font-weight:700;margin-top:10px;display:block;letter-spacing:0.5px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.preview{width:100%;height:160px;background:#111;border-radius:12px;margin:8px 0;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px dashed #333}
-.preview img{width:100%;height:100%;object-fit:cover}
-.progress{height:6px;background:#222;border-radius:10px;overflow:hidden;margin:8px 0;display:none}
-.progress-bar{height:100%;background:#5e0a28;width:0%;transition:width 0.3s}
-.status{font-size:11px;margin:4px 0}
-.categoria-bloque{margin-bottom:24px;border:1px solid #222;border-radius:16px;overflow:hidden}
-.cat-head{display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;padding:12px 16px;border-bottom:1px solid #222}
-.cat-head h3{color:#fff;font-size:16px}
-.product-row{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid #1a1a1a;background:#111}
-.product-row:last-child{border:none}
-.product-row img.thumb{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#222;flex-shrink:0}
-.prod-fields{flex:1;display:grid;gap:6px}
-.prod-fields input{margin:0;padding:8px;font-size:13px}
-.prod-actions{display:flex;flex-direction:column;gap:6px}
-.badge{font-size:10px;background:#222;padding:3px 8px;border-radius:20px;color:#aaa}
-.badge-link{color:#22c55e;word-break:break-all;font-size:9px}
+body{background:#fff;min-height:100vh}
+.header{ background:#5e0a28; padding:18px 16px 28px 16px; border-radius:0 0 26px 26px; position:relative; }
+.header-top{display:flex;align-items:center;gap:12px}
+.btn-back{width:36px;height:36px;border-radius:50%;background:transparent;border:none;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.logo{color:#fff;font-weight:900;font-size:36px;letter-spacing:-1px;font-style:italic}
+.logo span{color:#ffcc00}
+.header h1{color:#fff;font-size:26px;font-weight:800;line-height:1.1;margin-top:8px}
+.header p{color:rgba(255,255,255,0.85);font-size:14px;font-weight:400;margin-top:2px}
+.search-row{display:flex;gap:10px;align-items:center;margin:-18px 12px 0 12px;position:relative;z-index:2}
+.search-box{flex:1;background:#fff;border:1.5px solid #e5e7eb;border-radius:18px;display:flex;align-items:center;padding:12px 14px;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,0.06)}
+.search-box i{color:#6b7280;font-size:18px}
+.search-box input{border:none;outline:none;flex:1;font-size:14px;font-weight:500;color:#111}
+.search-box input::placeholder{color:#9ca3af}
+.actions{display:flex;gap:8px}
+.btn-add{background:#5e0a28;color:#fff;border:none;padding:12px 14px;border-radius:14px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.btn-add.sec{background:#fff;color:#5e0a28;border:1.5px solid #5e0a28}
+.btn-add i{font-size:14px}
+.filters{display:flex;gap:8px;overflow-x:auto;padding:14px 12px 8px 12px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.f-chip{border:none;background:#f3f4f6;color:#6b7280;padding:9px 18px;border-radius:12px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.f-chip.active{background:#5e0a28;color:#fff}
+.list{padding:8px 12px 90px 12px;display:flex;flex-direction:column;gap:10px}
+.p-card{display:flex;gap:12px;background:#fff;border:1px solid #f0f0f0;border-radius:16px;padding:10px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.p-img{width:86px;height:86px;border-radius:12px;object-fit:cover;background:#f3f4f6;flex-shrink:0}
+.p-info{flex:1;min-width:0}
+.p-name{font-weight:800;font-size:14px;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-cat{font-size:11px;color:#6b7280;font-weight:500;margin-top:1px}
+.p-price{color:#5e0a28;font-weight:800;font-size:15px;margin-top:2px}
+.p-av{font-size:11px;color:#16a34a;font-weight:600;display:flex;align-items:center;gap:6px;margin-top:3px}
+.p-av i{width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block}
+.p-av.off{color:#9ca3af}
+.p-av.off i{background:#9ca3af}
+.p-actions{display:flex;gap:6px;align-items:center}
+.btn-icon{width:36px;height:36px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#334155}
+.btn-icon:hover{background:#f9fafb}
+.switch{width:44px;height:26px;background:#e5e7eb;border-radius:30px;position:relative;cursor:pointer;transition:0.2s}
+.switch.on{background:#5e0a28}
+.switch-dot{width:20px;height:20px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.switch.on.switch-dot{left:21px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:99;display:none;align-items:center;justify-content:center;padding:14px}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:420px;max-height:90vh;overflow:auto}
+.modal-h{padding:16px 18px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.modal-h h3{font-size:15px;font-weight:800}
+.modal-b{padding:16px 18px}
+.input{width:100%;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;outline:none;margin-bottom:10px}
+.input:focus{border-color:#5e0a28}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-save{width:100%;background:#5e0a28;color:#fff;border:none;padding:13px;border-radius:30px;font-weight:800;font-size:14px;cursor:pointer;margin-top:8px}
+.btn-cancel{width:100%;background:#f3f4f6;color:#111;border:none;padding:13px;border-radius:30px;font-weight:700;font-size:13px;cursor:pointer;margin-top:8px}
+.menu-dot{position:relative}
+.dot-menu{position:absolute;right:0;top:40px;background:#fff;border:1px solid #eee;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.12);display:none;z-index:5;min-width:140px;overflow:hidden}
+.dot-menu.show{display:block}
+.dot-menu button{width:100%;text-align:left;padding:10px 12px;border:none;background:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;gap:8px;align-items:center}
+.dot-menu button:hover{background:#f9fafb}
+.dot-menu.del{color:#ef4444}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div>
-    <h2 style="font-size:20px">Santillos - Productos</h2>
-    <div style="font-size:11px;color:#777">Ruta: login/productos.html • Edición en tiempo real</div>
+  <div class="header-top">
+    <button class="btn-back" onclick="location.href='./admin.html'"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="logo">Santillos<span>.</span></div>
   </div>
-  <button class="btn btn-dark" onclick="location.href='index.html'"><i class="fa-solid fa-arrow-left"></i> Panel</button>
+  <h1>Panel de productos</h1>
+  <p>Gestiona, edita y organiza todos tus productos.</p>
 </div>
 
-<div class="card">
-  <h3 style="margin-bottom:8px">Crear nuevo producto</h3>
-  <div class="grid2">
-    <div>
-      <label>Categoría</label>
-      <div style="display:flex;gap:6px">
-        <select id="catSelect" style="flex:1"></select>
-        <button class="btn btn-dark btn-sm" onclick="nuevaCategoria()">+ Nueva</button>
+<div class="search-row">
+  <div class="search-box">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input id="buscador" placeholder="Buscar producto..." oninput="filtrar()">
+  </div>
+  <div class="actions">
+    <button class="btn-add" onclick="abrirModalProducto()"><i class="fa-solid fa-plus"></i> Agregar producto</button>
+    <button class="btn-add sec" onclick="abrirModalCategoria()"><i class="fa-solid fa-layer-group"></i> Agregar categoría</button>
+  </div>
+</div>
+
+<div class="filters" id="filtros"></div>
+
+<div class="list" id="lista"></div>
+
+<!-- MODAL PRODUCTO -->
+<div class="overlay" id="modalProd" onclick="if(event.target===this)cerrarModales()">
+  <div class="modal">
+    <div class="modal-h"><h3 id="tituloModal">Agregar producto</h3><button onclick="cerrarModales()" style="border:none;background:#f3f4f6;width:28px;height:28px;border-radius:50%;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-b">
+      <input id="p_nombre" class="input" placeholder="Nombre del producto *">
+      <div class="row2">
+        <select id="p_categoria" class="input"></select>
+        <input id="p_precio" class="input" type="number" placeholder="Precio *">
+      </div>
+      <input id="p_imagen" class="input" placeholder="Link imagen (https://...) *">
+      <small style="font-size:11px;color:#6b7280">Pega el link de Firebase Storage aquí. Para subir ve a Firebase Console > Storage > Subir archivo > Copiar URL</small>
+      <div class="row2" style="margin-top:10px">
+        <label style="font-size:12px;font-weight:700">Disponible <input id="p_disp" type="checkbox" checked style="margin-left:6px"></label>
+        <label style="font-size:12px;font-weight:700">Destacado <input id="p_dest" type="checkbox" style="margin-left:6px"></label>
+      </div>
+      <button class="btn-save" onclick="guardarProducto()">Guardar producto</button>
+      <button class="btn-cancel" onclick="cerrarModales()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CATEGORIA -->
+<div class="overlay" id="modalCat" onclick="if(event.target===this)cerrarModales()">
+  <div class="modal">
+    <div class="modal-h"><h3>Agregar categoría</h3><button onclick="cerrarModales()" style="border:none;background:#f3f4f6;width:28px;height:28px;border-radius:50%;cursor:pointer"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-b">
+      <input id="c_nombre" class="input" placeholder="Nombre categoría (Ej: Comidas)">
+      <div id="listaCats" style="margin-top:10px"></div>
+      <button class="btn-save" onclick="guardarCategoria()">Guardar categoría</button>
+      <button class="btn-cancel" onclick="cerrarModales()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue, push, set, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = { apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA", authDomain:"santillos-1ac6d.firebaseapp.com", databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com", projectId:"santillos-1ac6d", storageBucket:"santillos-1ac6d.firebasestorage.app", messagingSenderId:"285600299102", appId:"1:285600299102:web:9590597c2b3d8888821ccf" };
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+let productosCache = [];
+let categoriasCache = ["Todos","Comidas","Bebidas","Postres","Promociones"];
+let categoriaActiva = "Todos";
+let editId = null;
+
+// CATEGORIAS DESDE FIREBASE
+onValue(ref(db,'categorias'), snap=>{
+  if(snap.exists()){
+    let cats = Object.values(snap.val()).map(c=>c.nombre);
+    if(cats.length>0){
+      categoriasCache = ["Todos",...cats];
+    }
+  }
+  renderFiltros();
+  renderSelectCat();
+  renderListaCats();
+});
+
+function renderFiltros(){
+  document.getElementById('filtros').innerHTML = categoriasCache.map(c=>`<button class="f-chip ${c===categoriaActiva?'active':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+}
+window.setCat=(c)=>{ categoriaActiva=c; renderFiltros(); filtrar(); }
+
+function renderSelectCat(){
+  let soloCats = categoriasCache.filter(c=>c!=="Todos");
+  document.getElementById('p_categoria').innerHTML = soloCats.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+function renderListaCats(){
+  let soloCats = categoriasCache.filter(c=>c!=="Todos");
+  document.getElementById('listaCats').innerHTML = soloCats.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:600">${c}<button onclick="borrarCat('${c}')" style="border:none;background:#fee2e2;color:#b42318;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">Borrar</button></div>`).join('');
+}
+
+// PRODUCTOS DESDE FIREBASE
+onValue(ref(db,'productos'), snap=>{
+  if(!snap.exists()){ productosCache=[]; render(); return; }
+  productosCache = Object.entries(snap.val()).map(([id,val])=>({id,...val}));
+  productosCache.sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+  render();
+});
+
+function render(){
+  filtrar();
+}
+
+window.filtrar=()=>{
+  const txt = document.getElementById('buscador').value.toLowerCase();
+  let lista = productosCache.filter(p=>{
+    let matchCat = categoriaActiva==="Todos" || p.categoria===categoriaActiva;
+    let matchTxt =!txt || p.nombre.toLowerCase().includes(txt);
+    return matchCat && matchTxt;
+  });
+  const cont = document.getElementById('lista');
+  if(lista.length===0){ cont.innerHTML=`<div style="text-align:center;padding:30px;color:#999;font-size:13px">No hay productos en ${categoriaActiva}</div>`; return; }
+  cont.innerHTML = lista.map(p=>`
+    <div class="p-card">
+      <img class="p-img" src="${p.imagen||'https://via.placeholder.com/100'}" onerror="this.src='https://via.placeholder.com/100'">
+      <div class="p-info">
+        <div class="p-name">${p.nombre}</div>
+        <div class="p-cat">${p.categoria||'Sin categoría'}</div>
+        <div class="p-price">$${Number(p.precio||0).toFixed(2)}</div>
+        <div class="p-av ${p.disponible===false?'off':''}"><i></i> ${p.disponible===false?'No disponible':'Disponible'}</div>
+      </div>
+      <div class="p-actions">
+        <button class="btn-icon" onclick="editarProd('${p.id}')"><i class="fa-solid fa-pencil"></i></button>
+        <div class="menu-dot">
+          <button class="btn-icon" onclick="toggleMenu(this)"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          <div class="dot-menu">
+            <button onclick="editarProd('${p.id}')"><i class="fa-solid fa-pen"></i> Editar</button>
+            <button class="del" onclick="eliminarProd('${p.id}')"><i class="fa-solid fa-trash"></i> Eliminar</button>
+          </div>
+        </div>
+        <div class="switch ${p.disponible!==false?'on':''}" onclick="toggleDisp('${p.id}', ${p.disponible!==false})"><div class="switch-dot"></div></div>
       </div>
     </div>
-    <div>
-      <label>Precio</label>
-      <input id="prodPrice" type="number" placeholder="180">
-    </div>
-  </div>
-  <label>Nombre</label>
-  <input id="prodName" placeholder="Ej: Combo Triple">
-  <label>Foto (elige desde tu celular - se sube con link)</label>
-  <input type="file" id="fileInput" accept="image/*">
-  <div class="progress" id="progressBox"><div class="progress-bar" id="progressBar"></div></div>
-  <div class="status" id="status"></div>
-  <div class="preview" id="preview"><span style="color:#555">Preview</span></div>
-  <input type="hidden" id="prodImgUrl">
-  <div style="display:flex;gap:8px;margin-top:10px">
-    <button class="btn btn-primary" style="flex:1" id="btnGuardar" onclick="guardarNuevo()"><i class="fa-solid fa-plus"></i> Guardar</button>
-    <button class="btn btn-dark" style="display:none" id="btnCancelar" onclick="resetForm()">Cancelar</button>
-  </div>
-</div>
+  `).join('');
+}
 
-<div class="card">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <h3>Todos los productos en Firebase</h3>
-    <div class="badge" id="totalCount">0 productos</div>
-  </div>
-  <div id="contenedorProductos"></div>
-</div>
+window.toggleMenu=(btn)=>{
+  document.querySelectorAll('.dot-menu').forEach(m=>{ if(m!==btn.nextElementSibling) m.classList.remove('show') });
+  btn.nextElementSibling.classList.toggle('show');
+}
+document.addEventListener('click', e=>{ if(!e.target.closest('.menu-dot')) document.querySelectorAll('.dot-menu').forEach(m=>m.classList.remove('show')) })
 
-<script>
-const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
-const storage=firebase.storage();
-
-let categoryOrder=[]; let menuData={}; let editMode=null;
-
-db.ref('categoryOrder').on('value', s=>{
-  categoryOrder=s.val()||[];
-  renderCatSelect();
-  renderLista();
-});
-db.ref('menu').on('value', s=>{
-  menuData=s.val()||{};
-  if(categoryOrder.length===0 && Object.keys(menuData).length>0){
-    categoryOrder=Object.keys(menuData);
+// ACCIONES
+window.abrirModalProducto=()=>{
+  editId=null;
+  document.getElementById('tituloModal').innerText="Agregar producto";
+  document.getElementById('p_nombre').value="";
+  document.getElementById('p_precio').value="";
+  document.getElementById('p_imagen').value="";
+  document.getElementById('p_disp').checked=true;
+  document.getElementById('p_dest').checked=false;
+  renderSelectCat();
+  document.getElementById('modalProd').classList.add('show');
+}
+window.editarProd=(id)=>{
+  let p = productosCache.find(x=>x.id===id); if(!p) return;
+  editId=id;
+  document.getElementById('tituloModal').innerText="Editar producto";
+  document.getElementById('p_nombre').value=p.nombre||"";
+  document.getElementById('p_precio').value=p.precio||"";
+  document.getElementById('p_imagen').value=p.imagen||"";
+  document.getElementById('p_disp').checked = p.disponible!==false;
+  document.getElementById('p_dest').checked = p.destacado||false;
+  renderSelectCat();
+  document.getElementById('p_categoria').value=p.categoria||categoriasCache[1];
+  document.getElementById('modalProd').classList.add('show');
+}
+window.guardarProducto=async()=>{
+  const nombre = document.getElementById('p_nombre').value.trim();
+  const categoria = document.getElementById('p_categoria').value;
+  const precio = parseFloat(document.getElementById('p_precio').value);
+  const imagen = document.getElementById('p_imagen').value.trim();
+  const disponible = document.getElementById('p_disp').checked;
+  const destacado = document.getElementById('p_dest').checked;
+  if(!nombre||!precio||!imagen){ alert('Nombre, precio e imagen con link son obligatorios'); return; }
+  const data = { nombre, categoria, precio, imagen, disponible, destacado, timestamp: Date.now() };
+  if(editId){
+    await update(ref(db,'productos/'+editId), data);
+  }else{
+    await push(ref(db,'productos'), data);
   }
-  renderCatSelect();
-  renderLista();
-});
-
-function renderCatSelect(){
-  const sel=document.getElementById('catSelect');
-  const current=sel.value;
-  sel.innerHTML='';
-  categoryOrder.forEach(c=>{
-    const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
-  });
-  if(current) sel.value=current;
-  if(categoryOrder.length===0){
-    const o=document.createElement('option'); o.textContent='Crea una categoría'; sel.appendChild(o);
-  }
+  cerrarModales();
 }
-function nuevaCategoria(){
-  const n=prompt('Nombre categoría:'); if(!n) return;
-  if(!categoryOrder.includes(n)){
-    categoryOrder.push(n);
-    db.ref('categoryOrder').set(categoryOrder);
-  }
-}
+window.eliminarProd=async(id)=>{ if(!confirm('¿Eliminar producto?')) return; await remove(ref(db,'productos/'+id)); }
+window.toggleDisp=async(id, actual)=>{ await update(ref(db,'productos/'+id), { disponible:!actual }); }
 
-// SUBIR FOTO A STORAGE Y OBTENER LINK
-let uploadedFileUrl='';
-document.getElementById('fileInput').addEventListener('change', async function(e){
-  const file=e.target.files[0]; if(!file) return;
-  const cat=document.getElementById('catSelect').value || 'general';
-  const status=document.getElementById('status');
-  const pBox=document.getElementById('progressBox');
-  const pBar=document.getElementById('progressBar');
-  pBox.style.display='block'; status.style.color='#fff'; status.innerText='Subiendo a Firebase Storage...';
-  try{
-    const safeName=file.name.replace(/[^a-zA-Z0-9.]/g,'_');
-    const ref=storage.ref().child(`productos/${cat}/${Date.now()}_${safeName}`);
-    const task=ref.put(file);
-    task.on('state_changed', snap=>{
-      const pct=Math.round((snap.bytesTransferred/snap.totalBytes)*100);
-      pBar.style.width=pct+'%'; status.innerText=`Subiendo ${pct}%`;
-    }, err=>{
-      status.innerText='Error: '+err.message; status.style.color='#ff5a5a';
-    }, async ()=>{
-      const url=await task.snapshot.ref.getDownloadURL();
-      uploadedFileUrl=url;
-      document.getElementById('prodImgUrl').value=url;
-      document.getElementById('preview').innerHTML=`<img src="${url}">`;
-      status.innerText='✅ Listo - Link: '+url.substring(0,40)+'...'; status.style.color='#22c55e';
-      pBox.style.display='none';
-    });
-    // preview local
-    const reader=new FileReader();
-    reader.onload=ev=>{ document.getElementById('preview').innerHTML=`<img src="${ev.target.result}" style="opacity:0.6">`; }
-    reader.readAsDataURL(file);
-  }catch(err){ status.innerText='Error '+err.message; }
-});
-
-function guardarNuevo(){
-  const cat=document.getElementById('catSelect').value;
-  const name=document.getElementById('prodName').value.trim();
-  const price=parseInt(document.getElementById('prodPrice').value);
-  const img=document.getElementById('prodImgUrl').value;
-  if(!cat||!name||!price){ alert('Falta categoría, nombre o precio'); return; }
-  if(!img){ alert('Sube una foto primero'); return; }
-  const lista=menuData[cat]||[];
-  const idx=lista.length;
-  db.ref(`menu/${cat}/${idx}`).set({name, price, img, disp:true}).then(()=>{
-    alert('Producto guardado con link'); resetForm();
-  });
+window.abrirModalCategoria=()=>{
+  document.getElementById('c_nombre').value="";
+  renderListaCats();
+  document.getElementById('modalCat').classList.add('show');
 }
-function resetForm(){
-  document.getElementById('prodName').value=''; document.getElementById('prodPrice').value='';
-  document.getElementById('fileInput').value=''; document.getElementById('prodImgUrl').value='';
-  document.getElementById('preview').innerHTML='<span style="color:#555">Preview</span>';
-  document.getElementById('status').innerText=''; document.getElementById('progressBox').style.display='none';
-  editMode=null;
+window.guardarCategoria=async()=>{
+  const nombre = document.getElementById('c_nombre').value.trim();
+  if(!nombre) return alert('Escribe nombre');
+  if(categoriasCache.includes(nombre)) return alert('Ya existe');
+  await push(ref(db,'categorias'), { nombre, timestamp: Date.now() });
+  document.getElementById('c_nombre').value="";
+}
+window.borrarCat=async(nombre)=>{
+  if(!confirm('Borrar categoria '+nombre+'?')) return;
+  // buscar key
+  onValue(ref(db,'categorias'), async snap=>{
+    if(!snap.exists()) return;
+    let entries = Object.entries(snap.val());
+    let found = entries.find(([k,v])=>v.nombre===nombre);
+    if(found){ await remove(ref(db,'categorias/'+found[0])); }
+  }, {onlyOnce:true});
 }
 
-// LISTA EDITABLE EN TIEMPO REAL
-function renderLista(){
-  const cont=document.getElementById('contenedorProductos');
-  let total=0; Object.values(menuData).forEach(a=> total+= (a||[]).filter(Boolean).length );
-  document.getElementById('totalCount').innerText=total+' productos';
-  let html='';
-  if(categoryOrder.length===0){ cont.innerHTML='<div style="color:#777;text-align:center;padding:20px">No hay categorías</div>'; return; }
-  categoryOrder.forEach(cat=>{
-    const lista=menuData[cat]||[];
-    const filtrada=lista.map((p,i)=>({p,i})).filter(x=>x.p);
-    if(filtrada.length===0) return;
-    html+=`<div class="categoria-bloque"><div class="cat-head"><h3>${cat}</h3><div style="display:flex;gap:6px"><button class="btn btn-dark btn-sm" onclick="renombrarCat('${cat}')"><i class="fa-solid fa-pen"></i></button><button class="btn btn-dark btn-sm" style="color:#ff5a5a" onclick="borrarCat('${cat}')"><i class="fa-solid fa-trash"></i></button></div></div>`;
-    filtrada.forEach(({p,i})=>{
-      html+=`<div class="product-row" id="row-${cat}-${i}">
-        <img class="thumb" src="${p.img}" onerror="this.src='https://via.placeholder.com/64'">
-        <div class="prod-fields">
-          <input id="name-${cat}-${i}" value="${(p.name||'').replace(/"/g,'&quot;')}" placeholder="Nombre" onblur="guardarEdicion('${cat}',${i})">
-          <div style="display:flex;gap:6px">
-            <input id="price-${cat}-${i}" type="number" value="${p.price||0}" style="flex:1" onblur="guardarEdicion('${cat}',${i})">
-            <label style="flex:1;margin:0"><input type="file" accept="image/*" style="display:none" onchange="cambiarFoto('${cat}',${i}, this)"><span class="btn btn-dark btn-sm" style="display:flex;width:100%;justify-content:center"><i class="fa-solid fa-image"></i> Cambiar foto</span></label>
-          </div>
-          <div class="badge-link">${p.img? p.img.substring(0,60)+'...' : 'sin link'}</div>
-        </div>
-        <div class="prod-actions">
-          <button class="btn btn-dark btn-sm" onclick="toggleDisp('${cat}',${i})">${p.disp===false?'👁️‍🗨️':'👁️'}</button>
-          <button class="btn btn-dark btn-sm" style="color:#ff5a5a" onclick="eliminarProd('${cat}',${i})"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      </div>`;
-    });
-    html+=`</div>`;
-  });
-  cont.innerHTML=html||'<div style="color:#777;text-align:center;padding:20px">No hay productos</div>';
-}
-
-function guardarEdicion(cat,i){
-  const nameEl=document.getElementById(`name-${cat}-${i}`);
-  const priceEl=document.getElementById(`price-${cat}-${i}`);
-  if(!nameEl||!priceEl) return;
-  const p=menuData[cat][i]; if(!p) return;
-  const newName=nameEl.value.trim(); const newPrice=parseInt(priceEl.value);
-  if(newName!==p.name || newPrice!==p.price){
-    db.ref(`menu/${cat}/${i}`).update({name:newName, price:newPrice});
-  }
-}
-async function cambiarFoto(cat,i, input){
-  const file=input.files[0]; if(!file) return;
-  const row=document.getElementById(`row-${cat}-${i}`);
-  if(row) row.style.opacity='0.5';
-  try{
-    const ref=storage.ref().child(`productos/${cat}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g,'_')}`);
-    const task=await ref.put(file);
-    const url=await task.ref.getDownloadURL();
-    await db.ref(`menu/${cat}/${i}`).update({img:url});
-    if(row) row.style.opacity='1';
-  }catch(e){ alert('Error subiendo: '+e.message); if(row) row.style.opacity='1'; }
-}
-function toggleDisp(cat,i){
-  const p=menuData[cat][i]; if(!p) return;
-  db.ref(`menu/${cat}/${i}`).update({disp: p.disp===false? true:false});
-}
-function eliminarProd(cat,i){
-  if(!confirm('¿Eliminar este producto?')) return;
-  db.ref(`menu/${cat}/${i}`).remove().then(()=>{
-    db.ref(`menu/${cat}`).once('value').then(s=>{
-      const val=s.val()||[]; const filtered=val.filter(Boolean);
-      db.ref(`menu/${cat}`).set(filtered);
-    });
-  });
-}
-function renombrarCat(oldName){
-  const nuevo=prompt('Nuevo nombre:', oldName); if(!nuevo||nuevo===oldName) return;
-  db.ref(`menu/${oldName}`).once('value').then(s=>{
-    const data=s.val();
-    if(data){ db.ref(`menu/${nuevo}`).set(data).then(()=>{ db.ref(`menu/${oldName}`).remove(); }); }
-  });
-  const idx=categoryOrder.indexOf(oldName);
-  if(idx>=0){ categoryOrder[idx]=nuevo; db.ref('categoryOrder').set(categoryOrder); }
-}
-function borrarCat(cat){
-  if(!confirm(`¿Borrar categoría completa ${cat} y sus productos?`)) return;
-  db.ref(`menu/${cat}`).remove();
-  categoryOrder=categoryOrder.filter(c=>c!==cat);
-  db.ref('categoryOrder').set(categoryOrder);
-}
+window.cerrarModales=()=>{ document.querySelectorAll('.overlay').forEach(o=>o.classList.remove('show')) }
 </script>
 </body>
 </html>

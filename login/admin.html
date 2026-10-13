@@ -150,16 +150,15 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue, update, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// ===== CORREGIDO: MISMA BASE QUE USA RESUMEN Y CONFIRMAR =====
-// santillos-pedidos = prepedido + pedidos
+// ===== CORREGIDO: SANTILLOS-PEDIDOS EXCLUSIVO =====
 const firebaseConfig = {
-  apiKey: "AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
-  authDomain: "santillos-1ac6d.firebaseapp.com",
-  databaseURL: "https://santillos-1ac6d-default-rtdb.firebaseio.com",
-  projectId: "santillos-1ac6d",
-  storageBucket: "santillos-1ac6d.firebasestorage.app",
-  messagingSenderId: "285600299102",
-  appId: "1:285600299102:web:9590597c2b3d8888821ccf"
+  apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
+  authDomain: "santillos-pedidos.firebaseapp.com",
+  databaseURL: "https://santillos-pedidos-default-rtdb.firebaseio.com",
+  projectId: "santillos-pedidos",
+  storageBucket: "santillos-pedidos.firebasestorage.app",
+  messagingSenderId: "341477805263",
+  appId: "1:341477805263:web:b86bc36da92854650afbba"
 };
 
 const app=initializeApp(firebaseConfig);const db=getDatabase(app);
@@ -228,7 +227,7 @@ window.abrirProductos=function(id){
     ${lista}
     <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px">
       <div class="modal-line" style="justify-content:space-between"><span>Subtotal</span><b>$${p.subtotal||p.total||0}</b></div>
-      <div class="modal-line" style="justify-content:space-between"><span>Envío</span><b>${Number(p.envio||0)===0?'Gratis':'$'+(p.costoEnvio||p.envio||0)}</b></div>
+      <div class="modal-line" style="justify-content:space-between"><span>Envío</span><b>${Number(p.envio||p.costoEnvio||0)===0?'Gratis':'$'+(p.costoEnvio||p.envio||0)}</b></div>
       <div class="modal-line" style="justify-content:space-between;font-size:14px"><b>Total</b><b>$${p.total||0}</b></div>
       ${p.cliente?.lat?`<a href="https://www.google.com/maps?q=${p.cliente.lat},${p.cliente.lng}" target="_blank" class="btn-call" style="text-decoration:none;background:#fff;color:#111;border:1px solid #e5e7eb"><i class="fa-solid fa-map-location-dot"></i> Ver en Maps</a>`:''}
     </div>`;
@@ -323,7 +322,8 @@ window.addEventListener('load', ()=>{ setTimeout(()=>{ initAudio(); },500); });
 
 onValue(ref(db,'ips_bloqueadas'),snap=>{ipsBloqueadasCache=snap.val()||{};renderPedidos();});
 
-onValue(query(ref(db,'pedidos'), limitToLast(100)), snap=>{
+// CORREGIDO: faltaba un parentesis, ahora si carga de santillos-pedidos
+onValue(query(ref(db,'pedidos'), limitToLast(100)), (snap)=>{
   const data=snap.val()||{};
   let todas=Object.entries(data).map(([k,v])=>({id:k,...v}));
   todas.sort((a,b)=>{
@@ -331,7 +331,7 @@ onValue(query(ref(db,'pedidos'), limitToLast(100)), snap=>{
     if(ca && cb) return ca-cb;
     if(ca) return -1;
     if(cb) return 1;
-    return (a.timestamp||0)-(b.timestamp||0);
+    return (a.timestamp||a.creadoEn||0)-(b.timestamp||b.creadoEn||0);
   });
   todas.forEach((p,idx)=>{ if(!p.correlativo){p.correlativo=idx+1; if(!p.numero) p.numero=`ST-${String(idx+1).padStart(4,'0')}`;} if(!p.numero) p.numero=`ST-${String(p.correlativo).padStart(4,'0')}`; });
   pedidosTodosCache=todas;

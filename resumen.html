@@ -105,7 +105,6 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 </div>
 
 <script>
-// ===== CORREGIDO: AHORA ES SANTILLOS-PEDIDOS EXCLUSIVO =====
 const firebaseConfigPedidos={
   apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
   authDomain: "santillos-pedidos.firebaseapp.com",
@@ -302,7 +301,7 @@ async function confirmarPedido(){
   const btn=document.getElementById('btnConfirm');
   btn.innerText="Enviando..."; btn.disabled=true;
 
-  let ipClienteFinal="desconocida"; let ciudadIPFinal="Dolores Hidalgo"; let ciudadFinal="";
+  let ipClienteFinal="desconocida"; let ciudadIPFinal="Dolores Hidalgo"; let ciudadFinal="Dolores Hidalgo";
   try{
     const ipData=await fetch('https://api.ipify.org?format=json').then(r=>r.json());
     ipClienteFinal=ipData.ip;
@@ -312,6 +311,22 @@ async function confirmarPedido(){
       ciudadIPFinal=(geo.city||"Dolores Hidalgo")+(geo.region?", "+geo.region:"")+(geo.country?", "+geo.country:"");
     }catch(e){}
   }catch(e){}
+
+  // ===== CONTABILIDAD EN ORDEN ST-0001, ST-0002 =====
+  let correlativoFinal = 1;
+  let numeroPedidoFinal = "ST-0001";
+  try {
+    const contadorRef = db.ref('contador_pedidos');
+    const result = await contadorRef.transaction(current => {
+      return (current || 0) + 1;
+    });
+    if(result.committed){
+      correlativoFinal = result.snapshot.val();
+      numeroPedidoFinal = `ST-${String(correlativoFinal).padStart(4,'0')}`;
+    }
+  } catch(e){
+    console.log("Error contador", e);
+  }
 
   const ahora = new Date();
   const pedido={
@@ -323,7 +338,6 @@ async function confirmarPedido(){
       lat:latCliente,
       lng:lngCliente
     },
-    //Compatibilidad con admin
     nombre:document.getElementById('nombre').value.trim(),
     telefono:document.getElementById('telefono').value.trim(),
     direccion:document.getElementById('direccion').value.trim(),
@@ -336,12 +350,12 @@ async function confirmarPedido(){
     total:subtotal+costoEnvio,
     distancia:distanciaKm,
     distanciaTxt:document.getElementById('distanciaTxt').innerText,
-    // Datos solicitados para santillos-pedidos
     ciudad: ciudadFinal,
     ciudadIP: ciudadIPFinal,
     ip: ipClienteFinal,
     ipCliente: ipClienteFinal,
-    correlativo: Date.now(),
+    correlativo: correlativoFinal,
+    numero: numeroPedidoFinal,
     creadoEn: Date.now(),
     timestamp: Date.now(),
     fechaISO: ahora.toISOString(),

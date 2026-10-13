@@ -42,13 +42,25 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .modal-box{background:#1e1e1e;border:1px solid #333;border-radius:20px;padding:20px;width:85%;max-width:320px;text-align:center}
 .qty-modal-control{display:flex;align-items:center;justify-content:center;gap:20px;margin:20px 0}
 .qty-modal-btn{width:44px;height:44px;border-radius:50%;border:none;background:#5e0a28;color:#fff;font-size:22px;font-weight:900;cursor:pointer}
+
+/* MODAL ELEGANTE VACIAR */
+.modal-vaciar{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-vaciar.show{display:flex}
+.modal-vaciar-card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:24px;padding:24px;width:92%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:popIn 0.25s ease}
+@keyframes popIn{0%{transform:scale(0.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.modal-vaciar-icon{width:64px;height:64px;background:#2a1a1a;border:1px solid #3a2222;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#ff5a5a;font-size:28px}
+.modal-vaciar-title{font-size:18px;font-weight:800;margin-bottom:6px}
+.modal-vaciar-sub{font-size:13px;color:#888;margin-bottom:22px;line-height:1.4}
+.modal-vaciar-actions{display:flex;gap:12px}
+.btn-modal-no{flex:1;background:#22c55e;color:#fff;border:none;padding:13px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-modal-si{flex:1;background:#ef4444;color:#fff;border:none;padding:13px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
 </style>
 </head>
 <body>
 <div class="header-carrito">
   <button class="btn-back" onclick="location.href='menu.html'"><i class="fa-solid fa-chevron-left"></i></button>
   <div class="titulo-carrito">Carrito</div>
-  <button class="btn-trash" onclick="vaciarCarrito()"><i class="fa-solid fa-trash"></i></button>
+  <button class="btn-trash" onclick="abrirVaciarModal()"><i class="fa-solid fa-trash"></i></button>
 </div>
 <div class="subtitulo">Productos seleccionados</div>
 <div class="productos-carrito" id="listaCarrito"></div>
@@ -75,33 +87,44 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
   </div>
 </div>
 
-<script>
-const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
-firebase.initializeApp(firebaseConfig);const db=firebase.database();
+<!-- MODAL VACIAR ELEGANTE -->
+<div class="modal-vaciar" id="modalVaciar" onclick="cerrarVaciarModal()">
+  <div class="modal-vaciar-card" onclick="event.stopPropagation()">
+    <div class="modal-vaciar-icon"><i class="fa-solid fa-trash-can"></i></div>
+    <div class="modal-vaciar-title">¿Deseas vaciar el carrito?</div>
+    <div class="modal-vaciar-sub">Se eliminarán todos los productos que agregaste. Esta acción no se puede deshacer.</div>
+    <div class="modal-vaciar-actions">
+      <button class="btn-modal-no" onclick="cerrarVaciarModal()"><i class="fa-solid fa-xmark"></i> No</button>
+      <button class="btn-modal-si" onclick="confirmarVaciar()"><i class="fa-solid fa-check"></i> Sí, vaciar</button>
+    </div>
+  </div>
+</div>
 
-let carrito = {}; let cantidades = {}; let menuData = null;
+<script>
+// USAMOS SOLO DATOS LOCALES, NO BASE VIEJA
+let carrito = {}; let cantidades = {};
 let modalId = null; let modalTempCant = 1;
 
-try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
-try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
-try{ menuData = JSON.parse(localStorage.getItem('santillos_cache_menu_v2')||'null'); }catch(e){}
+function cargarCarrito(){
+  try{
+    // intentamos v3 primero, luego viejo para compatibilidad
+    let c1 = localStorage.getItem('santillos_carrito_v3');
+    let c2 = localStorage.getItem('santillos_carrito');
+    carrito = JSON.parse(c1 || c2 || '{}');
+  }catch(e){ carrito={}; }
+  try{
+    let q1 = localStorage.getItem('santillos_cantidades_v3');
+    let q2 = localStorage.getItem('santillos_cantidades');
+    cantidades = JSON.parse(q1 || q2 || '{}');
+  }catch(e){ cantidades={}; }
+}
+cargarCarrito();
 
-function getImagenPorId(id){
-  if(!menuData) return '';
-  const parts = id.split('_');
-  const idx = parseInt(parts.pop());
-  const cat = parts.join('_');
-  if(menuData[cat] && menuData[cat][idx] && menuData[cat][idx].img){
-    return menuData[cat][idx].img;
-  }
-  // fallback: buscar por nombre
-  for(let catKey in menuData){
-    let arr = menuData[catKey]||[];
-    for(let p of arr){
-      if(carrito[id] && p.name===carrito[id].nombre) return p.img||'';
-    }
-  }
-  return '';
+function guardarCarrito(){
+  localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
+  localStorage.setItem('santillos_carrito_v3', JSON.stringify(carrito));
+  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+  localStorage.setItem('santillos_cantidades_v3', JSON.stringify(cantidades));
 }
 
 function renderCarrito(){
@@ -109,7 +132,7 @@ function renderCarrito(){
   const ids = Object.keys(carrito);
   document.getElementById('cartCount').innerText = Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
   if(ids.length===0){
-    cont.innerHTML = '<div class="vacio"><i class="fa-solid fa-bag-shopping" style="font-size:40px;margin-bottom:12px"></i><div>Tu carrito está vacío</div></div>';
+    cont.innerHTML = '<div class="vacio"><i class="fa-solid fa-bag-shopping" style="font-size:40px;margin-bottom:12px"></i><div>Tu carrito está vacío</div><div style="margin-top:8px;font-size:13px"><a href="menu.html" style="color:#5e0a28;text-decoration:none;font-weight:800">Ir al menú</a></div></div>';
     document.getElementById('resumen').style.display='none';
     document.getElementById('btnPedir').style.display='none';
     return;
@@ -117,13 +140,13 @@ function renderCarrito(){
   let html=''; let subtotal=0;
   ids.forEach(id=>{
     const item = carrito[id];
-    const img = item.img && item.img.length>100? item.img : getImagenPorId(id);
-    const totalItem = (item.precio||0)*(item.cant||0);
+    const img = item.img || item.imagen || 'https://via.placeholder.com/80x80?text=S';
+    const totalItem = (Number(item.precio||0))*(Number(item.cant||0));
     subtotal+=totalItem;
     html+=`<div class="item-carrito">
       <div class="item-img"><img src="${img}" onerror="this.src='https://via.placeholder.com/80x80?text=S'"></div>
       <div class="item-info">
-        <div class="item-name">${item.nombre||item.name||'Producto'}</div>
+        <div class="item-name">${item.nombre||'Producto'}</div>
         <div class="item-cant">Cantidad: ${item.cant} • $${item.precio} c/u</div>
         <div class="item-price">$${totalItem}</div>
       </div>
@@ -140,17 +163,6 @@ function renderCarrito(){
   document.getElementById('btnPedir').style.display='block';
 }
 
-// Si no tenemos menuData, lo traemos una vez para sacar las fotos
-if(!menuData){
-  db.ref('menu').once('value').then(s=>{
-    if(s.val()){
-      menuData=s.val();
-      localStorage.setItem('santillos_cache_menu_v2', JSON.stringify(menuData));
-      renderCarrito();
-    }
-  });
-}
-
 renderCarrito();
 
 function editarItem(id){
@@ -165,13 +177,23 @@ function guardarModalQty(){
   if(!modalId) return;
   carrito[modalId].cant=modalTempCant;
   cantidades[modalId]=modalTempCant;
-  localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
-  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+  guardarCarrito();
   cerrarModal(); renderCarrito();
 }
 function cerrarModal(){ document.getElementById('modalQty').classList.remove('show'); modalId=null; }
-function eliminarItem(id){ delete carrito[id]; delete cantidades[id]; localStorage.setItem('santillos_carrito', JSON.stringify(carrito)); localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades)); renderCarrito(); }
-function vaciarCarrito(){ if(confirm('¿Vaciar carrito?')){ carrito={}; cantidades={}; localStorage.setItem('santillos_carrito', JSON.stringify(carrito)); localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades)); renderCarrito(); } }
+function eliminarItem(id){ delete carrito[id]; delete cantidades[id]; guardarCarrito(); renderCarrito(); }
+
+function abrirVaciarModal(){
+  if(Object.keys(carrito).length===0) return;
+  document.getElementById('modalVaciar').classList.add('show');
+}
+function cerrarVaciarModal(){ document.getElementById('modalVaciar').classList.remove('show'); }
+function confirmarVaciar(){
+  carrito={}; cantidades={};
+  guardarCarrito();
+  cerrarVaciarModal();
+  renderCarrito();
+}
 function irAPagar(){ location.href='checkout.html'; }
 </script>
 </body>

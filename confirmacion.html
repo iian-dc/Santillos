@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pedido Confirmado - Santillos</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
@@ -9,160 +9,171 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;min-height:100vh;position:relative;overflow-x:hidden}
-.header{padding:18px 16px;display:flex;align-items:center;gap:12px;background:#0f0f0f;border-bottom:1px solid #1e1e1e}
-.header h1{font-size:18px;font-weight:800}
-.card{background:#1c1c1c;border:1px solid #2a2a2a;border-radius:16px;margin:12px;padding:14px}
-.confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
-.confetti span{position:absolute;width:8px;height:8px;border-radius:50%;animation:fall 2.5s ease-in forwards}
-
-/* TARJETA CONFIRMADO TRANSPARENTE */
-.toast-confirm{position:fixed;top:12px;left:12px;right:12px;background:rgba(28,28,28,0.88);backdrop-filter:blur(14px);border:1px solid rgba(34,197,94,0.35);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px;z-index:10000;box-shadow:0 8px 30px rgba(0,0,0,0.6);transform:translateY(-140%);transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);max-width:476px;margin:0 auto}
-.toast-confirm.show{transform:translateY(0)}
-.toast-icon{width:48px;height:48px;background:linear-gradient(135deg,#22c55e,#16a34a);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 20px rgba(34,197,94,0.5)}
-.toast-icon i{color:#fff;font-size:22px}
-.toast-text{flex:1}
-.toast-text b{display:block;font-size:13px;font-weight:800;color:#fff}
-.toast-text span{font-size:11px;color:#aaa;display:flex;align-items:center;gap:5px}
-.toast-text span i{color:#22c55e;font-size:10px}
-.toast-close{width:28px;height:28px;background:rgba(255,255,255,0.08);border-radius:50%;border:none;color:#aaa;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
-@keyframes fall{0%{transform:translateY(-20px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(0);opacity:0}}
-
-/* TRACKING */
-.step{display:flex;gap:12px;position:relative;padding-bottom:20px}
-.step:last-child{padding-bottom:0}
-.step-line{position:absolute;left:17px;top:36px;bottom:0;width:2px;background:#2a2a2a}
-.step-circle{width:36px;height:36px;border-radius:50%;background:#2a2a2a;border:2px solid #3a3a3a;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;transition:all 0.4s}
-.step.active .step-circle{background:#22c55e;border-color:#22c55e;box-shadow:0 0 15px rgba(34,197,94,0.5)}
-.step.done .step-circle{background:#22c55e;border-color:#22c55e}
-.step-circle i{font-size:14px;color:#777}.step.active .step-circle i,.step.done .step-circle i{color:#fff}
-.step-info b{font-size:12px;display:block}.step-info span{font-size:10px;color:#888}
-.step.active b{color:#fff}
-
-.btns{display:flex;gap:10px;margin:16px 12px}
-.btn{flex:1;padding:14px;border-radius:14px;border:none;font-weight:800;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
-.btn-new{background:#1c1c1c;border:1px solid #333;color:#fff}
-.btn-call{background:#5e0a28;color:#fff}
-
-.item-res{display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;color:#ccc}
+body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16px}
+h1{font-size:22px;font-weight:800;margin-bottom:16px}
+.card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:18px;padding:16px;margin-bottom:14px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid #2a2a2a;padding-bottom:10px}
+.client-name{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%}
+.badge{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:800;background:#1a2f1a;color:#22c55e;border:1px solid #22c55e}
+.badge.preparando{background:#2a2a1a;color:#eab308;border-color:#eab308}
+.badge.camino{background:#1a2535;color:#3b82f6;border-color:#3b82f6}
+.badge.entregado{background:#1a2f1a;color:#22c55e;border-color:#22c55e}
+.row{display:flex;justify-content:space-between;margin:6px 0;font-size:13px}
+.row span:first-child{color:#999}
+.row.total span{font-weight:800;font-size:15px;color:#fff}
+.row.total span:last-child{font-size:16px}
 .envio-free{color:#22c55e!important;font-weight:800}
+.direccion{margin-top:10px;font-size:12px;color:#aaa;display:flex;gap:6px;align-items:flex-start}
+.direccion i{color:#22c55e;margin-top:2px}
+.productos{margin-top:12px;border-top:1px solid #2a2a2a;padding-top:10px}
+.prod{font-size:11px;color:#ccc;margin:3px 0;display:flex;justify-content:space-between}
+
+.timeline-title{font-size:14px;font-weight:800;margin-bottom:14px}
+.step{display:flex;gap:12px;margin-bottom:18px;opacity:0.4;transition:all 0.3s}
+.step.active{opacity:1}
+.step-icon{width:42px;height:42px;border-radius:50%;background:#2a2a2a;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all 0.3s}
+.step.active .step-icon{background:#22c55e;color:#fff;border-color:#22c55e;box-shadow:0 0 15px rgba(34,197,94,0.4)}
+.step-info b{font-size:13px;display:block}
+.step-info span{font-size:11px;color:#888}
+
+.btns{display:flex;gap:12px;margin-top:16px}
+.btn{flex:1;padding:14px;border-radius:16px;border:none;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.btn-gray{background:#2a2a2a;color:#fff;border:1px solid #333}
+.btn-purple{background:#5e0a28;color:#fff}
 </style>
 </head>
 <body>
-<div class="confetti" id="confetti"></div>
+<h1>Seguimiento de tu pedido</h1>
 
-<div class="toast-confirm" id="toastConfirm">
-  <div class="toast-icon"><i class="fa-solid fa-check"></i></div>
-  <div class="toast-text">
-    <b>¡Pedido Confirmado!</b>
-    <span><i class="fa-solid fa-utensils"></i> <i class="fa-solid fa-bell"></i> Tu delicia ya está en proceso <i class="fa-solid fa-fire"></i></span>
+<div class="card" id="cardResumen">
+  <div class="card-head">
+    <div class="client-name" id="nombreCliente">#Cargando...</div>
+    <div class="badge" id="badgeEstado">PENDIENTE</div>
   </div>
-  <button class="toast-close" onclick="cerrarToast()"><i class="fa-solid fa-xmark"></i></button>
-</div>
-
-<div class="header"><h1>Seguimiento de tu pedido</h1></div>
-
-<div class="card" id="infoPedido">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <b style="font-size:13px" id="idPedido">#Cargando...</b>
-    <span style="font-size:10px;background:#22c55e22;color:#22c55e;padding:4px 8px;border-radius:20px;font-weight:800" id="estadoTxt">PENDIENTE</span>
-  </div>
-  <div id="listaItems"></div>
-  <div style="border-top:1px solid #2a2a2a;margin-top:8px;padding-top:8px">
-    <div class="item-res"><span>Subtotal</span><span id="subTxt">--</span></div>
-    <div class="item-res"><span>Envío</span><span id="envTxt" class="envio-free">GRATIS</span></div>
-    <div class="item-res" style="font-weight:800;color:#fff;font-size:12px"><span>Total</span><span id="totTxt">--</span></div>
-  </div>
-  <div style="margin-top:10px;font-size:10px;color:#888"><i class="fa-solid fa-location-dot" style="color:#22c55e"></i> <span id="dirTxt">--</span></div>
+  <div class="row"><span>Subtotal</span><span id="subtotal">--</span></div>
+  <div class="row"><span>Envío</span><span id="envio" class="envio-free">--</span></div>
+  <div class="row total"><span>Total</span><span id="total">--</span></div>
+  <div class="direccion"><i class="fa-solid fa-location-dot"></i><span id="direccionTxt">--</span></div>
+  <div class="productos" id="listaProductos"></div>
 </div>
 
 <div class="card">
-  <b style="font-size:13px;display:block;margin-bottom:12px">Estado en tiempo real</b>
-  <div class="step done active" id="s1"><div class="step-line"></div><div class="step-circle"><i class="fa-solid fa-receipt"></i></div><div class="step-info"><b>Pedido Recibido</b><span>Hemos recibido tu orden</span></div></div>
-  <div class="step" id="s2"><div class="step-line"></div><div class="step-circle"><i class="fa-solid fa-fire-burner"></i></div><div class="step-info"><b>Preparando</b><span>La cocina está preparando tu pedido</span></div></div>
-  <div class="step" id="s3"><div class="step-line"></div><div class="step-circle"><i class="fa-solid fa-motorcycle"></i></div><div class="step-info"><b>En camino</b><span>Tu pedido va hacia ti</span></div></div>
-  <div class="step" id="s4"><div class="step-circle"><i class="fa-solid fa-house"></i></div><div class="step-info"><b>Entregado</b><span>¡Disfruta tu pedido!</span></div></div>
+  <div class="timeline-title">Estado en tiempo real</div>
+  
+  <div class="step active" id="stepRecibido">
+    <div class="step-icon"><i class="fa-solid fa-file-lines"></i></div>
+    <div class="step-info"><b>Pedido Recibido</b><span>Hemos recibido tu orden</span></div>
+  </div>
+  <div class="step" id="stepPreparando">
+    <div class="step-icon"><i class="fa-solid fa-fire-burner"></i></div>
+    <div class="step-info"><b>Preparando</b><span>La cocina está preparando tu pedido</span></div>
+  </div>
+  <div class="step" id="stepCamino">
+    <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
+    <div class="step-info"><b>En camino</b><span>Tu pedido va hacia ti</span></div>
+  </div>
+  <div class="step" id="stepEntregado">
+    <div class="step-icon"><i class="fa-solid fa-house"></i></div>
+    <div class="step-info"><b>Entregado</b><span>¡Disfruta tu pedido!</span></div>
+  </div>
 </div>
 
 <div class="btns">
-  <button class="btn btn-new" onclick="nuevoPedido()"><i class="fa-solid fa-rotate"></i> Nuevo pedido</button>
-  <a class="btn btn-call" href="tel:+524121234567"><i class="fa-solid fa-phone"></i> Llamar restaurante</a>
+  <a href="menu.html" class="btn btn-gray"><i class="fa-solid fa-rotate"></i> Nuevo pedido</a>
+  <a href="tel:+5210000000000" class="btn btn-purple"><i class="fa-solid fa-phone"></i> Llamar restaurante</a>
 </div>
 
 <script>
-const firebaseConfig={apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",authDomain:"santillos-1ac6d.firebaseapp.com",databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",projectId:"santillos-1ac6d",storageBucket:"santillos-1ac6d.firebasestorage.app",messagingSenderId:"285600299102",appId:"1:285600299102:web:9590597c2b3d8888821ccf"};
-firebase.initializeApp(firebaseConfig);const db=firebase.database();
-const params=new URLSearchParams(window.location.search);
-const id=params.get('id') || localStorage.getItem('santillos_ultimo_pedido');
-if(!id) window.location.href='index.html';
-document.getElementById('idPedido').innerText='#'+id.substring(0,8).toUpperCase();
+const firebaseConfigPedidos={
+  apiKey:"AIzaSyD1eh7jbI-T43XvMErYsxi9C_fw4PI61oA",
+  authDomain:"santillos-1ac6d.firebaseapp.com",
+  databaseURL:"https://santillos-1ac6d-default-rtdb.firebaseio.com",
+  projectId:"santillos-1ac6d",
+  storageBucket:"santillos-1ac6d.firebasestorage.app",
+  messagingSenderId:"285600299102",
+  appId:"1:285600299102:web:9590597c2b3d8888821ccf"
+};
+firebase.initializeApp(firebaseConfigPedidos);
+const db=firebase.database();
 
-function mostrarToast(){
-  const t=document.getElementById('toastConfirm');
-  const conf=document.getElementById('confetti');
-  const colors=['#22c55e','#16a34a','#facc15','#5e0a28','#ffffff'];
-  for(let i=0;i<35;i++){
-    const s=document.createElement('span');
-    s.style.left=Math.random()*100+'%';
-    s.style.background=colors[Math.floor(Math.random()*colors.length)];
-    s.style.animationDelay=(Math.random()*0.5)+'s';
-    s.style.top='-10px';
-    conf.appendChild(s);
-  }
-  setTimeout(()=>t.classList.add('show'),200);
-  setTimeout(()=>cerrarToast(),3000);
-}
-function cerrarToast(){
-  document.getElementById('toastConfirm').classList.remove('show');
-  setTimeout(()=>document.getElementById('confetti').innerHTML='',3500);
-}
-mostrarToast();
+// Obtener ID del pedido
+let pedidoId = localStorage.getItem('santillos_ultimo_pedido_id');
+const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('id')) pedidoId = urlParams.get('id');
 
-function pintarEstado(estado){
-  const orden=['pendiente','preparando','en_camino','entregado'];
-  let idx=orden.indexOf(estado);
-  if(idx<0) idx=0;
-  document.getElementById('estadoTxt').innerText=estado.replace('_',' ').toUpperCase();
-  for(let i=1;i<=4;i++){
-    const el=document.getElementById('s'+i);
-    el.classList.remove('active','done');
-    if(i-1<idx){ el.classList.add('done'); }
-    if(i-1===idx){ el.classList.add('active','done'); }
-  }
-}
+let pedidoLocal = null;
+try{ pedidoLocal = JSON.parse(localStorage.getItem('santillos_ultimo_pedido')||'null'); }catch(e){}
 
-db.ref('pedidos/'+id).on('value', snap=>{
-  const data=snap.val();
+function pintarPedido(data){
   if(!data) return;
-  let html=''; let subt=0;
-  if(data.carrito){
-    Object.values(data.carrito).forEach(p=>{
-      html+=`<div class="item-res"><span>${p.nombre} x${p.cant}</span><span>$${p.precio*p.cant}</span></div>`;
-    });
-    subt=data.subtotal||0;
-  }
-  document.getElementById('listaItems').innerHTML=html;
-  document.getElementById('subTxt').innerText='$'+(data.subtotal||subt);
-  // ENVIO SIEMPRE GRATIS EN VERDE COMO PEDISTE
-  const envioEl=document.getElementById('envTxt');
-  if((data.envio||0)===0){
-    envioEl.innerText='GRATIS';
-    envioEl.className='envio-free';
+  document.getElementById('nombreCliente').innerText = '#'+(data.cliente?.nombre || 'CLIENTE').toUpperCase();
+  document.getElementById('subtotal').innerText = '$'+(data.subtotal||0);
+  document.getElementById('total').innerText = '$'+(data.total||0);
+  
+  if(Number(data.envio||0)===0){
+    document.getElementById('envio').innerText='GRATIS';
+    document.getElementById('envio').className='envio-free';
   }else{
-    envioEl.innerText='$'+data.envio;
-    envioEl.className='';
+    document.getElementById('envio').innerText='$'+data.envio;
+    document.getElementById('envio').className='';
   }
-  document.getElementById('totTxt').innerText='$'+(data.total||subt);
-  document.getElementById('dirTxt').innerText=data.cliente?.direccion||'--';
-  pintarEstado(data.estado||'pendiente');
-});
+  
+  document.getElementById('direccionTxt').innerText = (data.cliente?.direccion||'') + (data.cliente?.referencia ? ' - '+data.cliente.referencia : '');
+  
+  // Productos
+  let html='';
+  if(data.productos){
+    Object.values(data.productos).forEach(p=>{
+      html+=`<div class="prod"><span>${p.nombre} x${p.cant}</span><span>$${Number(p.precio||0)*Number(p.cant||0)}</span></div>`;
+    });
+  }
+  document.getElementById('listaProductos').innerHTML=html;
+  
+  actualizarEstado(data.estado||'nuevo');
+}
 
-function nuevoPedido(){
-  // Mantiene cliente (ubicación guardada) pero limpia carrito y ultimo pedido
-  localStorage.removeItem('santillos_carrito');
-  localStorage.removeItem('santillos_ultimo_pedido');
-  // Si ya tenia cliente, lo deja para que no pregunte ubicación de nuevo
-  window.location.href='index.html';
+function actualizarEstado(estado){
+  const badge=document.getElementById('badgeEstado');
+  estado=(estado||'nuevo').toLowerCase();
+  
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('stepRecibido').classList.add('active');
+  badge.innerText='PENDIENTE';
+  badge.className='badge';
+
+  if(estado==='nuevo' || estado==='pendiente' || estado==='recibido'){
+    badge.innerText='PENDIENTE';
+  }
+  if(estado==='preparando'){
+    document.getElementById('stepPreparando').classList.add('active');
+    badge.innerText='PREPARANDO'; badge.className='badge preparando';
+  }
+  if(estado==='en_camino' || estado==='camino' || estado==='en camino'){
+    document.getElementById('stepPreparando').classList.add('active');
+    document.getElementById('stepCamino').classList.add('active');
+    badge.innerText='EN CAMINO'; badge.className='badge camino';
+  }
+  if(estado==='entregado'){
+    document.getElementById('stepPreparando').classList.add('active');
+    document.getElementById('stepCamino').classList.add('active');
+    document.getElementById('stepEntregado').classList.add('active');
+    badge.innerText='ENTREGADO'; badge.className='badge entregado';
+  }
+}
+
+if(pedidoId){
+  // Tiempo real con admin
+  db.ref('pedidos/'+pedidoId).on('value', snap=>{
+    if(snap.exists()){
+      pintarPedido(snap.val());
+    } else if(pedidoLocal){
+      pintarPedido(pedidoLocal);
+    }
+  });
+} else if(pedidoLocal){
+  pintarPedido(pedidoLocal);
+} else {
+  document.getElementById('nombreCliente').innerText='#CLIENTE';
 }
 </script>
 </body>

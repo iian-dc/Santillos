@@ -7,10 +7,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16px}
-h1{font-size:22px;font-weight:800;margin-bottom:16px}
+body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16px;overflow-x:hidden}
+.success-header{text-align:center;margin-bottom:18px;animation:pop 0.6s ease}
+@keyframes pop{0%{transform:scale(0.8);opacity:0}100%{transform:scale(1);opacity:1}}
+.success-icon{width:72px;height:72px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:32px;color:#fff;box-shadow:0 0 25px rgba(34,197,94,0.5)}
+.success-header h1{font-size:20px;font-weight:800}
+.success-header p{font-size:12px;color:#aaa;margin-top:4px}
 .card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:18px;padding:16px;margin-bottom:14px}
 .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid #2a2a2a;padding-bottom:10px}
 .client-name{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%}
@@ -28,13 +33,16 @@ h1{font-size:22px;font-weight:800;margin-bottom:16px}
 .productos{margin-top:12px;border-top:1px solid #2a2a2a;padding-top:10px}
 .prod{font-size:11px;color:#ccc;margin:3px 0;display:flex;justify-content:space-between}
 
-.timeline-title{font-size:14px;font-weight:800;margin-bottom:14px}
-.step{display:flex;gap:12px;margin-bottom:18px;opacity:0.4;transition:all 0.3s}
-.step.active{opacity:1}
-.step-icon{width:42px;height:42px;border-radius:50%;background:#2a2a2a;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all 0.3s}
-.step.active .step-icon{background:#22c55e;color:#fff;border-color:#22c55e;box-shadow:0 0 15px rgba(34,197,94,0.4)}
+.timeline-title{font-size:14px;font-weight:800;margin-bottom:18px}
+.step{display:flex;gap:12px;position:relative;padding-bottom:22px}
+.step:last-child{padding-bottom:0}
+.step-line{position:absolute;left:21px;top:44px;width:2px;height:calc(100% - 22px);background:#2a2a2a;z-index:0}
+.step.active .step-line{background:#22c55e}
+.step-icon{width:42px;height:42px;border-radius:50%;background:#2a2a2a;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;z-index:1;transition:all 0.3s}
+.step.active .step-icon{background:#22c55e;color:#fff;border-color:#22c55e;box-shadow:0 0 12px rgba(34,197,94,0.4)}
 .step-info b{font-size:13px;display:block}
 .step-info span{font-size:11px;color:#888}
+.step{opacity:0.5} .step.active{opacity:1}
 
 .btns{display:flex;gap:12px;margin-top:16px}
 .btn{flex:1;padding:14px;border-radius:16px;border:none;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
@@ -43,7 +51,12 @@ h1{font-size:22px;font-weight:800;margin-bottom:16px}
 </style>
 </head>
 <body>
-<h1>Seguimiento de tu pedido</h1>
+
+<div class="success-header">
+  <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+  <h1>¡Tu delicia ha sido exitosa!</h1>
+  <p>Tu pedido ha sido confirmado con éxito 🎉</p>
+</div>
 
 <div class="card" id="cardResumen">
   <div class="card-head">
@@ -61,14 +74,17 @@ h1{font-size:22px;font-weight:800;margin-bottom:16px}
   <div class="timeline-title">Estado en tiempo real</div>
   
   <div class="step active" id="stepRecibido">
+    <div class="step-line"></div>
     <div class="step-icon"><i class="fa-solid fa-file-lines"></i></div>
     <div class="step-info"><b>Pedido Recibido</b><span>Hemos recibido tu orden</span></div>
   </div>
   <div class="step" id="stepPreparando">
+    <div class="step-line"></div>
     <div class="step-icon"><i class="fa-solid fa-fire-burner"></i></div>
     <div class="step-info"><b>Preparando</b><span>La cocina está preparando tu pedido</span></div>
   </div>
   <div class="step" id="stepCamino">
+    <div class="step-line"></div>
     <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
     <div class="step-info"><b>En camino</b><span>Tu pedido va hacia ti</span></div>
   </div>
@@ -96,7 +112,6 @@ const firebaseConfigPedidos={
 firebase.initializeApp(firebaseConfigPedidos);
 const db=firebase.database();
 
-// Obtener ID del pedido
 let pedidoId = localStorage.getItem('santillos_ultimo_pedido_id');
 const urlParams = new URLSearchParams(window.location.search);
 if(urlParams.get('id')) pedidoId = urlParams.get('id');
@@ -104,12 +119,23 @@ if(urlParams.get('id')) pedidoId = urlParams.get('id');
 let pedidoLocal = null;
 try{ pedidoLocal = JSON.parse(localStorage.getItem('santillos_ultimo_pedido')||'null'); }catch(e){}
 
+// CONFETI PIÑATA COMO LO TENIAS
+function lanzarConfeti(){
+  var duration = 2500;
+  var end = Date.now() + duration;
+  (function frame(){
+    confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors:['#22c55e','#5e0a28','#ffffff','#facc15'] });
+    confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors:['#22c55e','#5e0a28','#ffffff','#facc15'] });
+    if(Date.now() < end) requestAnimationFrame(frame);
+  }());
+}
+setTimeout(lanzarConfeti, 300);
+
 function pintarPedido(data){
   if(!data) return;
   document.getElementById('nombreCliente').innerText = '#'+(data.cliente?.nombre || 'CLIENTE').toUpperCase();
   document.getElementById('subtotal').innerText = '$'+(data.subtotal||0);
   document.getElementById('total').innerText = '$'+(data.total||0);
-  
   if(Number(data.envio||0)===0){
     document.getElementById('envio').innerText='GRATIS';
     document.getElementById('envio').className='envio-free';
@@ -117,10 +143,7 @@ function pintarPedido(data){
     document.getElementById('envio').innerText='$'+data.envio;
     document.getElementById('envio').className='';
   }
-  
   document.getElementById('direccionTxt').innerText = (data.cliente?.direccion||'') + (data.cliente?.referencia ? ' - '+data.cliente.referencia : '');
-  
-  // Productos
   let html='';
   if(data.productos){
     Object.values(data.productos).forEach(p=>{
@@ -128,22 +151,15 @@ function pintarPedido(data){
     });
   }
   document.getElementById('listaProductos').innerHTML=html;
-  
   actualizarEstado(data.estado||'nuevo');
 }
 
 function actualizarEstado(estado){
   const badge=document.getElementById('badgeEstado');
   estado=(estado||'nuevo').toLowerCase();
-  
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('stepRecibido').classList.add('active');
-  badge.innerText='PENDIENTE';
-  badge.className='badge';
-
-  if(estado==='nuevo' || estado==='pendiente' || estado==='recibido'){
-    badge.innerText='PENDIENTE';
-  }
+  badge.innerText='PENDIENTE'; badge.className='badge';
   if(estado==='preparando'){
     document.getElementById('stepPreparando').classList.add('active');
     badge.innerText='PREPARANDO'; badge.className='badge preparando';
@@ -162,18 +178,12 @@ function actualizarEstado(estado){
 }
 
 if(pedidoId){
-  // Tiempo real con admin
   db.ref('pedidos/'+pedidoId).on('value', snap=>{
-    if(snap.exists()){
-      pintarPedido(snap.val());
-    } else if(pedidoLocal){
-      pintarPedido(pedidoLocal);
-    }
+    if(snap.exists()){ pintarPedido(snap.val()); } 
+    else if(pedidoLocal){ pintarPedido(pedidoLocal); }
   });
 } else if(pedidoLocal){
   pintarPedido(pedidoLocal);
-} else {
-  document.getElementById('nombreCliente').innerText='#CLIENTE';
 }
 </script>
 </body>

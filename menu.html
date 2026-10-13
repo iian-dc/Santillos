@@ -57,7 +57,7 @@ body{background:#0f0f0f;color:#fff;padding-bottom:100px;max-width:500px;margin:0
 <div class="img-viewer-overlay" id="imgViewer" onclick="cerrarViewer()"><div class="img-viewer-card" onclick="event.stopPropagation()"><button class="btn-close-img" onclick="cerrarViewer()"><i class="fa-solid fa-xmark"></i></button><img id="viewerImg" src=""></div></div>
 <div class="bottom-nav"><a href="menu.html" class="nav-item-rappi active"><i class="fa-solid fa-house"></i>INICIO</a><div class="nav-wrap"><a href="carrito.html" class="nav-item-rappi"><i class="fa-solid fa-bag-shopping"></i>CARRITO</a><div class="cart-badge" id="cartCount">0</div></div></div>
 <script>
-// BASE NUEVA SANTILLOS-MENU
+// SOLO MENU - SANTILLOS-MENU
 const firebaseConfig={
   apiKey:"AIzaSyCvnHeXuZZ-2IOF3Oas09VNYJK_HLLkau8",
   authDomain:"santillos-menu.firebaseapp.com",
@@ -72,49 +72,32 @@ const db=firebase.database();
 
 if(!localStorage.getItem('santillos_ubicacion_ok')){ window.location.href="index.html"; }
 
-// limpiar cache viejo que estorbaba
+// BORRAR CACHE VIEJO
 localStorage.removeItem('santillos_cache_menu_v2');
 localStorage.removeItem('santillos_cache_order_v2');
 
-let menuData=null;
+let menuData={};
 let categoryOrder=[];
-let cacheConfig=null;
-try{categoryOrder=JSON.parse(localStorage.getItem('santillos_cache_order_v3')||'[]')}catch(e){categoryOrder=[]}
-try{cacheConfig=JSON.parse(localStorage.getItem('santillos_cache_config_v3')||'null')}catch(e){}
-try{menuData=JSON.parse(localStorage.getItem('santillos_cache_data_v3')||'null')}catch(e){}
+let categoriaActiva=null;
+let carrito={};
+let cantidades={};
 
-let categoriaActiva = categoryOrder[0] || null;
-
-let cantidades = {};
-let carrito = {};
-try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades_v3')||'{}'); }catch(e){ cantidades={}; }
-try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito_v3')||'{}'); }catch(e){ carrito={}; }
+try{ carrito = JSON.parse(localStorage.getItem('santillos_carrito')||'{}'); }catch(e){ carrito={}; }
+try{ cantidades = JSON.parse(localStorage.getItem('santillos_cantidades')||'{}'); }catch(e){ cantidades={}; }
 
 function actualizarBadge(){
-  const total = Object.values(carrito).reduce((s,b)=>s+(b.cant||0),0);
-  document.getElementById('cartCount').innerText = total;
+  let total=0;
+  for(let k in carrito) total+=carrito[k].cant||0;
+  document.getElementById('cartCount').innerText=total;
 }
 actualizarBadge();
 
-function aplicarConfig(c){
-  if(!c)return;
-  if(c.portada) document.getElementById('portadaImg').src=c.portada;
-  if(c.logo&&c.logo.length>20){
-    document.getElementById('logoImg').src=c.logo;
-    document.getElementById('logoImg').style.display='block';
-    document.getElementById('logoTxt').style.display='none';
-  }
-  if(c.nombre) document.getElementById('nombreRest').innerText=c.nombre;
-}
-if(cacheConfig) aplicarConfig(cacheConfig);
-
 function renderCategorias(){
  const d=document.getElementById('categorias');
- if(!d||!categoryOrder||categoryOrder.length===0) return;
+ if(!d || categoryOrder.length===0) return;
  if(!categoriaActiva) categoriaActiva=categoryOrder[0];
  d.innerHTML='';
  categoryOrder.forEach(c=>{
-  if(menuData &&!menuData[c]) return;
   const b=document.createElement('button');
   b.className='cat-btn'+(c===categoriaActiva?' active':'');
   b.innerText=c;
@@ -125,117 +108,104 @@ function renderCategorias(){
 
 function renderProductos(){
  const cont=document.getElementById('productos');
- if(!cont||!menuData||!categoriaActiva) return;
- const lista=menuData[categoriaActiva]||[];
+ if(!cont||!categoriaActiva||!menuData[categoriaActiva]) return;
+ const lista=menuData[categoriaActiva];
  let html='';
  lista.forEach((p)=>{
   if(p.disp===false) return;
   const id = p.idReal;
-  const cant = cantidades[id]||0;
-  const accion = cant===0
- ? `<button class="btn-add" data-action="add" data-id="${id}">+</button>`
-  : `<div class="qty-control"><button class="qty-btn" data-action="sub" data-id="${id}">−</button><div class="qty-num">${cant}</div><button class="qty-btn" data-action="add" data-id="${id}">+</button></div>`;
-  html+=`<div class="product-card"><div class="product-img-box" onclick="abrirViewer('${(p.img||'').replace(/'/g,'')}')"><img src="${p.img}" loading="lazy" onerror="this.style.display='none'"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div><div class="action-right">${accion}</div></div></div>`;
+  const cant = cantidades[id]? cantidades[id] : 0;
+  let accion='';
+  if(cant===0){
+    accion = `<button class="btn-add" onclick="sumar('${id}')">+</button>`;
+  } else {
+    accion = `<div class="qty-control"><button class="qty-btn" onclick="restar('${id}')">−</button><div class="qty-num" id="num-${id}">${cant}</div><button class="qty-btn" onclick="sumar('${id}')">+</button></div>`;
+  }
+  html+=`<div class="product-card"><div class="product-img-box" onclick="abrirViewer('${p.img}')"><img src="${p.img}" loading="lazy"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-bottom"><div class="product-price">$${p.price}</div></div><div class="action-right" id="act-${id}">${accion}</div></div></div>`;
  });
- cont.innerHTML=html || `<div style="text-align:center;padding:20px;color:#777">No hay productos en ${categoriaActiva}</div>`;
+ cont.innerHTML=html;
 }
-if(menuData && categoryOrder.length>0){ renderCategorias(); renderProductos(); }
 
-function transformarProductosFirebase(data){
-  let agrupado = {};
-  let cats = new Set();
-  Object.entries(data).forEach(([idReal, val])=>{
-    const cat = (val.categoria || val.cat || 'Extras').trim();
-    if(!agrupado[cat]) agrupado[cat]=[];
+window.sumar = function(idReal){
+  let p=null;
+  for(let cat in menuData){
+    let f = menuData[cat].find(x=>x.idReal===idReal);
+    if(f){ p=f; break; }
+  }
+  if(!p) return;
+  let cant = cantidades[idReal]||0;
+  cant++;
+  if(cant>99) cant=99;
+  cantidades[idReal]=cant;
+  carrito[idReal]={nombre:p.name, precio:p.price, cant:cant, idReal:idReal, img:p.img};
+  guardar();
+  let act = document.getElementById('act-'+idReal);
+  if(act){
+    if(cant===1){
+      act.innerHTML=`<div class="qty-control"><button class="qty-btn" onclick="restar('${idReal}')">−</button><div class="qty-num" id="num-${idReal}">${cant}</div><button class="qty-btn" onclick="sumar('${idReal}')">+</button></div>`;
+    } else {
+      let num = document.getElementById('num-'+idReal);
+      if(num) num.innerText=cant;
+    }
+  }
+}
+
+window.restar = function(idReal){
+  let cant = cantidades[idReal]||0;
+  cant--;
+  if(cant<=0){
+    delete cantidades[idReal];
+    delete carrito[idReal];
+    let act = document.getElementById('act-'+idReal);
+    if(act) act.innerHTML=`<button class="btn-add" onclick="sumar('${idReal}')">+</button>`;
+  } else {
+    cantidades[idReal]=cant;
+    carrito[idReal].cant=cant;
+    let num = document.getElementById('num-'+idReal);
+    if(num) num.innerText=cant;
+  }
+  guardar();
+}
+
+function guardar(){
+  localStorage.setItem('santillos_carrito', JSON.stringify(carrito));
+  localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
+  actualizarBadge();
+}
+
+function transformar(data){
+  let agrupado={};
+  let cats=[];
+  Object.entries(data).forEach(([idReal,val])=>{
+    let cat = (val.categoria||'Extras').trim();
+    if(!agrupado[cat]){ agrupado[cat]=[]; cats.push(cat); }
     agrupado[cat].push({
-      idReal: idReal,
-      name: val.nombre || val.name || 'Sin nombre',
-      price: Number(val.precio || val.price || 0),
-      img: val.imagen || val.img || val.image || '',
+      idReal:idReal,
+      name:val.nombre||val.name||'Sin nombre',
+      price: Number(val.precio||0),
+      img: val.imagen||val.img||'',
       disp: val.disponible!==false
     });
-    cats.add(cat);
   });
-  return { agrupado, cats: Array.from(cats) };
+  return {agrupado,cats};
 }
-
-db.ref('config').once('value').then(s=>{
-  if(s.val()){
-    aplicarConfig(s.val());
-    localStorage.setItem('santillos_cache_config_v3', JSON.stringify(s.val()));
-  }
-});
 
 db.ref('productos').on('value', snap=>{
   if(!snap.exists()){
-    document.getElementById('productos').innerHTML='<div style="text-align:center;padding:30px;color:#999">No hay productos en santillos-menu</div>';
+    document.getElementById('productos').innerHTML='<div style="text-align:center;padding:30px;color:#999">No hay productos</div>';
     return;
   }
-  const res = transformarProductosFirebase(snap.val());
-  menuData = res.agrupado;
-
-  let cats = res.cats;
-  let ordenPreferido = ["Comidas","Bebidas","Postres","Promociones","Extras"];
-  let ordenado = [];
-  ordenPreferido.forEach(o=>{ if(cats.includes(o)) ordenado.push(o); });
-  cats.forEach(c=>{ if(!ordenado.includes(c)) ordenado.push(c); });
-  categoryOrder = ordenado;
-
-  localStorage.setItem('santillos_cache_order_v3', JSON.stringify(categoryOrder));
-  localStorage.setItem('santillos_cache_data_v3', JSON.stringify(menuData));
-
-  if(!categoriaActiva ||!menuData[categoriaActiva]) categoriaActiva=categoryOrder[0];
+  let res = transformar(snap.val());
+  menuData=res.agrupado;
+  // ordenar categorias bonito
+  let pref=["Comidas","Bebidas","Postres","Promociones","Extras"];
+  let ord=[];
+  pref.forEach(p=>{ if(res.cats.includes(p)) ord.push(p); });
+  res.cats.forEach(c=>{ if(!ord.includes(c)) ord.push(c); });
+  categoryOrder=ord;
+  if(!categoriaActiva) categoriaActiva=categoryOrder[0];
   renderCategorias();
   renderProductos();
-});
-
-// CLICK CORREGIDO - AHORA SI SUMA
-document.getElementById('productos').addEventListener('click', function(e){
-  const btn = e.target.closest('[data-action]');
-  if(!btn) return;
-  const idReal = btn.dataset.id;
-  const delta = btn.dataset.action==='add'?1:-1;
-  if(!idReal ||!menuData) return;
-
-  let p = null;
-  for(let cat in menuData){
-    let found = menuData[cat].find(x=>x.idReal===idReal);
-    if(found){ p=found; break; }
-  }
-  if(!p) return;
-
-  let a = cantidades[idReal]||0;
-  a+=delta;
-  if(a<0) a=0;
-  if(a>99) a=99;
-
-  if(a===0){
-    delete carrito[idReal];
-    delete cantidades[idReal];
-  } else {
-    cantidades[idReal]=a;
-    carrito[idReal]={nombre:p.name, precio:p.price, cant:a, idReal:p.idReal, img:p.img};
-  }
-
-  actualizarBadge();
-  localStorage.setItem('santillos_carrito_v3',JSON.stringify(carrito));
-  localStorage.setItem('santillos_cantidades_v3',JSON.stringify(cantidades));
-  // para compatibilidad con tu carrito.html actual
-  localStorage.setItem('santillos_carrito',JSON.stringify(carrito));
-  localStorage.setItem('santillos_cantidades',JSON.stringify(cantidades));
-
-  const card = btn.closest('.product-card');
-  const actionDiv = card? card.querySelector('.action-right') : null;
-  if(!actionDiv) return;
-  if(a===0){
-    actionDiv.innerHTML=`<button class="btn-add" data-action="add" data-id="${idReal}">+</button>`;
-  }else{
-    const num = actionDiv.querySelector('.qty-num');
-    if(num){ num.innerText=a; }
-    else{
-      actionDiv.innerHTML=`<div class="qty-control"><button class="qty-btn" data-action="sub" data-id="${idReal}">−</button><div class="qty-num">${a}</div><button class="qty-btn" data-action="add" data-id="${idReal}">+</button></div>`;
-    }
-  }
 });
 
 function abrirViewer(src){ if(!src) return; document.getElementById('viewerImg').src=src; document.getElementById('imgViewer').classList.add('show'); }

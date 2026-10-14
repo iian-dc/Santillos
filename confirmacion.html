@@ -50,11 +50,19 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
 .btn{flex:1;padding:14px;border-radius:16px;border:none;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
 .btn-gray{background:#2a2a2a;color:#fff;border:1px solid #333}
 .btn-purple{background:#5e0a28;color:#fff}
+
+/* VISTA ENTREGADO */
+.vista-entregado{display:none;text-align:center;padding:20px 10px}
+.vista-entregado.show{display:block;animation:pop 0.5s ease}
+.icon-entregado{width:100px;height:100px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:48px;color:#fff;box-shadow:0 0 40px rgba(34,197,94,0.6)}
+.btn-verde-grande{width:100%;background:#22c55e;color:#fff;border:none;padding:18px;border-radius:18px;font-weight:900;font-size:18px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 25px rgba(34,197,94,0.4)}
+.text-disfruta{margin-top:18px;font-size:22px;font-weight:800;color:#fff}
+.sub-disfruta{margin-top:6px;font-size:13px;color:#aaa}
 </style>
 </head>
 <body>
 
-<div class="success-header">
+<div id="headerNormal" class="success-header">
   <div class="success-icon"><i class="fa-solid fa-check"></i></div>
   <h1>¡Tu delicia ha sido exitosa!</h1>
   <p>Tu pedido ha sido confirmado con éxito 🎉</p>
@@ -72,7 +80,7 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
   <div class="direccion"><i class="fa-solid fa-location-dot"></i><span id="direccionTxt">--</span></div>
 </div>
 
-<div class="card">
+<div class="card" id="cardTimeline">
   <div class="timeline-title">Estado en tiempo real</div>
   <div class="step active" id="stepRecibido">
     <div class="step-line"></div>
@@ -95,9 +103,17 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
   </div>
 </div>
 
-<div class="btns">
-  <a href="menu.html" class="btn btn-gray"><i class="fa-solid fa-rotate"></i> Nuevo pedido</a>
-  <a href="tel:+5210000000000" class="btn btn-purple"><i class="fa-solid fa-phone"></i> Llamar restaurante</a>
+<!-- VISTA CUANDO YA ESTA ENTREGADO -->
+<div class="vista-entregado" id="vistaEntregado">
+  <div class="icon-entregado"><i class="fa-solid fa-check"></i></div>
+  <button class="btn-verde-grande"><i class="fa-solid fa-bag-shopping"></i> PEDIDO ENTREGADO</button>
+  <div class="text-disfruta">¡Disfruta tu pedido!</div>
+  <div class="sub-disfruta">Gracias por elegir Santillos 🍔❤️</div>
+</div>
+
+<div class="btns" id="btnsContainer">
+  <a href="menu.html" class="btn btn-gray" id="btnNuevo"><i class="fa-solid fa-rotate"></i> Nuevo pedido</a>
+  <a href="tel:+5210000000000" class="btn btn-purple" id="btnLlamar"><i class="fa-solid fa-phone"></i> Llamar restaurante</a>
 </div>
 
 <script>
@@ -121,15 +137,26 @@ let pedidoLocal = null;
 try{ pedidoLocal = JSON.parse(localStorage.getItem('santillos_ultimo_pedido')||'null'); }catch(e){}
 
 function lanzarConfeti(){
-  var duration = 2500;
+  var duration = 3000;
   var end = Date.now() + duration;
   (function frame(){
-    confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors:['#22c55e','#5e0a28','#ffffff','#facc15'] });
-    confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors:['#22c55e','#5e0a28','#ffffff','#facc15'] });
+    confetti({ particleCount: 4, angle: 60, spread: 65, origin: { x: 0 }, colors:['#22c55e','#5e0a28','#ffffff','#facc15'] });
+    confetti({ particleCount: 4, angle: 120, spread: 65, origin: { x: 1 }, colors:['#22c55e','#5e0a28','#ffffff','#facc15'] });
     if(Date.now() < end) requestAnimationFrame(frame);
   }());
 }
 setTimeout(lanzarConfeti, 300);
+
+function lanzarConfetiEntregado(){
+  var duration = 4000;
+  var end = Date.now() + duration;
+  (function frame(){
+    confetti({ particleCount: 6, angle: 60, spread: 70, origin: { x: 0 }, colors:['#22c55e','#ffffff','#facc15'] });
+    confetti({ particleCount: 6, angle: 120, spread: 70, origin: { x: 1 }, colors:['#22c55e','#ffffff','#facc15'] });
+    confetti({ particleCount: 2, angle: 90, spread: 80, origin: { x: 0.5, y: 0.6 }, colors:['#22c55e'] });
+    if(Date.now() < end) requestAnimationFrame(frame);
+  }());
+}
 
 function pintarPedido(data){
   if(!data) return;
@@ -163,67 +190,56 @@ function pintarPedido(data){
 function actualizarEstado(estado){
   const badge=document.getElementById('badgeEstado');
   estado=(estado||'pendiente').toLowerCase().trim();
+
+  // RESET VISTAS NORMALES
+  document.getElementById('headerNormal').style.display='block';
+  document.getElementById('cardResumen').style.display='block';
+  document.getElementById('cardTimeline').style.display='block';
+  document.getElementById('vistaEntregado').classList.remove('show');
+  document.getElementById('vistaEntregado').style.display='none';
+  document.getElementById('btnLlamar').style.display='flex';
+  document.getElementById('btnsContainer').style.justifyContent='';
+
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
-  
-  // SIEMPRE RECIBIDO ACTIVO
   document.getElementById('stepRecibido').classList.add('active');
-  badge.innerText='PENDIENTE'; 
-  badge.className='badge';
+  badge.innerText='PENDIENTE'; badge.className='badge';
 
   if(estado==='pendiente' || estado==='nuevo' || estado===''){
-    badge.innerText='PENDIENTE';
-    badge.className='badge';
-    return;
+    badge.innerText='PENDIENTE'; badge.className='badge'; return;
   }
-
   if(estado==='aceptado'){
-    // ACEPTADO = SOLO PEDIDO RECIBIDO EN VERDE
     document.getElementById('stepRecibido').classList.add('active');
-    badge.innerText='PEDIDO RECIBIDO';
-    badge.className='badge recibido';
-    return;
+    badge.innerText='PEDIDO RECIBIDO'; badge.className='badge recibido'; return;
   }
-
   if(estado==='preparando'){
     document.getElementById('stepRecibido').classList.add('active');
     document.getElementById('stepPreparando').classList.add('active');
-    badge.innerText='PREPARANDO';
-    badge.className='badge preparando';
-    return;
+    badge.innerText='PREPARANDO'; badge.className='badge preparando'; return;
   }
-
-  if(estado==='listo' || estado==='esta_listo' || estado==='está listo'){
-    // LISTO = MANTIENE RECIBIDO + PREPARANDO EN VERDE, NO SE APAGA NADA
+  if(estado==='listo' || estado==='esta_listo'){
     document.getElementById('stepRecibido').classList.add('active');
     document.getElementById('stepPreparando').classList.add('active');
-    badge.innerText='¡ESTÁ LISTO!';
-    badge.className='badge listo';
-    return;
+    badge.innerText='¡ESTÁ LISTO!'; badge.className='badge listo'; return;
   }
-
   if(estado==='en_camino' || estado==='en camino' || estado==='camino'){
     document.getElementById('stepRecibido').classList.add('active');
     document.getElementById('stepPreparando').classList.add('active');
     document.getElementById('stepCamino').classList.add('active');
-    badge.innerText='EN CAMINO';
-    badge.className='badge camino';
-    return;
+    badge.innerText='EN CAMINO'; badge.className='badge camino'; return;
   }
-
   if(estado==='entregado'){
-    document.getElementById('stepRecibido').classList.add('active');
-    document.getElementById('stepPreparando').classList.add('active');
-    document.getElementById('stepCamino').classList.add('active');
-    document.getElementById('stepEntregado').classList.add('active');
-    badge.innerText='ENTREGADO';
-    badge.className='badge entregado';
+    // MODO ENTREGADO - QUITAR TODO Y MOSTRAR SOLO VISTA VERDE
+    document.getElementById('headerNormal').style.display='none';
+    document.getElementById('cardResumen').style.display='none';
+    document.getElementById('cardTimeline').style.display='none';
+    document.getElementById('vistaEntregado').style.display='block';
+    document.getElementById('vistaEntregado').classList.add('show');
+    document.getElementById('btnLlamar').style.display='none';
+    lanzarConfetiEntregado();
     return;
   }
-
-  if(estado==='cancelado' || estado==='rechazado'){
-    badge.innerText='CANCELADO';
-    badge.className='badge cancelado';
-    return;
+  if(estado==='cancelado'){
+    badge.innerText='CANCELADO'; badge.className='badge cancelado'; return;
   }
 }
 

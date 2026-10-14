@@ -20,9 +20,12 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
 .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #2a2a2a}
 .client-name{font-weight:800;font-size:16px;letter-spacing:0.5px}
 .badge{padding:5px 12px;border-radius:20px;font-size:10px;font-weight:800;background:#1a2f1a;color:#22c55e;border:1px solid #22c55e}
+.badge.recibido{background:#1a2f1a;color:#22c55e;border-color:#22c55e}
 .badge.preparando{background:#2a2a1a;color:#eab308;border-color:#eab308}
+.badge.listo{background:#1a2535;color:#3b82f6;border-color:#3b82f6}
 .badge.camino{background:#1a2535;color:#3b82f6;border-color:#3b82f6}
 .badge.entregado{background:#1a2f1a;color:#22c55e;border-color:#22c55e}
+.badge.cancelado{background:#2a1a1a;color:#ef4444;border-color:#ef4444}
 .prod{font-size:13px;color:#fff;margin:0 0 8px 0;display:flex;justify-content:space-between;font-weight:600}
 .prod span:last-child{font-weight:800}
 .productos{padding-bottom:12px;border-bottom:1px solid #2a2a2a;margin-bottom:12px}
@@ -62,16 +65,10 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
     <div class="client-name" id="codigoPedido">#ST-0000</div>
     <div class="badge" id="badgeEstado">PENDIENTE</div>
   </div>
-
-  <!-- 1. PRODUCTOS PRIMERO -->
   <div class="productos" id="listaProductos"></div>
-
-  <!-- 2. PRECIOS -->
   <div class="row"><span>Subtotal</span><span id="subtotal">--</span></div>
   <div class="row"><span>Envío</span><span id="envio" class="envio-free">--</span></div>
   <div class="row total"><span>Total</span><span id="total">--</span></div>
-
-  <!-- 3. DIRECCION AL FINAL -->
   <div class="direccion"><i class="fa-solid fa-location-dot"></i><span id="direccionTxt">--</span></div>
 </div>
 
@@ -136,15 +133,12 @@ setTimeout(lanzarConfeti, 300);
 
 function pintarPedido(data){
   if(!data) return;
-  
-  // NUMERO DE PEDIDO COMO EN ADMIN ST-000X
   let numero = data.numero || '';
   if(!numero){
     let corr = data.correlativo ? String(data.correlativo).slice(-4) : '0001';
     numero = 'ST-'+String(corr).padStart(4,'0');
   }
   document.getElementById('codigoPedido').innerText = '#'+numero;
-
   document.getElementById('subtotal').innerText = '$'+(data.subtotal||0);
   document.getElementById('total').innerText = '$'+(data.total||0);
   let env = data.envio!=null ? data.envio : data.costoEnvio;
@@ -156,7 +150,6 @@ function pintarPedido(data){
     document.getElementById('envio').className='';
   }
   document.getElementById('direccionTxt').innerText = (data.cliente?.direccion||data.direccion||'') + (data.cliente?.referencia||data.referencia ? ' - '+(data.cliente?.referencia||data.referencia) : '');
-
   let html='';
   if(data.productos){
     Object.values(data.productos).forEach(p=>{
@@ -164,29 +157,73 @@ function pintarPedido(data){
     });
   }
   document.getElementById('listaProductos').innerHTML=html || '<div class="prod"><span>Producto</span><span>--</span></div>';
-  actualizarEstado(data.estado||'nuevo');
+  actualizarEstado(data.estado||'pendiente');
 }
 
 function actualizarEstado(estado){
   const badge=document.getElementById('badgeEstado');
-  estado=(estado||'nuevo').toLowerCase();
+  estado=(estado||'pendiente').toLowerCase().trim();
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  
+  // SIEMPRE RECIBIDO ACTIVO
   document.getElementById('stepRecibido').classList.add('active');
-  badge.innerText='PENDIENTE'; badge.className='badge';
-  if(estado==='aceptado' || estado==='preparando'){
-    document.getElementById('stepPreparando').classList.add('active');
-    badge.innerText='PREPARANDO'; badge.className='badge preparando';
+  badge.innerText='PENDIENTE'; 
+  badge.className='badge';
+
+  if(estado==='pendiente' || estado==='nuevo' || estado===''){
+    badge.innerText='PENDIENTE';
+    badge.className='badge';
+    return;
   }
-  if(estado==='en_camino' || estado==='camino' || estado==='en camino'){
+
+  if(estado==='aceptado'){
+    // ACEPTADO = SOLO PEDIDO RECIBIDO EN VERDE
+    document.getElementById('stepRecibido').classList.add('active');
+    badge.innerText='PEDIDO RECIBIDO';
+    badge.className='badge recibido';
+    return;
+  }
+
+  if(estado==='preparando'){
+    document.getElementById('stepRecibido').classList.add('active');
+    document.getElementById('stepPreparando').classList.add('active');
+    badge.innerText='PREPARANDO';
+    badge.className='badge preparando';
+    return;
+  }
+
+  if(estado==='listo' || estado==='esta_listo' || estado==='está listo'){
+    // LISTO = MANTIENE RECIBIDO + PREPARANDO EN VERDE, NO SE APAGA NADA
+    document.getElementById('stepRecibido').classList.add('active');
+    document.getElementById('stepPreparando').classList.add('active');
+    badge.innerText='¡ESTÁ LISTO!';
+    badge.className='badge listo';
+    return;
+  }
+
+  if(estado==='en_camino' || estado==='en camino' || estado==='camino'){
+    document.getElementById('stepRecibido').classList.add('active');
     document.getElementById('stepPreparando').classList.add('active');
     document.getElementById('stepCamino').classList.add('active');
-    badge.innerText='EN CAMINO'; badge.className='badge camino';
+    badge.innerText='EN CAMINO';
+    badge.className='badge camino';
+    return;
   }
+
   if(estado==='entregado'){
+    document.getElementById('stepRecibido').classList.add('active');
     document.getElementById('stepPreparando').classList.add('active');
     document.getElementById('stepCamino').classList.add('active');
     document.getElementById('stepEntregado').classList.add('active');
-    badge.innerText='ENTREGADO'; badge.className='badge entregado';
+    badge.innerText='ENTREGADO';
+    badge.className='badge entregado';
+    return;
+  }
+
+  if(estado==='cancelado' || estado==='rechazado'){
+    badge.innerText='CANCELADO';
+    badge.className='badge cancelado';
+    return;
   }
 }
 

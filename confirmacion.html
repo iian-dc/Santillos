@@ -50,14 +50,13 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
 .btn{flex:1;padding:14px;border-radius:16px;border:none;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
 .btn-gray{background:#2a2a2a;color:#fff;border:1px solid #333}
 .btn-purple{background:#5e0a28;color:#fff}
-
-/* VISTA ENTREGADO */
-.vista-entregado{display:none;text-align:center;padding:20px 10px}
+.vista-entregado{display:none;text-align:center;padding:10px 10px 0}
 .vista-entregado.show{display:block;animation:pop 0.5s ease}
 .icon-entregado{width:100px;height:100px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:48px;color:#fff;box-shadow:0 0 40px rgba(34,197,94,0.6)}
-.btn-verde-grande{width:100%;background:#22c55e;color:#fff;border:none;padding:18px;border-radius:18px;font-weight:900;font-size:18px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 25px rgba(34,197,94,0.4)}
+.btn-verde-grande{width:100%;background:#22c55e;color:#fff;border:none;padding:18px;border-radius:18px;font-weight:900;font-size:18px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 25px rgba(34,197,94,0.4);cursor:pointer;text-decoration:none}
 .text-disfruta{margin-top:18px;font-size:22px;font-weight:800;color:#fff}
 .sub-disfruta{margin-top:6px;font-size:13px;color:#aaa}
+.btn-nuevo-pedido{width:100%;background:#fff;color:#111;border:none;padding:16px;border-radius:16px;font-weight:900;font-size:15px;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;text-decoration:none}
 </style>
 </head>
 <body>
@@ -103,12 +102,12 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding:20px 16
   </div>
 </div>
 
-<!-- VISTA CUANDO YA ESTA ENTREGADO -->
 <div class="vista-entregado" id="vistaEntregado">
   <div class="icon-entregado"><i class="fa-solid fa-check"></i></div>
-  <button class="btn-verde-grande"><i class="fa-solid fa-bag-shopping"></i> PEDIDO ENTREGADO</button>
+  <div class="btn-verde-grande"><i class="fa-solid fa-bag-shopping"></i> PEDIDO ENTREGADO</div>
   <div class="text-disfruta">¡Disfruta tu pedido!</div>
   <div class="sub-disfruta">Gracias por elegir Santillos 🍔❤️</div>
+  <a href="menu.html" class="btn-nuevo-pedido"><i class="fa-solid fa-rotate"></i> Pedido Nuevo</a>
 </div>
 
 <div class="btns" id="btnsContainer">
@@ -126,8 +125,25 @@ const firebaseConfigPedidos={
   messagingSenderId: "341477805263",
   appId: "1:341477805263:web:b86bc36da92854650afbba"
 };
+const configRepartidor={
+  apiKey: "AIzaSyDQ0SPfwvP_T06wcEXla2UW_SP8CcGYbjI",
+  authDomain: "santillos-repartidor.firebaseapp.com",
+  databaseURL: "https://santillos-repartidor-default-rtdb.firebaseio.com",
+  projectId: "santillos-repartidor"
+};
+const configHistorial={
+  apiKey: "AIzaSyAXXnmGShWhXPKYDgL3RC-zu5ZU9SQzl_Q",
+  authDomain: "santillos-historial.firebaseapp.com",
+  databaseURL: "https://santillos-historial-default-rtdb.firebaseio.com",
+  projectId: "santillos-historial"
+};
+
 firebase.initializeApp(firebaseConfigPedidos);
-const db=firebase.database();
+const dbPedidos = firebase.database();
+const appRep = firebase.initializeApp(configRepartidor, "repartidor2");
+const dbRep = appRep.database();
+const appHist = firebase.initializeApp(configHistorial, "historial2");
+const dbHist = appHist.database();
 
 let pedidoId = localStorage.getItem('santillos_ultimo_pedido_id');
 const urlParams = new URLSearchParams(window.location.search);
@@ -145,10 +161,8 @@ function lanzarConfeti(){
     if(Date.now() < end) requestAnimationFrame(frame);
   }());
 }
-setTimeout(lanzarConfeti, 300);
-
 function lanzarConfetiEntregado(){
-  var duration = 4000;
+  var duration = 4500;
   var end = Date.now() + duration;
   (function frame(){
     confetti({ particleCount: 6, angle: 60, spread: 70, origin: { x: 0 }, colors:['#22c55e','#ffffff','#facc15'] });
@@ -157,6 +171,7 @@ function lanzarConfetiEntregado(){
     if(Date.now() < end) requestAnimationFrame(frame);
   }());
 }
+setTimeout(lanzarConfeti, 300);
 
 function pintarPedido(data){
   if(!data) return;
@@ -187,28 +202,42 @@ function pintarPedido(data){
   actualizarEstado(data.estado||'pendiente');
 }
 
+let yaMostroEntregado=false;
 function actualizarEstado(estado){
   const badge=document.getElementById('badgeEstado');
   estado=(estado||'pendiente').toLowerCase().trim();
 
-  // RESET VISTAS NORMALES
+  if(estado==='entregado'){
+    if(yaMostroEntregado) return;
+    yaMostroEntregado=true;
+    document.getElementById('headerNormal').style.display='none';
+    document.getElementById('cardResumen').style.display='none';
+    document.getElementById('cardTimeline').style.display='none';
+    document.getElementById('btnsContainer').style.display='none';
+    document.getElementById('vistaEntregado').style.display='block';
+    document.getElementById('vistaEntregado').classList.add('show');
+    lanzarConfetiEntregado();
+    localStorage.removeItem('santillos_ultimo_pedido_id');
+    return;
+  }
+
+  // VISTA NORMAL
   document.getElementById('headerNormal').style.display='block';
   document.getElementById('cardResumen').style.display='block';
   document.getElementById('cardTimeline').style.display='block';
   document.getElementById('vistaEntregado').classList.remove('show');
   document.getElementById('vistaEntregado').style.display='none';
+  document.getElementById('btnsContainer').style.display='flex';
   document.getElementById('btnLlamar').style.display='flex';
-  document.getElementById('btnsContainer').style.justifyContent='';
 
   document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
   document.getElementById('stepRecibido').classList.add('active');
   badge.innerText='PENDIENTE'; badge.className='badge';
 
   if(estado==='pendiente' || estado==='nuevo' || estado===''){
-    badge.innerText='PENDIENTE'; badge.className='badge'; return;
+    badge.innerText='PENDIENTE'; return;
   }
-  if(estado==='aceptado'){
-    document.getElementById('stepRecibido').classList.add('active');
+  if(estado==='aceptado' || estado==='recibido'){
     badge.innerText='PEDIDO RECIBIDO'; badge.className='badge recibido'; return;
   }
   if(estado==='preparando'){
@@ -227,26 +256,36 @@ function actualizarEstado(estado){
     document.getElementById('stepCamino').classList.add('active');
     badge.innerText='EN CAMINO'; badge.className='badge camino'; return;
   }
-  if(estado==='entregado'){
-    // MODO ENTREGADO - QUITAR TODO Y MOSTRAR SOLO VISTA VERDE
-    document.getElementById('headerNormal').style.display='none';
-    document.getElementById('cardResumen').style.display='none';
-    document.getElementById('cardTimeline').style.display='none';
-    document.getElementById('vistaEntregado').style.display='block';
-    document.getElementById('vistaEntregado').classList.add('show');
-    document.getElementById('btnLlamar').style.display='none';
-    lanzarConfetiEntregado();
-    return;
-  }
   if(estado==='cancelado'){
     badge.innerText='CANCELADO'; badge.className='badge cancelado'; return;
   }
 }
 
+// ESCUCHA PRINCIPAL + FALLBACK A HISTORIAL
 if(pedidoId){
-  db.ref('pedidos/'+pedidoId).on('value', snap=>{
-    if(snap.exists()){ pintarPedido(snap.val()); } 
-    else if(pedidoLocal){ pintarPedido(pedidoLocal); }
+  // 1. Escucha pedidos principal
+  dbPedidos.ref('pedidos/'+pedidoId).on('value', snap=>{
+    if(snap.exists()){
+      pintarPedido(snap.val());
+    } else {
+      // 2. Si lo borraron, busca en historial_entregados
+      dbHist.ref('historial_entregados/'+pedidoId).once('value').then(h=>{
+        if(h.exists()){
+          actualizarEstado('entregado');
+          if(pedidoLocal) pintarPedido({...pedidoLocal, estado:'entregado'});
+          else pintarPedido(h.val());
+        } else if(pedidoLocal){
+          pintarPedido(pedidoLocal);
+        }
+      });
+    }
+  });
+  // 3. También escucha repartidor por si cambia a en_camino
+  dbRep.ref('pedidos_en_camino/'+pedidoId).on('value', snap=>{
+    if(snap.exists()){
+      let v=snap.val();
+      if(v.estado) actualizarEstado(v.estado);
+    }
   });
 } else if(pedidoLocal){
   pintarPedido(pedidoLocal);

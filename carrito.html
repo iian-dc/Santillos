@@ -29,7 +29,6 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .resumen{margin:16px;background:#1c1c1c;border-radius:18px;padding:16px;border:1px solid #2a2a2a}
 .fila-resumen{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;color:#aaa}
 .fila-resumen.total{color:#fff;font-weight:800;font-size:16px;border-top:1px solid #2a2a2a;margin-top:8px;padding-top:12px}
-/* BOTON CENTRADO CORREGIDO */
 .btn-pedir{width:92%;max-width:468px;background:#5e0a28;color:#fff;border:none;padding:16px;border-radius:25px;font-weight:800;font-size:16px;cursor:pointer;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);margin:0;z-index:101}
 .bottom-nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);width:92%;max-width:460px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;justify-content:space-around;align-items:center;padding:14px 8px;z-index:100;border-radius:28px}
 .nav-item-rappi{display:flex;flex-direction:column;align-items:center;gap:4px;color:#777;font-size:9px;font-weight:800;background:none;border:none;cursor:pointer;min-width:64px;text-decoration:none}
@@ -53,6 +52,13 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .modal-vaciar-actions{display:flex;gap:12px}
 .btn-modal-no{flex:1;background:#22c55e;color:#fff;border:none;padding:13px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
 .btn-modal-si{flex:1;background:#ef4444;color:#fff;border:none;padding:13px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.bloqueo-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
+.bloqueo-overlay.show{display:flex}
+.bloqueo-card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:22px;padding:26px 20px;text-align:center;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.bloqueo-icon{width:80px;height:80px;background:#2a1a1a;border:1px solid #ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:36px;color:#ef4444}
+.bloqueo-card h2{font-size:18px;font-weight:900;margin-bottom:8px}
+.bloqueo-card p{font-size:13px;color:#aaa;line-height:1.5;margin-bottom:18px}
+.btn-llamar-rest{width:100%;background:#5e0a28;color:#fff;border:none;padding:14px;border-radius:14px;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;text-decoration:none}
 </style>
 </head>
 <body>
@@ -98,8 +104,16 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
   </div>
 </div>
 
+<div class="bloqueo-overlay" id="overlayBloqueo">
+  <div class="bloqueo-card">
+    <div class="bloqueo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <h2>Acceso restringido</h2>
+    <p>No puedes realizar pedidos en este momento por tema de seguridad. Tu dispositivo ha sido bloqueado por múltiples cancelaciones.</p>
+    <a href="tel:+524182110000" class="btn-llamar-rest"><i class="fa-solid fa-phone"></i> Llamar a restaurante</a>
+  </div>
+</div>
+
 <script>
-// ===== DOS FIREBASES - ORGANIZADO =====
 const firebaseConfigMenu={
   apiKey:"AIzaSyCvnHeXuZZ-2IOF3Oas09VNYJK_HLLkau8",
   authDomain:"santillos-menu.firebaseapp.com",
@@ -118,9 +132,17 @@ const firebaseConfigPedidos={
   messagingSenderId:"285600299102",
   appId:"1:285600299102:web:9590597c2b3d8888821ccf"
 };
+const firebaseConfigHistorial={
+  apiKey:"AIzaSyAXXnmGShWhXPKYDgL3RC-zu5ZU9SQzl_Q",
+  authDomain:"santillos-historial.firebaseapp.com",
+  databaseURL:"https://santillos-historial-default-rtdb.firebaseio.com",
+  projectId:"santillos-historial"
+};
 const appMenu = firebase.initializeApp(firebaseConfigMenu, "menuApp");
 const appPedidos = firebase.initializeApp(firebaseConfigPedidos, "pedidosApp");
+const appHistorial = firebase.initializeApp(firebaseConfigHistorial, "historialApp");
 const dbPedidos = appPedidos.database();
+const dbHistorial = appHistorial.database();
 
 let sessionId = localStorage.getItem('santillos_session_id');
 if(!sessionId){
@@ -150,7 +172,6 @@ function guardarCarrito(){
   localStorage.setItem('santillos_carrito_v3', JSON.stringify(carrito));
   localStorage.setItem('santillos_cantidades', JSON.stringify(cantidades));
   localStorage.setItem('santillos_cantidades_v3', JSON.stringify(cantidades));
-  // Guardar en prepedido en santillos-pedidos
   try{
     if(Object.keys(carrito).length===0){
       dbPedidos.ref('prepedido/'+sessionId).remove();
@@ -164,6 +185,43 @@ function guardarCarrito(){
     }
   }catch(e){}
 }
+
+// ===== BLOQUEO TIEMPO REAL =====
+let ipActual=''; let ipKeyActual='';
+async function obtenerIP(){
+  try{ let r=await fetch('https://api.ipify.org?format=json'); let d=await r.json(); return d.ip||''; }catch(e){ return ''; }
+}
+function mostrarBloqueo(){ document.getElementById('overlayBloqueo').classList.add('show'); document.body.style.overflow='hidden'; }
+function ocultarBloqueo(){ document.getElementById('overlayBloqueo').classList.remove('show'); document.body.style.overflow=''; }
+async function iniciarBloqueoTiempoReal(){
+  ipActual = await obtenerIP();
+  if(!ipActual) return;
+  ipKeyActual = ipActual.replace(/\./g,'_');
+  dbHistorial.ref('ips_bloqueadas/'+ipKeyActual).on('value', snap=>{
+    if(snap.exists() && snap.val().bloqueado){ mostrarBloqueo(); }
+    else{ verificarEnRegistro(); }
+  });
+  dbHistorial.ref('ips_registro').on('value', snap=>{ verificarEnRegistroSnap(snap); });
+}
+function verificarEnRegistroSnap(snap){
+  if(!snap ||!snap.exists()){ ocultarBloqueo(); return; }
+  let val=snap.val(); let bloqueado=false;
+  for(let k in val){
+    if(val[k].ip===ipActual && val[k].bloqueado){ bloqueado=true; break; }
+    let telLocal = localStorage.getItem('santillos_tel_cliente')||'';
+    if(telLocal && val[k].telefono===telLocal && val[k].bloqueado){ bloqueado=true; break; }
+  }
+  if(bloqueado) mostrarBloqueo();
+  else{
+    dbHistorial.ref('ips_bloqueadas/'+ipKeyActual).once('value').then(s=>{
+      if(!s.exists() ||!s.val().bloqueado) ocultarBloqueo();
+    });
+  }
+}
+async function verificarEnRegistro(){
+  try{ let snap=await dbHistorial.ref('ips_registro').once('value'); verificarEnRegistroSnap(snap); }catch(e){}
+}
+iniciarBloqueoTiempoReal();
 
 function renderCarrito(){
   const cont = document.getElementById('listaCarrito');
@@ -203,13 +261,11 @@ function renderCarrito(){
 
 renderCarrito();
 
-// También escucha prepedido en tiempo real por si viene de menu.html
 try{
   dbPedidos.ref('prepedido/'+sessionId).on('value', snap=>{
     if(snap.exists()){
       const data = snap.val();
       if(data.carrito){
-        // Solo actualiza si local está vacío o diferente
         if(Object.keys(carrito).length===0){
           carrito = data.carrito;
           cantidades = data.cantidades||{};
@@ -250,7 +306,10 @@ function confirmarVaciar(){
   cerrarVaciarModal();
   renderCarrito();
 }
-function irAPagar(){ location.href='resumen.html'; }
+function irAPagar(){
+  if(document.getElementById('overlayBloqueo').classList.contains('show')){ mostrarBloqueo(); return; }
+  location.href='resumen.html';
+}
 </script>
 </body>
 </html>

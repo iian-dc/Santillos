@@ -48,7 +48,7 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
 .icon-x{width:80px;height:80px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;color:#ef4444;font-size:38px}
 .card-bloqueo h2{font-size:20px;font-weight:800;color:#111;margin-bottom:10px}
 .card-bloqueo p{font-size:13px;color:#666;line-height:1.5;margin-bottom:22px}
-.btn-soporte{width:100%;background:#111;color:#fff;border:none;padding:14px;border-radius:30px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-soporte{width:100%;background:#111;color:#fff;border:none;padding:14px;border-radius:30px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
 </style>
 </head>
 <body>
@@ -100,7 +100,7 @@ body{background:#0f0f0f;color:#fff;max-width:500px;margin:0 auto;padding-bottom:
     <div class="icon-x"><i class="fa-solid fa-xmark"></i></div>
     <h2>Pedido no disponible</h2>
     <p>Por motivos de seguridad, no podemos recibir tu pedido en este momento.</p>
-    <button class="btn-soporte" onclick="contactarSoporte()"><i class="fa-brands fa-whatsapp"></i> Escribir a soporte técnico</button>
+    <a href="tel:+524182110000" class="btn-soporte"><i class="fa-solid fa-phone"></i> Llamar a restaurante</a>
   </div>
 </div>
 
@@ -114,8 +114,16 @@ const firebaseConfigPedidos={
   messagingSenderId: "341477805263",
   appId: "1:341477805263:web:b86bc36da92854650afbba"
 };
+const firebaseConfigHistorial={
+  apiKey:"AIzaSyAXXnmGShWhXPKYDgL3RC-zu5ZU9SQzl_Q",
+  authDomain:"santillos-historial.firebaseapp.com",
+  databaseURL:"https://santillos-historial-default-rtdb.firebaseio.com",
+  projectId:"santillos-historial"
+};
 firebase.initializeApp(firebaseConfigPedidos);
 const db=firebase.database();
+const appHistorial = firebase.initializeApp(firebaseConfigHistorial, "historialApp");
+const dbHistorial = appHistorial.database();
 
 const META=200; const PRECIO_KM=12; const TIENDA={lat:21.1560,lng:-100.9340};
 
@@ -131,6 +139,44 @@ try{
 
 let subtotal=0;
 let distanciaKm=0; let costoEnvio=0; let latCliente=null; let lngCliente=null;
+
+// ===== BLOQUEO TIEMPO REAL EN CHECKOUT =====
+let ipActual=''; let ipKeyActual=''; let estaBloqueado=false;
+async function obtenerIP(){
+  try{ let r=await fetch('https://api.ipify.org?format=json'); let d=await r.json(); return d.ip||''; }catch(e){ return ''; }
+}
+function mostrarBloqueoCheckout(){ document.getElementById('overlayIPBloqueadaCheckout').classList.add('show'); estaBloqueado=true; }
+function ocultarBloqueoCheckout(){ document.getElementById('overlayIPBloqueadaCheckout').classList.remove('show'); estaBloqueado=false; }
+async function iniciarBloqueoTiempoReal(){
+  ipActual = await obtenerIP();
+  if(!ipActual) return;
+  ipKeyActual = ipActual.replace(/\./g,'_');
+  dbHistorial.ref('ips_bloqueadas/'+ipKeyActual).on('value', snap=>{
+    if(snap.exists() && snap.val().bloqueado){ mostrarBloqueoCheckout(); }
+    else{ verificarEnRegistro(); }
+  });
+  dbHistorial.ref('ips_registro').on('value', snap=>{ verificarEnRegistroSnap(snap); });
+  document.getElementById('telefono').addEventListener('input', ()=>{ verificarEnRegistro(); });
+}
+function verificarEnRegistroSnap(snap){
+  if(!snap ||!snap.exists()){ ocultarBloqueoCheckout(); return; }
+  let val=snap.val(); let bloqueado=false;
+  let telInput = document.getElementById('telefono').value.trim() || localStorage.getItem('santillos_tel_cliente')||'';
+  for(let k in val){
+    if(val[k].ip===ipActual && val[k].bloqueado){ bloqueado=true; break; }
+    if(telInput && val[k].telefono===telInput && val[k].bloqueado){ bloqueado=true; break; }
+  }
+  if(bloqueado) mostrarBloqueoCheckout();
+  else{
+    dbHistorial.ref('ips_bloqueadas/'+ipKeyActual).once('value').then(s=>{
+      if(!s.exists() ||!s.val().bloqueado) ocultarBloqueoCheckout();
+    });
+  }
+}
+async function verificarEnRegistro(){
+  try{ let snap=await dbHistorial.ref('ips_registro').once('value'); verificarEnRegistroSnap(snap); }catch(e){}
+}
+iniciarBloqueoTiempoReal();
 
 function renderBase(){
   if(Object.keys(carrito).length===0) return;
@@ -185,7 +231,7 @@ try{
 function setupClear(inputId, clearId){
   const input=document.getElementById(inputId); const btn=document.getElementById(clearId);
   const toggle=()=>{ if(input.value.length>0) btn.classList.add('show'); else btn.classList.remove('show'); };
-  input.addEventListener('input',()=>{toggle(); const mapErr={direccion:['fieldDir','errDir'],telefono:['fieldTel','errTel'],nombre:['fieldNom','errNom']}; if(mapErr[inputId]){document.getElementById(mapErr[inputId][0]).classList.remove('error');document.getElementById(mapErr[inputId][1]).classList.remove('show');} guardarCliente(); });
+  input.addEventListener('input',()=>{toggle(); const mapErr={direccion:['fieldDir','errDir'],telefono:['fieldTel','errTel'],nombre:['fieldNom','errNom']}; if(mapErr[inputId]){document.getElementById(mapErr[inputId][0]).classList.remove('error');document.getElementById(mapErr[inputId][1]).classList.remove('show');} guardarCliente(); verificarEnRegistro(); });
   input.addEventListener('focus',toggle); setTimeout(toggle,300);
   btn.addEventListener('click',()=>{ input.value='';btn.classList.remove('show');input.focus(); if(inputId==='direccion'){ if(window.markerCliente){markerCliente.setMap(null);} if(window.directionsRenderer){directionsRenderer.setDirections({routes:[]});} distanciaKm=0; latCliente=null; lngCliente=null; document.getElementById('distanciaTxt').innerText='--'; actualizarTotales(); guardarCliente(); } });
 }
@@ -201,6 +247,7 @@ function guardarCliente(){
       lat: latCliente,
       lng: lngCliente
     }));
+    localStorage.setItem('santillos_tel_cliente', document.getElementById('telefono').value.trim());
   }catch(e){}
 }
 document.getElementById('nombre').addEventListener('input',guardarCliente);
@@ -297,22 +344,36 @@ function validar(){
 }
 
 async function confirmarPedido(){
+  if(estaBloqueado){ mostrarBloqueoCheckout(); return; }
+  await verificarEnRegistro();
+  if(estaBloqueado){ mostrarBloqueoCheckout(); return; }
   if(!validar()) return;
   const btn=document.getElementById('btnConfirm');
   btn.innerText="Enviando..."; btn.disabled=true;
 
-  let ipClienteFinal="desconocida"; let ciudadIPFinal="Dolores Hidalgo"; let ciudadFinal="Dolores Hidalgo";
+  let ipClienteFinal=ipActual||"desconocida"; let ciudadIPFinal="Dolores Hidalgo"; let ciudadFinal="Dolores Hidalgo";
   try{
-    const ipData=await fetch('https://api.ipify.org?format=json').then(r=>r.json());
-    ipClienteFinal=ipData.ip;
+    if(!ipClienteFinal) {
+      const ipData=await fetch('https://api.ipify.org?format=json').then(r=>r.json());
+      ipClienteFinal=ipData.ip;
+    }
     try{
-      const geo=await fetch(`https://ipapi.co/${ipData.ip}/json/`).then(r=>r.json());
+      const geo=await fetch(`https://ipapi.co/${ipClienteFinal}/json/`).then(r=>r.json());
       ciudadFinal=(geo.city||"Dolores Hidalgo");
       ciudadIPFinal=(geo.city||"Dolores Hidalgo")+(geo.region?", "+geo.region:"")+(geo.country?", "+geo.country:"");
     }catch(e){}
   }catch(e){}
 
-  // ===== CONTABILIDAD EN ORDEN ST-0001, ST-0002 =====
+  // Revisión final antes de enviar
+  try{
+    let ipKey = ipClienteFinal.replace(/\./g,'_');
+    let snapB = await dbHistorial.ref('ips_bloqueadas/'+ipKey).once('value');
+    if(snapB.exists() && snapB.val().bloqueado){ mostrarBloqueoCheckout(); btn.innerText="Confirmar pedido"; btn.disabled=false; return; }
+    let telCheck = document.getElementById('telefono').value.trim();
+    let snapR = await dbHistorial.ref('ips_registro/'+telCheck).once('value');
+    if(snapR.exists() && snapR.val().bloqueado){ mostrarBloqueoCheckout(); btn.innerText="Confirmar pedido"; btn.disabled=false; return; }
+  }catch(e){}
+
   let correlativoFinal = 1;
   let numeroPedidoFinal = "ST-0001";
   try {
@@ -324,9 +385,7 @@ async function confirmarPedido(){
       correlativoFinal = result.snapshot.val();
       numeroPedidoFinal = `ST-${String(correlativoFinal).padStart(4,'0')}`;
     }
-  } catch(e){
-    console.log("Error contador", e);
-  }
+  } catch(e){ console.log("Error contador", e); }
 
   const ahora = new Date();
   const pedido={
@@ -383,7 +442,7 @@ async function confirmarPedido(){
 }
 
 function contactarSoporte(){
-  window.open('https://wa.me/5210000000000?text=Hola%20soporte%20Santillos','_blank');
+  window.open('https://wa.me/524182110000?text=Hola%20soporte%20Santillos','_blank');
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>

@@ -48,10 +48,6 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 .arrow-btn{position:absolute;top:0;right:6px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:#dc2626;cursor:pointer;font-size:13px;background:transparent;border:none}
 .col-name{font-weight:800;font-size:13px;color:#111;display:flex;align-items:center;gap:7px;margin-bottom:4px}
 .col-sub{font-size:11.5px;color:#4b5563;display:flex;gap:7px;margin-bottom:4px;line-height:1.3}
-.col-ip{font-size:11.5px;color:#6b7280}
-.col-ip.ip-num{color:#4b5563;font-weight:600}
-.col-productos-title{color:#b45309;font-weight:800;font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px}
-.col-prod-item{font-size:11.5px;color:#4b5563;margin-bottom:2px}
 .col-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
 .col-total{font-size:22px;font-weight:900;color:#111}
 .badge-estado{background:#fff1f2;color:#e11d48;border:1px solid #ffe4e6;padding:5px 10px;border-radius:20px;font-size:9px;font-weight:800;display:flex;align-items:center;gap:5px}
@@ -174,14 +170,14 @@ window.abrirCliente=function(id){
   const dir=p.cliente?.direccion||p.direccion||'Sin dirección';
   const tel=p.cliente?.telefono||p.telefono||'';
   const refTxt=p.referencia||p.cliente?.referencia||'';
-  document.getElementById('bodyCliente').innerHTML=`<div class="modal-line"><i class="fa-solid fa-user"></i><div><b>Nombre del cliente</b><br><span>${nombre}</span></div></div><div class="modal-line"><i class="fa-solid fa-location-dot"></i><div><b>Dirección</b><br><span>${dir}${refTxt?'<br><small>Ref: '+refTxt+'</small>':''}</span></div></div><div class="modal-line"><i class="fa-solid fa-phone"></i><div><b>Teléfono</b><br><span>${tel}</span></div></div><button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i> Llamar</button>`;
+  document.getElementById('bodyCliente').innerHTML=`<div class="modal-line"><i class="fa-solid fa-user"></i><div><b>Nombre</b><br><span>${nombre}</span></div></div><div class="modal-line"><i class="fa-solid fa-location-dot"></i><div><b>Dirección</b><br><span>${dir}</span></div></div><div class="modal-line"><i class="fa-solid fa-phone"></i><div><b>Tel</b><br><span>${tel}</span></div></div><button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i> Llamar</button>`;
   document.getElementById('modalCliente').classList.add('show');
 }
 window.abrirIP=function(id){
   const p=pedidosCache.find(x=>x.id===id)||pedidosTodosCache.find(x=>x.id===id);if(!p)return;
   const ip=p.ip||p.ipCliente||'Sin IP';const ciudad=p.ciudad||p.ciudadIP||'Dolores Hidalgo';const est=estadoIP(ip);
   const esBloq=est==='bloqueada';
-  document.getElementById('bodyIP').innerHTML=`<div class="modal-line"><i class="fa-solid fa-globe"></i><div><b>IP</b><br><span>${ip}</span></div></div><div class="modal-line"><i class="fa-solid fa-location-dot"></i><div><b>Ciudad</b><br><span>${ciudad}</span></div></div><div class="modal-line"><i class="fa-solid ${esBloq?'fa-ban':'fa-circle-check'}" style="color:${esBloq?'#ef4444':'#16a34a'}"></i><div><b>Estado</b><br><span style="font-weight:800;color:${esBloq?'#ef4444':'#16a34a'}">${esBloq?'BLOQUEADA':'ACTIVA'}</span></div></div>${esBloq?`<button class="btn-block desbloquear" onclick="desbloquearIP('${ip}');cerrarModales()"><i class='fa-solid fa-lock-open'></i> Desbloquear</button>`:`<button class="btn-block bloquear" onclick="bloquearIP('${ip}','${p.id}');cerrarModales()"><i class='fa-solid fa-ban'></i> Bloquear IP</button>`}`;
+  document.getElementById('bodyIP').innerHTML=`<div class="modal-line"><i class="fa-solid fa-globe"></i><div><b>IP</b><br><span>${ip}</span></div></div><div class="modal-line"><i class="fa-solid fa-location-dot"></i><div><b>Ciudad</b><br><span>${ciudad}</span></div></div><div class="modal-line"><i class="fa-solid ${esBloq?'fa-ban':'fa-circle-check'}" style="color:${esBloq?'#ef4444':'#16a34a'}"></i><div><b>${esBloq?'BLOQUEADA':'ACTIVA'}</b></div></div>${esBloq?`<button class="btn-block desbloquear" onclick="desbloquearIP('${ip}');cerrarModales()"><i class='fa-solid fa-lock-open'></i> Desbloquear</button>`:`<button class="btn-block bloquear" onclick="bloquearIP('${ip}','${p.id}');cerrarModales()"><i class='fa-solid fa-ban'></i> Bloquear IP</button>`}`;
   document.getElementById('modalIP').classList.add('show');
 }
 window.abrirProductos=function(id){
@@ -190,7 +186,7 @@ window.abrirProductos=function(id){
   if(Array.isArray(p.productos)){lista=p.productos.map(pr=>`<div class='modal-line' style='justify-content:space-between'><span>${pr.cantidad||pr.cant||1}x ${pr.nombre||''}</span><b>$${(pr.precio||0)*(pr.cantidad||pr.cant||1)}</b></div>`).join('');}
   else if(typeof p.productos==='object'&&p.productos!==null){lista=Object.values(p.productos).map(pr=>`<div class='modal-line' style='justify-content:space-between'><span>${pr.cantidad||pr.cant||1}x ${pr.nombre||''}</span><b>$${(pr.precio||0)*(pr.cantidad||pr.cant||1)}</b></div>`).join('');}
   else{lista=`<div class='modal-line'><span>${p.detalle||'Sin detalle'}</span></div>`;}
-  document.getElementById('bodyProd').innerHTML=`${lista}<div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px"><div class="modal-line" style="justify-content:space-between"><span>Subtotal</span><b>$${p.subtotal||p.total||0}</b></div><div class="modal-line" style="justify-content:space-between"><span>Envío</span><b>${Number(p.envio||p.costoEnvio||0)===0?'Gratis':'$'+(p.costoEnvio||p.envio||0)}</b></div><div class="modal-line" style="justify-content:space-between;font-size:14px"><b>Total</b><b>$${p.total||0}</b></div>${p.cliente?.lat?`<a href="https://www.google.com/maps?q=${p.cliente.lat},${p.cliente.lng}" target="_blank" class="btn-call" style="text-decoration:none;background:#fff;color:#111;border:1px solid #e5e7eb"><i class="fa-solid fa-map-location-dot"></i> Ver en Maps</a>`:''}</div>`;
+  document.getElementById('bodyProd').innerHTML=`${lista}<div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px"><div class="modal-line" style="justify-content:space-between"><span>Subtotal</span><b>$${p.subtotal||p.total||0}</b></div><div class="modal-line" style="justify-content:space-between"><span>Total</span><b>$${p.total||0}</b></div></div>`;
   document.getElementById('modalProd').classList.add('show');
 }
 
@@ -203,7 +199,7 @@ function renderPedidos(){
     const numeroPedido = p.numero? p.numero : `ST-${String(p.correlativo||0).padStart(4,'0')}`;
     const nombre=p.cliente?.nombre||p.nombre||'Sin nombre';
     const telefono=p.cliente?.telefono||p.telefono||'';
-    const direccion=p.cliente?.direccion||p.direccion||p.ubicacionTexto||'Sin dirección';
+    const direccion=p.cliente?.direccion||p.direccion||'Sin dirección';
     const ipActual=p.ip||p.ipCliente||'';const ciudad=p.ciudad||p.ciudadIP||'Dolores Hidalgo';
     let productosCorto='Sin productos';let cantTxt='';if(Array.isArray(p.productos)&&p.productos.length>0){const pr=p.productos[0];productosCorto=pr.nombre||'';cantTxt=(pr.cantidad||pr.cant||1)+'x '; if(p.productos.length>1) productosCorto+=' +'+(p.productos.length-1)+' más';}else if(typeof p.productos==='object'&&p.productos!==null){const vals=Object.values(p.productos);if(vals.length>0){productosCorto=vals[0].nombre||'';cantTxt=(vals[0].cantidad||vals[0].cant||1)+'x ';}} else if(p.detalle){productosCorto=p.detalle.slice(0,30);}
     const fechaMostrar=p.fecha||new Date(obtenerInicioPedido(p)).toLocaleDateString();const horaMostrar=p.hora||new Date(obtenerInicioPedido(p)).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:true});
@@ -212,31 +208,13 @@ function renderPedidos(){
     <div class="pedido-card ${esNuevo?'nuevo':''}">
       <div class="pedido-top">
         <div class="pedido-id-pill"><i class="fa-solid fa-hashtag"></i> ${numeroPedido}</div>
-        <div class="pedido-top-meta">
-          <span><i class="fa-regular fa-calendar"></i> ${fechaMostrar}</span>
-          <span style="width:1px;height:14px;background:#e5e7eb"></span>
-          <span><i class="fa-regular fa-clock"></i> ${horaMostrar}</span>
-        </div>
+        <div class="pedido-top-meta"><span><i class="fa-regular fa-calendar"></i> ${fechaMostrar}</span><span><i class="fa-regular fa-clock"></i> ${horaMostrar}</span></div>
         <div class="crono-pill ${cronoClass}"><i class="fa-solid fa-stopwatch"></i> ${minutos} min</div>
       </div>
       <div class="pedido-middle">
-        <div class="col">
-          <button class="arrow-btn" onclick="abrirCliente('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button>
-          <div class="col-name"><i class="fa-solid fa-user"></i> ${nombre}</div>
-          <div class="col-sub"><i class="fa-solid fa-phone"></i> ${telefono}</div>
-          <div class="col-sub"><i class="fa-solid fa-location-dot"></i> <span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${direccion}</span></div>
-        </div>
-        <div class="col">
-          <button class="arrow-btn" onclick="abrirIP('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button>
-          <div class="col-name"><i class="fa-solid fa-globe"></i> <span class="ip-num">${ipActual||'IP pendiente'}</span></div>
-          <div class="col-sub"><i class="fa-solid fa-location-dot" style="opacity:0"></i> <span>${ciudad}</span></div>
-        </div>
-        <div class="col">
-          <button class="arrow-btn" onclick="abrirProductos('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button>
-          <div class="col-productos-title"><i class="fa-solid fa-bag-shopping"></i> Productos</div>
-          <div class="col-prod-item">${cantTxt}${productosCorto}</div>
-          <div class="col-total-row"><div class="col-total">$${Number(p.total||0).toLocaleString()}</div><div class="badge-estado"><i class="fa-solid fa-clock"></i> ${(p.estado||'pendiente').toUpperCase()}</div></div>
-        </div>
+        <div class="col"><button class="arrow-btn" onclick="abrirCliente('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button><div class="col-name"><i class="fa-solid fa-user"></i> ${nombre}</div><div class="col-sub"><i class="fa-solid fa-phone"></i> ${telefono}</div><div class="col-sub"><i class="fa-solid fa-location-dot"></i> ${direccion}</div></div>
+        <div class="col"><button class="arrow-btn" onclick="abrirIP('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button><div class="col-name"><i class="fa-solid fa-globe"></i> ${ipActual||'IP pendiente'}</div><div class="col-sub">${ciudad}</div></div>
+        <div class="col"><button class="arrow-btn" onclick="abrirProductos('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button><div class="col-productos-title"><i class="fa-solid fa-bag-shopping"></i> Productos</div><div class="col-prod-item">${cantTxt}${productosCorto}</div><div class="col-total-row"><div class="col-total">$${Number(p.total||0).toLocaleString()}</div><div class="badge-estado">${(p.estado||'pendiente').toUpperCase()}</div></div></div>
       </div>
       <div class="pedido-actions">
         <button class="btn-act btn-acept ${p.estado==='aceptado'?'active':''}" onclick="cambiarEstado('${p.id}','aceptado')"><i class="fa-solid fa-check"></i> Aceptado</button>
@@ -266,10 +244,7 @@ async function enviarARepartidor(pedido){
       hora: pedido.hora,
       valorServicio: 45,
       distancia: '2.8 km',
-      tiempoLlegada: '9 min',
-      telefono: pedido.cliente?.telefono||pedido.telefono||'',
-      direccion: pedido.cliente?.direccion||pedido.direccion||'',
-      nombre: pedido.cliente?.nombre||pedido.nombre||''
+      tiempoLlegada: '9 min'
     };
     await set(ref(dbRepartidor, 'pedidos_en_camino/'+pedido.id), payload);
   }catch(e){ console.error(e); }
@@ -313,8 +288,6 @@ function sonarRappi(){
   }catch(e){}
 }
 document.addEventListener('click', initAudio, {once:false});
-document.addEventListener('keydown', initAudio, {once:false});
-window.addEventListener('load', ()=>{ setTimeout(()=>{ initAudio(); },500); });
 
 onValue(ref(db,'ips_bloqueadas'),snap=>{ipsBloqueadasCache=snap.val()||{};renderPedidos();});
 
@@ -323,7 +296,7 @@ onValue(query(ref(db,'pedidos'), limitToLast(100)), (snap)=>{
   let todas=Object.entries(data).map(([k,v])=>({id:k,...v}));
   todas.sort((a,b)=> (a.correlativo||0)-(b.correlativo||0));
   pedidosTodosCache=todas;
-  let activas=todas.filter(p=>p.estado!=='entregado'&&p.estado!=='cancelado');
+  let activas=todas.filter(p=>p.estado!=='entregado'&&p.estado!=='cancelado'&&p.estado!=='listo');
   activas.sort((a,b)=>(a.correlativo||0)-(b.correlativo||0));
   if(!primerCarga){
     const nuevos=activas.filter(p=>!idsVistos.has(p.id));

@@ -48,7 +48,7 @@ body{background:#f7f3f6;color:#222;min-height:100vh}
 .detalle-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .detalle-box{background:#f9f5f7;border-radius:10px;padding:8px 10px}
 .detalle-box small{font-size:9px;color:#888;display:block;font-weight:700;letter-spacing:0.5px}
-.detalle-box b{font-size:12px;color:#111;display:block;margin-top:2px}
+.detalle-box b{font-size:12px;color:#111;display:block;margin-top:2px;word-break:break-word}
 .info-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .info-chip{background:#f3f4f6;border-radius:20px;padding:5px 10px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px}
 .actions{display:flex;gap:8px;margin-top:12px}
@@ -61,7 +61,7 @@ body{background:#f7f3f6;color:#222;min-height:100vh}
 .empty{background:#fff;border-radius:18px;padding:30px;text-align:center;color:#999;font-size:12px;border:1px dashed #e5e7eb}
 .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(5px);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
 .confirm-overlay.show{display:flex}
-.confirm-card{background:#fff;border-radius:20px;width:100%;max-width:380px;padding:20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:pop 0.3s ease;max-height:85vh;overflow-y:auto}
+.confirm-card{background:#fff;border-radius:20px;width:100%;max-width:420px;padding:20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:pop 0.3s ease;max-height:85vh;overflow-y:auto}
 @keyframes pop{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
 .confirm-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:24px}
 .confirm-icon.green{background:#dcfce7;color:#16a34a}
@@ -206,16 +206,52 @@ function render(){
       <div class="actions"><button class="btn btn-vino" onclick="verDetalles('${p.id}','entregados')"><i class="fa-solid fa-eye"></i> Ver detalles completos</button><button class="btn btn-gray" onclick="copiar('${p.telefono||''}')"><i class="fa-solid fa-copy"></i> Copiar tel</button></div></div>`;
     }).join('');
   }
+
   if(tabActual==='cancelados'){
     cont.innerHTML=lista.map(p=>{
       let numero=p.numero||`ST-${String(p.correlativo||'').padStart(4,'0')}`;
-      let fecha=p.fechaCancelacion?new Date(p.fechaCancelacion).toLocaleString():'';
-      return `<div class="card"><div class="card-head"><div class="card-head-left"><b>${p.nombreCliente||'Cliente'}</b><span>${numero} • ${fecha}</span></div><span class="badge cancelado">CANCELADO</span></div>
-      <div class="client-box"><div class="client-icon" style="background:#ef4444"><i class="fa-solid fa-ban"></i></div><div class="client-info"><b>${p.motivoCancelacion||'Sin motivo'}</b><span><i class="fa-solid fa-phone"></i> ${p.telefono||''} • IP: ${p.ipCliente||p.ip||''}</span></div></div>
-      <div class="info-row"><div class="info-chip" style="background:#fee2e2;color:#dc2626"><i class="fa-solid fa-triangle-exclamation"></i> ${p.motivoCancelacion||''}</div><div class="info-chip"><i class="fa-solid fa-motorcycle"></i> ${p.repartidor||''}</div></div>
-      <div class="actions"><button class="btn btn-vino" onclick="verDetalles('${p.id}','cancelados')"><i class="fa-solid fa-eye"></i> Detalles</button><button class="btn ${p.bloqueado?'btn-gray':'btn-red'}" onclick="bloquearIp('${p.id}','${p.telefono||p.id}','${p.ipCliente||p.ip||''}')">${p.bloqueado?'<i class="fa-solid fa-lock"></i> Bloqueado':'<i class="fa-solid fa-shield"></i> Bloquear IP'}</button></div></div>`;
+      let fechaPedido = p.fechaCancelacion || p.fecha || p.timestamp || p.creadoEn;
+      let fechaStr = fechaPedido ? new Date(fechaPedido).toLocaleString() : 'Fecha no disponible';
+      return `<div class="card" style="border-left:4px solid #ef4444">
+      <div class="card-head" style="background:#fef2f2;border-radius:12px;padding:12px;border:1px solid #fee2e2">
+        <div class="card-head-left">
+          <b style="font-size:15px;color:#991b1b"><i class="fa-solid fa-receipt"></i> ${numero}</b>
+          <span style="font-size:11px;color:#111;font-weight:800"><i class="fa-solid fa-calendar"></i> Fecha pedido: ${fechaStr}</span>
+          <span style="font-size:11px;color:#dc2626;font-weight:800;background:#fee2e2;padding:3px 8px;border-radius:20px;margin-top:4px;display:inline-block"><i class="fa-solid fa-triangle-exclamation"></i> Motivo: ${p.motivoCancelacion||p.motivo||p.ultimoMotivo||'No especificado'}</span>
+        </div>
+        <span class="badge cancelado">CANCELADO</span>
+      </div>
+
+      <div style="background:#faf6f8;border-radius:14px;padding:12px;margin-top:8px">
+        <div style="font-size:11px;font-weight:800;color:#5c0f2a;margin-bottom:8px;letter-spacing:0.5px"><i class="fa-solid fa-circle-info"></i> INFORMACIÓN COMPLETA - PEDIDO CANCELADO</div>
+        
+        <div class="client-box" style="background:#fff">
+          <div class="client-icon" style="background:#ef4444"><i class="fa-solid fa-user-xmark"></i></div>
+          <div class="client-info"><b>${p.nombreCliente||p.cliente?.nombre||'Cliente'} - Tel: ${p.telefono||'--'}</b><span>${p.cliente?.direccion||p.direccion||'Sin dirección'} • ${p.cliente?.referencia||''}</span></div>
+        </div>
+
+        <div class="detalle-grid" style="margin-top:10px">
+          <div class="detalle-box" style="background:#fff;border:1px solid #fee2e2"><small><i class="fa-solid fa-globe"></i> IP CLIENTE</small><b>${p.ipCliente||p.ip||'--'}</b></div>
+          <div class="detalle-box" style="background:#fff"><small><i class="fa-solid fa-location-dot"></i> DONDE ESTÁ UBICADO</small><b>${p.ciudadIP||p.ciudad||'Dolores Hidalgo'}</b></div>
+          <div class="detalle-box" style="background:#fff"><small><i class="fa-solid fa-city"></i> CIUDAD</small><b>${p.ciudad||'--'}</b></div>
+          <div class="detalle-box" style="background:#fff"><small><i class="fa-solid fa-phone"></i> TELÉFONO</small><b>${p.telefono||'--'}</b></div>
+          <div class="detalle-box" style="background:#fff;border:1px solid #dbeafe"><small><i class="fa-solid fa-mobile-screen"></i> TIPO DE CELULAR</small><b>${p.tipoCelular||p.dispositivo||p.plataforma||'--'}</b></div>
+          <div class="detalle-box" style="background:#fff;border:1px solid #dbeafe"><small><i class="fa-brands fa-chrome"></i> NAVEGADOR</small><b>${p.navegador||'--'} ${p.navegador&&p.navegador.includes('Chrome')?'(Google)':''}</b></div>
+          <div class="detalle-box" style="background:#fff"><small><i class="fa-solid fa-laptop"></i> PLATAFORMA</small><b>${p.plataforma||'--'}</b></div>
+          <div class="detalle-box" style="background:#fff"><small><i class="fa-solid fa-language"></i> IDIOMA</small><b>${p.idioma||'es'}</b></div>
+          <div class="detalle-box" style="grid-column:1/-1;background:#fff;border:1px dashed #e5e7eb"><small><i class="fa-solid fa-code"></i> USER AGENT COMPLETO - TIPO DE CELULAR DETALLADO</small><b style="font-size:9px;color:#555;line-height:1.3">${p.userAgent||'--'}</b></div>
+          <div class="detalle-box" style="background:#fff"><small><i class="fa-solid fa-motorcycle"></i> REPARTIDOR</small><b>${p.repartidor||'No asignado'}</b></div>
+          <div class="detalle-box" style="background:#fff"><small><i class="fa-solid fa-hashtag"></i> ID INTERNO</small><b style="font-size:9px">${p.id}</b></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-vino" onclick="verDetalles('${p.id}','cancelados')"><i class="fa-solid fa-eye"></i> Ver todo completo</button>
+        <button class="btn ${p.bloqueado?'btn-gray':'btn-red'}" onclick="bloquearIp('${p.id}','${p.telefono||p.id}','${p.ipCliente||p.ip||''}')">${p.bloqueado?'<i class="fa-solid fa-lock"></i> Bloqueado':'<i class="fa-solid fa-shield"></i> Bloquear IP'}</button>
+      </div></div>`;
     }).join('');
   }
+
   if(tabActual==='ips'){
     cont.innerHTML=lista.map(p=>{
       let fecha=p.fecha?new Date(p.fecha).toLocaleString():'';
@@ -235,9 +271,24 @@ window.verDetalles=function(id, tipo){
   let productos=p.productos? (Array.isArray(p.productos)?p.productos:Object.values(p.productos)) : [];
   let prodHtml=productos.map(pr=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:12px"><span>${pr.cant||pr.cantidad||1}x ${pr.nombre}</span><b>$${(pr.precio||0)*(pr.cant||pr.cantidad||1)}</b></div>`).join('');
   let cantProd = productos.reduce((s,x)=> s+Number(x.cant||x.cantidad||1),0);
-  let html=`<div style="text-align:left"><div style="text-align:center"><div class="confirm-icon ${tipo==='entregados'?'green':'red'}"><i class="fa-solid ${tipo==='entregados'?'fa-check':'fa-ban'}"></i></div><h3 style="font-size:15px;font-weight:800">${p.numero||p.id}</h3><p style="font-size:12px;color:#666">${tipo.toUpperCase()} • ${cantProd} productos</p></div>
-  <div style="margin-top:12px;background:#faf6f8;border-radius:12px;padding:10px;font-size:11px;line-height:1.6"><b>Cliente:</b> ${p.nombreCliente||p.cliente?.nombre||''}<br><b>Tel:</b> ${p.telefono||''}<br><b>Dirección:</b> ${p.cliente?.direccion||p.direccion||''}<br><b>IP:</b> ${p.ipCliente||p.ip||''}<br><b>Repartidor:</b> ${p.repartidor||''}<br><b>Total:</b> $${p.total||0} (${cantProd} productos)<br>${p.motivoCancelacion?`<b>Motivo:</b> ${p.motivoCancelacion}<br>`:''}${p.fechaEntrega?`<b>Entregado:</b> ${new Date(p.fechaEntrega).toLocaleString()}<br>`:''}${p.fechaCancelacion?`<b>Cancelado:</b> ${new Date(p.fechaCancelacion).toLocaleString()}<br>`:''}</div>
-  <div style="margin-top:12px"><b style="font-size:12px">Detalles de productos (${cantProd}):</b><div style="margin-top:6px;max-height:180px;overflow-y:auto">${prodHtml||'Sin productos'}</div></div>
+  let html=`<div style="text-align:left">
+  <div style="text-align:center"><div class="confirm-icon ${tipo==='cancelados'?'red':'green'}"><i class="fa-solid ${tipo==='cancelados'?'fa-ban':'fa-check'}"></i></div><h3 style="font-size:15px;font-weight:800">${p.numero||p.id}</h3><p style="font-size:11px;color:#666">${tipo.toUpperCase()} • ${cantProd} productos • ${p.fecha?new Date(p.fecha).toLocaleString():''}</p></div>
+  <div style="margin-top:12px;background:#fef2f2;border-radius:12px;padding:12px;font-size:11px;line-height:1.7;border:1px solid #fee2e2">
+  <b style="color:#991b1b">PEDIDO CANCELADO - INFORME COMPLETO</b><br>
+  <b>Número:</b> ${p.numero||p.id}<br>
+  <b>Fecha pedido:</b> ${p.fechaCancelacion?new Date(p.fechaCancelacion).toLocaleString():''}<br>
+  <b>Motivo cancelación:</b> ${p.motivoCancelacion||p.motivo||''}<br><br>
+  <b>Cliente:</b> ${p.nombreCliente||p.cliente?.nombre||''}<br><b>Tel:</b> ${p.telefono||''}<br><b>Dirección:</b> ${p.cliente?.direccion||p.direccion||''}<br>
+  <b>IP:</b> ${p.ipCliente||p.ip||''}<br>
+  <b>Ubicación IP:</b> ${p.ciudadIP||''}<br>
+  <b>Ciudad:</b> ${p.ciudad||''}<br>
+  <b>Tipo celular:</b> ${p.tipoCelular||p.dispositivo||''}<br>
+  <b>Navegador:</b> ${p.navegador||''} ${p.navegador&&p.navegador.includes('Chrome')?'- Conectado desde Google Chrome':''}<br>
+  <b>Plataforma:</b> ${p.plataforma||''}<br>
+  <b>Idioma:</b> ${p.idioma||''}<br>
+  <b>UserAgent:</b> <span style="font-size:9px;word-break:break-all">${p.userAgent||''}</span><br>
+  <b>Repartidor:</b> ${p.repartidor||''}<br><b>Total:</b> $${p.total||0}</div>
+  <div style="margin-top:12px"><b style="font-size:12px">Productos (${cantProd}):</b><div style="margin-top:6px;max-height:180px;overflow-y:auto">${prodHtml||'Sin productos'}</div></div>
   <div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarDetalles()">Cerrar</button></div></div>`;
   document.getElementById('cardDetalles').innerHTML=html;
   document.getElementById('overlayDetalles').classList.add('show');
@@ -254,7 +305,7 @@ function mostrarToast(msg){
 window.bloquearIp=async function(id, telefonoKey, ipCliente){
   const overlay=document.getElementById('overlayConfirm');
   const card=document.getElementById('cardConfirm');
-  card.innerHTML=`<div class="confirm-icon red"><i class="fa-solid fa-shield-halved"></i></div><h3>¿Bloquear IP / Tel?</h3><p>Se bloqueará ${telefonoKey} - ${ipCliente} y no podrá pedir en tiempo real</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-red" id="btnBloq">Sí, bloquear</button></div>`;
+  card.innerHTML=`<div class="confirm-icon red"><i class="fa-solid fa-shield-halved"></i></div><h3>¿Bloquear IP / Tel?</h3><p style="font-size:12px">Se bloqueará<br><b>${telefonoKey}</b><br><b>${ipCliente}</b><br>y no podrá pedir en tiempo real</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-red" id="btnBloq">Sí, bloquear</button></div>`;
   overlay.classList.add('show');
   document.getElementById('btnBloq').onclick=async()=>{
     cerrarConfirm();

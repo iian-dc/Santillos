@@ -140,7 +140,6 @@ try{
 let subtotal=0;
 let distanciaKm=0; let costoEnvio=0; let latCliente=null; let lngCliente=null;
 
-// ===== BLOQUEO TIEMPO REAL EN CHECKOUT =====
 let ipActual=''; let ipKeyActual=''; let estaBloqueado=false;
 async function obtenerIP(){
   try{ let r=await fetch('https://api.ipify.org?format=json'); let d=await r.json(); return d.ip||''; }catch(e){ return ''; }
@@ -279,21 +278,10 @@ function initMap(){
   geocoder=new google.maps.Geocoder();
   directionsService=new google.maps.DirectionsService();
   directionsRenderer=new google.maps.DirectionsRenderer({map:map,suppressMarkers:true,polylineOptions:{strokeColor:"#5e0a28",strokeWeight:5,strokeOpacity:0.9}});
-
-  markerTienda=new google.maps.Marker({
-    position:TIENDA,
-    map:map,
-    title:"Santillos",
-    icon:{ url:"https://maps.google.com/mapfiles/ms/icons/red-dot.png" }
-  });
-
+  markerTienda=new google.maps.Marker({position:TIENDA,map:map,title:"Santillos",icon:{ url:"https://maps.google.com/mapfiles/ms/icons/red-dot.png" }});
   const inputDir=document.getElementById('direccion');
-  autocomplete=new google.maps.places.Autocomplete(inputDir,{
-    componentRestrictions:{country:"mx"},
-    fields:["geometry","formatted_address"]
-  });
+  autocomplete=new google.maps.places.Autocomplete(inputDir,{componentRestrictions:{country:"mx"},fields:["geometry","formatted_address"]});
   autocomplete.bindTo("bounds", map);
-
   autocomplete.addListener("place_changed", ()=>{
     const place=autocomplete.getPlace();
     if(!place.geometry){ return; }
@@ -306,7 +294,6 @@ function initMap(){
     calcularRuta(pos);
     guardarCliente();
   });
-
   if(latCliente && lngCliente){
     const pos={lat:latCliente,lng:lngCliente};
     markerCliente=new google.maps.Marker({position:pos,map:map,icon:"https://maps.google.com/mapfiles/ms/icons/blue-dot.png"});
@@ -364,7 +351,6 @@ async function confirmarPedido(){
     }catch(e){}
   }catch(e){}
 
-  // Revisión final antes de enviar
   try{
     let ipKey = ipClienteFinal.replace(/\./g,'_');
     let snapB = await dbHistorial.ref('ips_bloqueadas/'+ipKey).once('value');
@@ -374,18 +360,31 @@ async function confirmarPedido(){
     if(snapR.exists() && snapR.val().bloqueado){ mostrarBloqueoCheckout(); btn.innerText="Confirmar pedido"; btn.disabled=false; return; }
   }catch(e){}
 
+  // ===== DETECCIÓN DISPOSITIVO COMPLETA =====
+  let ua = navigator.userAgent;
+  let plataforma = navigator.platform || 'Desconocida';
+  let idioma = navigator.language || 'es';
+  let esCelular = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+  let tipoDisp = esCelular? 'Celular' : 'Computadora';
+  if(/Android/i.test(ua)) tipoDisp = 'Android - Celular';
+  if(/iPhone/i.test(ua)) tipoDisp = 'iPhone - Celular';
+  if(/iPad/i.test(ua)) tipoDisp = 'iPad - Tablet';
+  let navegador = 'Desconocido';
+  if(ua.includes('Edg/')) navegador='Microsoft Edge';
+  else if(ua.includes('Chrome') &&!ua.includes('Chromium')) navegador='Google Chrome';
+  else if(ua.includes('Safari') &&!ua.includes('Chrome')) navegador='Safari - iPhone';
+  else if(ua.includes('Firefox')) navegador='Firefox';
+
   let correlativoFinal = 1;
   let numeroPedidoFinal = "ST-0001";
   try {
     const contadorRef = db.ref('contador_pedidos');
-    const result = await contadorRef.transaction(current => {
-      return (current || 0) + 1;
-    });
+    const result = await contadorRef.transaction(current => { return (current || 0) + 1; });
     if(result.committed){
       correlativoFinal = result.snapshot.val();
       numeroPedidoFinal = `ST-${String(correlativoFinal).padStart(4,'0')}`;
     }
-  } catch(e){ console.log("Error contador", e); }
+  } catch(e){}
 
   const ahora = new Date();
   const pedido={
@@ -415,6 +414,14 @@ async function confirmarPedido(){
     ipCliente: ipClienteFinal,
     correlativo: correlativoFinal,
     numero: numeroPedidoFinal,
+    // NUEVO - INFO COMPLETA DISPOSITIVO
+    dispositivo: tipoDisp,
+    tipoCelular: tipoDisp,
+    navegador: navegador,
+    plataforma: plataforma,
+    userAgent: ua,
+    idioma: idioma,
+    esCelular: esCelular,
     creadoEn: Date.now(),
     timestamp: Date.now(),
     fechaISO: ahora.toISOString(),
@@ -436,14 +443,11 @@ async function confirmarPedido(){
     location.href="confirmacion.html?id="+nuevoRef.key;
   }catch(e){
     console.error(e);
-    alert("Error al enviar pedido a santillos-pedidos: "+e.message);
+    alert("Error al enviar pedido: "+e.message);
     btn.innerText="Confirmar pedido"; btn.disabled=false;
   }
 }
-
-function contactarSoporte(){
-  window.open('https://wa.me/524182110000?text=Hola%20soporte%20Santillos','_blank');
-}
+function contactarSoporte(){ window.open('https://wa.me/524182110000?text=Hola%20soporte%20Santillos','_blank'); }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTV1sm6McEIkv-cheaVFCD_svp_a--6wg&libraries=places&callback=initMap" async defer></script>
 </body>

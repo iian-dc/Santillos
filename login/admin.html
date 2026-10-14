@@ -35,15 +35,11 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 @keyframes neonPulse{0%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 20px rgba(0,255,136,0.4)}50%{box-shadow:0 0 0 7px rgba(0,255,136,0.3),0 0 30px rgba(0,255,136,0.6)}100%{box-shadow:0 0 0 4px rgba(0,255,136,0.2),0 0 20px rgba(0,255,136,0.4)}}
 .pedido-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;border-bottom:1px solid #f0f0f0;flex-wrap:wrap}
 .pedido-id-pill{background:#fef9e8;border:1px solid #fdecc8;color:#111;padding:6px 14px;border-radius:10px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:6px}
-.pedido-id-pill i{font-size:16px;color:#111}
 .pedido-top-meta{display:flex;align-items:center;gap:14px;color:#6b7280;font-size:12px;font-weight:600}
-.pedido-top-meta span{display:flex;align-items:center;gap:5px}
-.pedido-top-meta i{font-size:14px;color:#111}
 .crono-pill{padding:7px 12px;border-radius:30px;font-weight:800;font-size:12px;display:flex;align-items:center;gap:6px}
 .crono-pill.verde{background:#d6f8e0;color:#0f7a2e}
 .crono-pill.amarillo{background:#fef9c3;color:#8a5a00}
 .crono-pill.rojo{background:#fee2e2;color:#b42318;animation:pulse 1s infinite}
-.crono-pill.arrow{color:#16a34a;font-size:12px;margin-left:4px}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
 .pedido-middle{display:grid;grid-template-columns:1.2fr 0.9fr 0.9fr;gap:0;margin-top:12px}
 .col{padding:0 14px;position:relative;border-right:1px solid #f0f0f0}
@@ -51,13 +47,10 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 .col:first-child{padding-left:0}
 .arrow-btn{position:absolute;top:0;right:6px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:#dc2626;cursor:pointer;font-size:13px;background:transparent;border:none}
 .col-name{font-weight:800;font-size:13px;color:#111;display:flex;align-items:center;gap:7px;margin-bottom:4px}
-.col-name i{font-size:13px}
 .col-sub{font-size:11.5px;color:#4b5563;display:flex;gap:7px;margin-bottom:4px;line-height:1.3}
-.col-sub i{font-size:12px;color:#111;margin-top:1px;min-width:14px}
 .col-ip{font-size:11.5px;color:#6b7280}
 .col-ip.ip-num{color:#4b5563;font-weight:600}
 .col-productos-title{color:#b45309;font-weight:800;font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px}
-.col-productos-title i{color:#b45309}
 .col-prod-item{font-size:11.5px;color:#4b5563;margin-bottom:2px}
 .col-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
 .col-total{font-size:22px;font-weight:900;color:#111}
@@ -66,7 +59,7 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 .btn-act{border:none;padding:10px 16px;border-radius:30px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;flex:1;justify-content:center;min-width:110px}
 .btn-acept{background:#22c55e;color:#fff}
 .btn-prep{background:#f59e0b;color:#fff}
-.btn-camino{background:#3b82f6;color:#fff}
+.btn-camino{background:#ffc300;color:#111}
 .btn-entre{background:#15803d;color:#fff}
 .btn-cancel{background:#ef4444;color:#fff}
 .btn-act.active{outline:2px solid #111;outline-offset:2px}
@@ -120,35 +113,20 @@ body{background:#f6f7f9;display:flex;min-height:100vh}
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:10px"><button class="btn-menu" onclick="document.getElementById('sidebar').classList.toggle('open')"><i class="fa-solid fa-bars"></i></button><div class="topbar-title">Pedidos Activos <span style="font-size:10px;color:#00c851;font-weight:700;margin-left:6px"><i class="fa-solid fa-volume-high"></i> SONIDO ACTIVO</span></div></div>
-    <div class="user-badge"><i class="fa-solid fa-user"></i> <span id="userNameTop">admin</span> <i class="fa-solid fa-chevron-down" style="font-size:10px"></i></div>
+    <div class="user-badge"><i class="fa-solid fa-user"></i> <span id="userNameTop">admin</span></div>
   </div>
   <div class="content">
     <div class="section active" id="sec-pedidos_activos"><div id="listaPedidosActivos"></div></div>
   </div>
 </div>
 
-<div class="overlay-modal" id="modalCliente" onclick="if(event.target===this)cerrarModales()">
-  <div class="modal-card">
-    <div class="modal-header"><h3><i class="fa-solid fa-user"></i> Datos del Cliente</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="modal-body" id="bodyCliente"></div>
-  </div>
-</div>
-<div class="overlay-modal" id="modalIP" onclick="if(event.target===this)cerrarModales()">
-  <div class="modal-card">
-    <div class="modal-header"><h3><i class="fa-solid fa-globe"></i> Información IP</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="modal-body" id="bodyIP"></div>
-  </div>
-</div>
-<div class="overlay-modal" id="modalProd" onclick="if(event.target===this)cerrarModales()">
-  <div class="modal-card">
-    <div class="modal-header"><h3><i class="fa-solid fa-bag-shopping"></i> Productos</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="modal-body" id="bodyProd"></div>
-  </div>
-</div>
+<div class="overlay-modal" id="modalCliente" onclick="if(event.target===this)cerrarModales()"><div class="modal-card"><div class="modal-header"><h3><i class="fa-solid fa-user"></i> Datos del Cliente</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body" id="bodyCliente"></div></div></div>
+<div class="overlay-modal" id="modalIP" onclick="if(event.target===this)cerrarModales()"><div class="modal-card"><div class="modal-header"><h3><i class="fa-solid fa-globe"></i> Información IP</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body" id="bodyIP"></div></div></div>
+<div class="overlay-modal" id="modalProd" onclick="if(event.target===this)cerrarModales()"><div class="modal-card"><div class="modal-header"><h3><i class="fa-solid fa-bag-shopping"></i> Productos</h3><button class="btn-close" onclick="cerrarModales()"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body" id="bodyProd"></div></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, onValue, update, remove, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, onValue, update, remove, set, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC0Y1TKsFWX-byB6ws_m2ldJ0P7Gs8k4N4",
@@ -159,8 +137,21 @@ const firebaseConfig = {
   messagingSenderId: "341477805263",
   appId: "1:341477805263:web:b86bc36da92854650afbba"
 };
+const firebaseConfigRepartidor = {
+  apiKey: "AIzaSyDQ0SPfwvP_T06wcEXla2UW_SP8CcGYbjI",
+  authDomain: "santillos-repartidor.firebaseapp.com",
+  databaseURL: "https://santillos-repartidor-default-rtdb.firebaseio.com",
+  projectId: "santillos-repartidor",
+  storageBucket: "santillos-repartidor.firebasestorage.app",
+  messagingSenderId: "1067077534751",
+  appId: "1:1067077534751:web:a2c976cf80d8eeb8f5012a"
+};
 
-const app=initializeApp(firebaseConfig);const db=getDatabase(app);
+const appPedidos = initializeApp(firebaseConfig, "pedidos");
+const appRepartidor = initializeApp(firebaseConfigRepartidor, "repartidor");
+const db = getDatabase(appPedidos);
+const dbRepartidor = getDatabase(appRepartidor);
+
 if(!localStorage.getItem('santillos_admin_login')){window.location.href='./';}
 document.getElementById('userNameTop').innerText=localStorage.getItem('santillos_admin_usuario')||'admin';
 
@@ -174,18 +165,16 @@ window.goTo=function(id,el){
     document.getElementById('sidebar').classList.remove('open');
     return;
   }
-  document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
-  if(el)el.classList.add('active');
   window.location.href='./'+pagina+'.html';
 }
 window.cerrarSesion=function(){localStorage.clear();window.location.href='./';}
 
 let pedidosCache=[];let pedidosTodosCache=[];let ipsBloqueadasCache={};
 let idsVistos=new Set(); let primerCarga=true; let nuevosIds=new Set();
+
 function obtenerInicioPedido(p){if(p.timestamp)return new Date(p.timestamp);if(p.creadoEn)return new Date(p.creadoEn);if(p.fechaISO)return new Date(p.fechaISO);if(p.fecha)return new Date(p.fecha);return new Date();}
 function calcularMinutos(p){const ini=obtenerInicioPedido(p);return Math.max(0,Math.floor((new Date()-ini)/60000));}
 function estadoIP(ip){if(!ip)return 'sin_ip';const k=ip.replace(/\./g,'_');return ipsBloqueadasCache[k]?'bloqueada':'activa';}
-
 window.cerrarModales=function(){document.querySelectorAll('.overlay-modal').forEach(m=>m.classList.remove('show'));}
 window.abrirCliente=function(id){
   const p=pedidosCache.find(x=>x.id===id)||pedidosTodosCache.find(x=>x.id===id);if(!p)return;
@@ -193,45 +182,73 @@ window.abrirCliente=function(id){
   const dir=p.cliente?.direccion||p.direccion||'Sin dirección';
   const tel=p.cliente?.telefono||p.telefono||'';
   const refTxt=p.referencia||p.cliente?.referencia||'';
-  document.getElementById('bodyCliente').innerHTML=`
-    <div class="modal-line"><i class="fa-solid fa-user"></i><div><b>Nombre del cliente</b><br><span>${nombre}</span></div></div>
-    <div class="modal-line"><i class="fa-solid fa-location-dot"></i><div><b>Dirección de entrega</b><br><span>${dir}${refTxt?'<br><small>Ref: '+refTxt+'</small>':''}</span></div></div>
-    <div class="modal-line"><i class="fa-solid fa-phone"></i><div><b>Número de teléfono</b><br><span>${tel}</span></div></div>
-    <button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i> Llamar al cliente</button>`;
+  document.getElementById('bodyCliente').innerHTML=`<div class="modal-line"><i class="fa-solid fa-user"></i><div><b>Nombre del cliente</b><br><span>${nombre}</span></div></div><div class="modal-line"><i class="fa-solid fa-location-dot"></i><div><b>Dirección</b><br><span>${dir}${refTxt?'<br><small>Ref: '+refTxt+'</small>':''}</span></div></div><div class="modal-line"><i class="fa-solid fa-phone"></i><div><b>Teléfono</b><br><span>${tel}</span></div></div><button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i> Llamar</button>`;
   document.getElementById('modalCliente').classList.add('show');
 }
 window.abrirIP=function(id){
   const p=pedidosCache.find(x=>x.id===id)||pedidosTodosCache.find(x=>x.id===id);if(!p)return;
-  const ip=p.ip||p.ipCliente||'Sin IP';const ciudad=p.ciudad||p.ciudadIP||'Dolores Hidalgo';const est=estadoIP(p.ip||p.ipCliente||'');
+  const ip=p.ip||p.ipCliente||'Sin IP';const ciudad=p.ciudad||p.ciudadIP||'Dolores Hidalgo';const est=estadoIP(ip);
   const esBloq=est==='bloqueada';
-  document.getElementById('bodyIP').innerHTML=`
-    <div class="modal-line"><i class="fa-solid fa-globe"></i><div><b>Dirección IP</b><br><span>${ip}</span></div></div>
-    <div class="modal-line"><i class="fa-solid fa-location-dot"></i><div><b>Ubicación</b><br><span>${ciudad}</span></div></div>
-    <div class="modal-line"><i class="fa-solid ${esBloq?'fa-ban':'fa-circle-check'}" style="color:${esBloq?'#ef4444':'#16a34a'}"></i><div><b>Estado</b><br><span style="font-weight:800;color:${esBloq?'#ef4444':'#16a34a'}">${esBloq?'BLOQUEADA':'ACTIVA'}</span><br><small style="color:#6b7280">${esBloq?'Esta IP no puede hacer pedidos ni entrar a la tienda.':'Esta IP puede navegar y pedir con normalidad.'}</small></div></div>
-    ${esBloq?`<button class="btn-block desbloquear" onclick="desbloquearIP('${ip}');cerrarModales()"><i class='fa-solid fa-lock-open'></i> Desbloquear IP</button>`:`<button class="btn-block bloquear" onclick="bloquearIP('${ip}','${p.id}');cerrarModales()"><i class='fa-solid fa-ban'></i> Bloquear IP</button>`}
-  `;
+  document.getElementById('bodyIP').innerHTML=`<div class="modal-line"><i class="fa-solid fa-globe"></i><div><b>IP</b><br><span>${ip}</span></div></div><div class="modal-line"><i class="fa-solid fa-location-dot"></i><div><b>Ciudad</b><br><span>${ciudad}</span></div></div><div class="modal-line"><i class="fa-solid ${esBloq?'fa-ban':'fa-circle-check'}" style="color:${esBloq?'#ef4444':'#16a34a'}"></i><div><b>Estado</b><br><span style="font-weight:800;color:${esBloq?'#ef4444':'#16a34a'}">${esBloq?'BLOQUEADA':'ACTIVA'}</span></div></div>${esBloq?`<button class="btn-block desbloquear" onclick="desbloquearIP('${ip}');cerrarModales()"><i class='fa-solid fa-lock-open'></i> Desbloquear</button>`:`<button class="btn-block bloquear" onclick="bloquearIP('${ip}','${p.id}');cerrarModales()"><i class='fa-solid fa-ban'></i> Bloquear IP</button>`}`;
   document.getElementById('modalIP').classList.add('show');
 }
 window.abrirProductos=function(id){
   const p=pedidosCache.find(x=>x.id===id)||pedidosTodosCache.find(x=>x.id===id);if(!p)return;
   let lista='';
-  if(Array.isArray(p.productos)){
-    lista=p.productos.map(pr=>`<div class='modal-line' style='justify-content:space-between'><span>${pr.cantidad||pr.cant||1}x ${pr.nombre||''}</span><b>$${(pr.precio||0)*(pr.cantidad||pr.cant||1)}</b></div>`).join('');
-  }else if(typeof p.productos==='object'&&p.productos!==null){
-    lista=Object.values(p.productos).map(pr=>`<div class='modal-line' style='justify-content:space-between'><span>${pr.cantidad||pr.cant||1}x ${pr.nombre||''}</span><b>$${(pr.precio||0)*(pr.cantidad||pr.cant||1)}</b></div>`).join('');
-  }else{
-    lista=`<div class='modal-line'><span>${p.detalle||'Sin detalle'}</span></div>`;
-  }
-  document.getElementById('bodyProd').innerHTML=`
-    ${lista}
-    <div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px">
-      <div class="modal-line" style="justify-content:space-between"><span>Subtotal</span><b>$${p.subtotal||p.total||0}</b></div>
-      <div class="modal-line" style="justify-content:space-between"><span>Envío</span><b>${Number(p.envio||p.costoEnvio||0)===0?'Gratis':'$'+(p.costoEnvio||p.envio||0)}</b></div>
-      <div class="modal-line" style="justify-content:space-between;font-size:14px"><b>Total</b><b>$${p.total||0}</b></div>
-      ${p.cliente?.lat?`<a href="https://www.google.com/maps?q=${p.cliente.lat},${p.cliente.lng}" target="_blank" class="btn-call" style="text-decoration:none;background:#fff;color:#111;border:1px solid #e5e7eb"><i class="fa-solid fa-map-location-dot"></i> Ver en Maps</a>`:''}
-    </div>`;
+  if(Array.isArray(p.productos)){lista=p.productos.map(pr=>`<div class='modal-line' style='justify-content:space-between'><span>${pr.cantidad||pr.cant||1}x ${pr.nombre||''}</span><b>$${(pr.precio||0)*(pr.cantidad||pr.cant||1)}</b></div>`).join('');}
+  else if(typeof p.productos==='object'&&p.productos!==null){lista=Object.values(p.productos).map(pr=>`<div class='modal-line' style='justify-content:space-between'><span>${pr.cantidad||pr.cant||1}x ${pr.nombre||''}</span><b>$${(pr.precio||0)*(pr.cantidad||pr.cant||1)}</b></div>`).join('');}
+  else{lista=`<div class='modal-line'><span>${p.detalle||'Sin detalle'}</span></div>`;}
+  document.getElementById('bodyProd').innerHTML=`${lista}<div style="border-top:1px solid #f0f0f0;margin-top:10px;padding-top:10px"><div class="modal-line" style="justify-content:space-between"><span>Subtotal</span><b>$${p.subtotal||p.total||0}</b></div><div class="modal-line" style="justify-content:space-between"><span>Envío</span><b>${Number(p.envio||p.costoEnvio||0)===0?'Gratis':'$'+(p.costoEnvio||p.envio||0)}</b></div><div class="modal-line" style="justify-content:space-between;font-size:14px"><b>Total</b><b>$${p.total||0}</b></div>${p.cliente?.lat?`<a href="https://www.google.com/maps?q=${p.cliente.lat},${p.cliente.lng}" target="_blank" class="btn-call" style="text-decoration:none;background:#fff;color:#111;border:1px solid #e5e7eb"><i class="fa-solid fa-map-location-dot"></i> Ver en Maps</a>`:''}</div>`;
   document.getElementById('modalProd').classList.add('show');
 }
+
+// ========= PARCHE REPARTIDOR =========
+async function enviarARepartidor(pedido){
+  try{
+    const payload = {
+      id: pedido.id,
+      numero: pedido.numero || `ST-${String(pedido.correlativo||0).padStart(4,'0')}`,
+      correlativo: pedido.correlativo||0,
+      cliente: pedido.cliente || {nombre: pedido.nombre, telefono: pedido.telefono, direccion: pedido.direccion, referencia: pedido.referencia, lat: pedido.cliente?.lat, lng: pedido.cliente?.lng},
+      productos: pedido.productos,
+      total: pedido.total,
+      subtotal: pedido.subtotal||pedido.total,
+      estado: 'en_camino',
+      enCaminoEn: Date.now(),
+      timestamp: pedido.timestamp||Date.now(),
+      fecha: pedido.fecha,
+      hora: pedido.hora,
+      valorServicio: 45,
+      distancia: '2.8 km',
+      tiempoLlegada: '9 min',
+      telefono: pedido.cliente?.telefono||pedido.telefono||'',
+      direccion: pedido.cliente?.direccion||pedido.direccion||'',
+      ip: pedido.ip||'',
+      nombre: pedido.cliente?.nombre||pedido.nombre||''
+    };
+    await set(ref(dbRepartidor, 'pedidos_en_camino/'+pedido.id), payload);
+  }catch(e){ console.error('Error repartidor', e); }
+}
+
+window.cambiarEstado=async function(id,nuevoEstado){
+  const pedido = pedidosCache.find(p=>p.id===id) || pedidosTodosCache.find(p=>p.id===id);
+  if(!pedido) return;
+  try{
+    // 1. Actualiza en santillos-pedidos -> cliente ve "en camino" en tiempo real
+    await update(ref(db,'pedidos/'+id),{estado:nuevoEstado, actualizadoEn: Date.now(), enCaminoEn: nuevoEstado==='en_camino'?Date.now():pedido.enCaminoEn||null});
+    // 2. Si es En camino -> enviar a repartidor
+    if(nuevoEstado==='en_camino'){
+      await enviarARepartidor({...pedido, estado: nuevoEstado});
+    }
+    // 3. Si es entregado/cancelado -> limpiar de repartidor
+    if(nuevoEstado==='entregado' || nuevoEstado==='cancelado'){
+      await set(ref(dbRepartidor,'pedidos_en_camino/'+id), null).catch(()=>{});
+    }
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+window.bloquearIP=async function(ip,pedidoId){if(!ip)return alert('Sin IP');if(!confirm('Bloquear '+ip+'?'))return;const key=ip.replace(/\./g,'_');await update(ref(db,'ips_bloqueadas/'+key),{ip:ip,fecha:new Date().toLocaleString(),timestamp:Date.now(),pedidoId:pedidoId});}
+window.desbloquearIP=async function(ip){if(!confirm('Desbloquear '+ip+'?'))return;const key=ip.replace(/\./g,'_');await remove(ref(db,'ips_bloqueadas/'+key));}
 
 function renderPedidos(){
   const cont=document.getElementById('listaPedidosActivos');
@@ -239,62 +256,17 @@ function renderPedidos(){
   cont.innerHTML=pedidosCache.map((p)=>{
     const minutos=calcularMinutos(p);
     let cronoClass='verde';if(minutos>=40)cronoClass='rojo';else if(minutos>=20)cronoClass='amarillo';
-    // ORDEN REAL ST-0001 SIN AZAR
-    const numeroPedido = p.numero ? p.numero : `ST-${String(p.correlativo||0).padStart(4,'0')}`;
+    const numeroPedido = p.numero? p.numero : `ST-${String(p.correlativo||0).padStart(4,'0')}`;
     const nombre=p.cliente?.nombre||p.nombre||'Sin nombre';
     const telefono=p.cliente?.telefono||p.telefono||'';
     const direccion=p.cliente?.direccion||p.direccion||p.ubicacionTexto||'Sin dirección';
     const ipActual=p.ip||p.ipCliente||'';const ciudad=p.ciudad||p.ciudadIP||'Dolores Hidalgo';
-    let productosCorto='Sin productos';let cantTxt='';if(Array.isArray(p.productos)&&p.productos.length>0){const pr=p.productos[0];productosCorto=pr.nombre||'';cantTxt=(pr.cantidad||pr.cant||1)+'x '; if(p.productos.length>1) productosCorto+=' +'+(p.productos.length-1)+' más';}else if(typeof p.productos==='object'&&p.productos!==null){const vals=Object.values(p.productos);if(vals.length>0){productosCorto=vals[0].nombre||'';cantTxt=(vals[0].cantidad||vals[0].cant||1)+'x ';}}
-    else if(p.detalle){productosCorto=p.detalle.slice(0,30);}
+    let productosCorto='Sin productos';let cantTxt='';if(Array.isArray(p.productos)&&p.productos.length>0){const pr=p.productos[0];productosCorto=pr.nombre||'';cantTxt=(pr.cantidad||pr.cant||1)+'x '; if(p.productos.length>1) productosCorto+=' +'+(p.productos.length-1)+' más';}else if(typeof p.productos==='object'&&p.productos!==null){const vals=Object.values(p.productos);if(vals.length>0){productosCorto=vals[0].nombre||'';cantTxt=(vals[0].cantidad||vals[0].cant||1)+'x ';}} else if(p.detalle){productosCorto=p.detalle.slice(0,30);}
     const fechaMostrar=p.fecha||new Date(obtenerInicioPedido(p)).toLocaleDateString();const horaMostrar=p.hora||new Date(obtenerInicioPedido(p)).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:true});
-    const estIP=estadoIP(ipActual);const cardBorder=estIP==='bloqueada'?'border:1.5px solid #fecaca;background:#fff8f8':'';
     const esNuevo=nuevosIds.has(p.id);
-    const claseNuevo=esNuevo?'nuevo':'';
-    return `
-    <div class="pedido-card ${claseNuevo}" style="${esNuevo?'':cardBorder}">
-      <div class="pedido-top">
-        <div class="pedido-id-pill"><i class="fa-solid fa-hashtag"></i> ${numeroPedido}</div>
-        <div class="pedido-top-meta">
-          <span><i class="fa-regular fa-calendar"></i> ${fechaMostrar}</span>
-          <span style="width:1px;height:14px;background:#e5e7eb"></span>
-          <span><i class="fa-regular fa-clock"></i> ${horaMostrar}</span>
-        </div>
-        <div class="crono-pill ${cronoClass}"><i class="fa-solid fa-stopwatch"></i> ${minutos} min <i class="fa-solid fa-chevron-right arrow"></i></div>
-      </div>
-      <div class="pedido-middle">
-        <div class="col">
-          <button class="arrow-btn" onclick="abrirCliente('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button>
-          <div class="col-name"><i class="fa-solid fa-user"></i> ${nombre}</div>
-          <div class="col-sub"><i class="fa-solid fa-phone"></i> ${telefono}</div>
-          <div class="col-sub"><i class="fa-solid fa-location-dot"></i> <span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${direccion}</span></div>
-        </div>
-        <div class="col">
-          <button class="arrow-btn" onclick="abrirIP('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button>
-          <div class="col-name"><i class="fa-solid fa-globe"></i> <span class="ip-num">${ipActual||'IP pendiente'}</span></div>
-          <div class="col-sub"><i class="fa-solid fa-location-dot" style="opacity:0"></i> <span>${ciudad}</span></div>
-        </div>
-        <div class="col">
-          <button class="arrow-btn" onclick="abrirProductos('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button>
-          <div class="col-productos-title"><i class="fa-solid fa-bag-shopping"></i> Productos</div>
-          <div class="col-prod-item">${cantTxt}${productosCorto}</div>
-          <div class="col-total-row"><div class="col-total">$${Number(p.total||0).toLocaleString()}</div><div class="badge-estado"><i class="fa-solid fa-clock"></i> ${(p.estado||'pendiente').toUpperCase()}</div></div>
-        </div>
-      </div>
-      <div class="pedido-actions">
-        <button class="btn-act btn-acept ${p.estado==='aceptado'?'active':''}" onclick="cambiarEstado('${p.id}','aceptado')"><i class="fa-solid fa-check"></i> Aceptado</button>
-        <button class="btn-act btn-prep ${p.estado==='preparando'?'active':''}" onclick="cambiarEstado('${p.id}','preparando')"><i class="fa-solid fa-stopwatch"></i> Preparando</button>
-        <button class="btn-act btn-camino ${p.estado==='en_camino'?'active':''}" onclick="cambiarEstado('${p.id}','en_camino')"><i class="fa-solid fa-motorcycle"></i> En camino</button>
-        <button class="btn-act btn-entre ${p.estado==='entregado'?'active':''}" onclick="cambiarEstado('${p.id}','entregado')"><i class="fa-solid fa-box-open"></i> Entregado</button>
-        <button class="btn-act btn-cancel ${p.estado==='cancelado'?'active':''}" onclick="cambiarEstado('${p.id}','cancelado')"><i class="fa-solid fa-xmark"></i> Cancelar</button>
-      </div>
-    </div>`;
+    return `<div class="pedido-card ${esNuevo?'nuevo':''}"><div class="pedido-top"><div class="pedido-id-pill"><i class="fa-solid fa-hashtag"></i> ${numeroPedido}</div><div class="pedido-top-meta"><span><i class="fa-regular fa-calendar"></i> ${fechaMostrar}</span><span style="width:1px;height:14px;background:#e5e7eb"></span><span><i class="fa-regular fa-clock"></i> ${horaMostrar}</span></div><div class="crono-pill ${cronoClass}"><i class="fa-solid fa-stopwatch"></i> ${minutos} min</div></div><div class="pedido-middle"><div class="col"><button class="arrow-btn" onclick="abrirCliente('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button><div class="col-name"><i class="fa-solid fa-user"></i> ${nombre}</div><div class="col-sub"><i class="fa-solid fa-phone"></i> ${telefono}</div><div class="col-sub"><i class="fa-solid fa-location-dot"></i> <span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${direccion}</span></div></div><div class="col"><button class="arrow-btn" onclick="abrirIP('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button><div class="col-name"><i class="fa-solid fa-globe"></i> ${ipActual||'IP pendiente'}</div><div class="col-sub"><i class="fa-solid fa-location-dot" style="opacity:0"></i> ${ciudad}</div></div><div class="col"><button class="arrow-btn" onclick="abrirProductos('${p.id}')"><i class="fa-solid fa-chevron-right"></i></button><div class="col-productos-title"><i class="fa-solid fa-bag-shopping"></i> Productos</div><div class="col-prod-item">${cantTxt}${productosCorto}</div><div class="col-total-row"><div class="col-total">$${Number(p.total||0).toLocaleString()}</div><div class="badge-estado"><i class="fa-solid fa-clock"></i> ${(p.estado||'pendiente').toUpperCase()}</div></div></div></div><div class="pedido-actions"><button class="btn-act btn-acept ${p.estado==='aceptado'?'active':''}" onclick="cambiarEstado('${p.id}','aceptado')"><i class="fa-solid fa-check"></i> Aceptado</button><button class="btn-act btn-prep ${p.estado==='preparando'?'active':''}" onclick="cambiarEstado('${p.id}','preparando')"><i class="fa-solid fa-stopwatch"></i> Preparando</button><button class="btn-act btn-camino ${p.estado==='en_camino'?'active':''}" onclick="cambiarEstado('${p.id}','en_camino')"><i class="fa-solid fa-motorcycle"></i> En camino</button><button class="btn-act btn-entre ${p.estado==='entregado'?'active':''}" onclick="cambiarEstado('${p.id}','entregado')"><i class="fa-solid fa-box-open"></i> Entregado</button><button class="btn-act btn-cancel ${p.estado==='cancelado'?'active':''}" onclick="cambiarEstado('${p.id}','cancelado')"><i class="fa-solid fa-xmark"></i> Cancelar</button></div></div>`;
   }).join('');
 }
-
-window.cambiarEstado=function(id,nuevoEstado){update(ref(db,'pedidos/'+id),{estado:nuevoEstado});}
-window.bloquearIP=async function(ip,pedidoId){if(!ip)return alert('Sin IP');if(!confirm('Bloquear '+ip+'?'))return;const key=ip.replace(/\./g,'_');await update(ref(db,'ips_bloqueadas/'+key),{ip:ip,fecha:new Date().toLocaleString(),timestamp:Date.now(),pedidoId:pedidoId});}
-window.desbloquearIP=async function(ip){if(!confirm('Desbloquear '+ip+'?'))return;const key=ip.replace(/\./g,'_');await remove(ref(db,'ips_bloqueadas/'+key));}
 
 let audioCtx=null;
 function initAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
@@ -313,7 +285,7 @@ function sonarRappi(){
       o.connect(g); g.connect(audioCtx.destination);
       o.start(now+delay); o.stop(now+delay+0.6);
     });
-    if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+    if(navigator.vibrate) navigator.vibrate([200][100][200][100][400]);
   }catch(e){}
 }
 document.addEventListener('click', initAudio, {once:false});
@@ -321,16 +293,13 @@ document.addEventListener('keydown', initAudio, {once:false});
 window.addEventListener('load', ()=>{ setTimeout(()=>{ initAudio(); },500); });
 
 onValue(ref(db,'ips_bloqueadas'),snap=>{ipsBloqueadasCache=snap.val()||{};renderPedidos();});
-
 onValue(query(ref(db,'pedidos'), limitToLast(100)), (snap)=>{
   const data=snap.val()||{};
-  let todas=Object.entries(data).map(([k,v])=>({id:k,...v}));
-  // ORDENAR POR CORRELATIVO REAL, NO POR FECHA RANDOM
+  let todas=Object.entries(data).map(([k][v])=>({id:k,...v}));
   todas.sort((a,b)=> (a.correlativo||0)-(b.correlativo||0));
   pedidosTodosCache=todas;
   let activas=todas.filter(p=>p.estado!=='entregado'&&p.estado!=='cancelado');
   activas.sort((a,b)=>(a.correlativo||0)-(b.correlativo||0));
-
   if(!primerCarga){
     const nuevos=activas.filter(p=>!idsVistos.has(p.id));
     if(nuevos.length>0){

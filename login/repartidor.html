@@ -98,7 +98,6 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 .toast-card i{font-size:28px;color:#22c55e}
 .toast-card b{font-size:14px;font-weight:800}
 .toast-card span{font-size:11px;color:#aaa}
-/* MOTIVOS CANCELACION */
 .motivo-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .motivo-btn{width:100%;text-align:left;padding:12px 12px;border-radius:12px;border:1.5px solid #f0e6ec;background:#faf6f8;font-size:12px;font-weight:600;color:#333;cursor:pointer;display:flex;align-items:center;gap:10px}
 .motivo-btn.active{border-color:#5c0f2a;background:#5c0f2a;color:#fff}
@@ -123,17 +122,17 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 
 <div class="confirm-overlay" id="overlayMotivos">
   <div class="confirm-card" style="max-width:360px;text-align:left">
-    <div style="text-align:center"><div class="confirm-icon vino"><i class="fa-solid fa-ban"></i></div><h3>¿Por qué se cancela?</h3><p>Selecciona el motivo para guardar en historial</p></div>
+    <div style="text-align:center"><div class="confirm-icon vino"><i class="fa-solid fa-ban"></i></div><h3>¿Por qué se cancela?</h3><p>Selecciona motivo para guardar en historial</p></div>
     <div class="motivo-list" id="listaMotivos">
       <button class="motivo-btn" data-motivo="Cliente no salió"><i class="fa-solid fa-person-walking"></i> Cliente no salió</button>
-      <button class="motivo-btn" data-motivo="No respondió / Tel apagado"><i class="fa-solid fa-phone-slash"></i> No respondió / Tel apagado</button>
-      <button class="motivo-btn" data-motivo="Dirección incorrecta / No encontrada"><i class="fa-solid fa-location-dot"></i> Dirección incorrecta</button>
+      <button class="motivo-btn" data-motivo="No respondió / Tel apagado"><i class="fa-solid fa-phone-slash"></i> No respondió</button>
+      <button class="motivo-btn" data-motivo="Dirección incorrecta"><i class="fa-solid fa-location-dot"></i> Dirección incorrecta</button>
       <button class="motivo-btn" data-motivo="Cliente canceló en sitio"><i class="fa-solid fa-hand"></i> Cliente canceló en sitio</button>
-      <button class="motivo-btn" data-motivo="Producto dañado"><i class="fa-solid fa-box-open"></i> Producto dañado / Derrame</button>
+      <button class="motivo-btn" data-motivo="Producto dañado"><i class="fa-solid fa-box-open"></i> Producto dañado</button>
       <button class="motivo-btn" data-motivo="Ubicación no segura"><i class="fa-solid fa-triangle-exclamation"></i> Ubicación no segura</button>
       <button class="motivo-btn" data-motivo="Otro"><i class="fa-solid fa-pen"></i> Otro motivo</button>
     </div>
-    <input type="text" id="inputOtroMotivo" class="input-otro" placeholder="Escribe el motivo...">
+    <input type="text" id="inputOtroMotivo" class="input-otro" placeholder="Escribe motivo...">
     <div class="confirm-actions" style="margin-top:14px"><button class="btn-confirm cancel" onclick="cerrarMotivos()">Cancelar</button><button class="btn-confirm yes-vino" onclick="confirmarCancelacionConMotivo()">Guardar en historial</button></div>
   </div>
 </div>
@@ -164,6 +163,7 @@ const configHistorial={
 const appPedidos = firebase.initializeApp(configPedidos, "pedidos");
 const appRepartidor = firebase.initializeApp(configRepartidor, "repartidor");
 const appHistorial = firebase.initializeApp(configHistorial, "historial");
+
 const dbPedidos = appPedidos.database();
 const dbRepartidor = appRepartidor.database();
 const dbHistorial = appHistorial.database();
@@ -172,7 +172,7 @@ let cache=[]; let idsVistos=new Set(); let primer=true; let nuevos=new Set(); le
 let cancelIdActual=null; let motivoSeleccionado=''; let ipCliente='';
 
 async function obtenerIP(){
-  try{ let r=await fetch('https://api.ipify.org?format=json'); let d=await r.json(); return d.ip||''; }catch(e){ return ''; }
+  try{ let r=await fetch('https://api.ipify.org?format=json'); let d=await r.json(); return d.ip||''; }catch(e){ return 'sin-ip'; }
 }
 obtenerIP().then(ip=>ipCliente=ip);
 
@@ -187,26 +187,20 @@ function init(){
     }
     idsVistos=new Set(lista.map(x=>x.firebaseId)); primer=false; cache=lista; render();
   });
-  dbPedidos.ref('pedidos').on('value', snap=>{
-    if(cache.length>0) return;
-    let data=snap.val()||{}; let lista=Object.entries(data).map(([k,v])=>({firebaseId:k, id:k, ...v})).filter(x=>x.estado==='listo' || x.estado==='en_camino');
-    if(lista.length>0){ cache=lista; render(); }
-  });
 }
 init();
 
 let ctx=null; function sonar(){ try{ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); const t=ctx.currentTime; [0,0.3].forEach((d,i)=>{ const o=ctx.createOscillator(); const g=ctx.createGain(); o.frequency.setValueAtTime(i?1200:900, t+d); o.frequency.exponentialRampToValueAtTime(i?900:700, t+d+0.3); g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(0.9,t+d+0.02); g.gain.exponentialRampToValueAtTime(0.01,t+d+0.5); o.connect(g); g.connect(ctx.destination); o.start(t+d); o.stop(t+d+0.6); }); if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){} }
 function timeAgo(ts){ if(!ts) return 'Ahora'; let diff=Math.floor((Date.now()-ts)/60000); if(diff<1) return 'Ahora'; if(diff<60) return `Hace ${diff} min`; return `Hace ${Math.floor(diff/60)} h`; }
 
-/* CONFIRMACIONES */
 function mostrarConfirm(tipo, onConfirm){
   const overlay=document.getElementById('overlayConfirm');
   const card=document.getElementById('cardConfirm');
   let html='';
   if(tipo==='en_camino'){
-    html=`<div class="confirm-icon yellow"><i class="fa-solid fa-motorcycle"></i></div><h3>¿Marcar en camino?</h3><p>El cliente verá que su pedido va en camino</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-yellow" id="btnYes">Sí, en camino</button></div>`;
+    html=`<div class="confirm-icon yellow"><i class="fa-solid fa-motorcycle"></i></div><h3>¿Marcar en camino?</h3><p>Cliente verá que va en camino</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-yellow" id="btnYes">Sí, en camino</button></div>`;
   }else if(tipo==='entregado'){
-    html=`<div class="confirm-icon green"><i class="fa-solid fa-check"></i></div><h3>¿Confirmar entrega?</h3><p>Se guardará en historial de entregados</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-green" id="btnYes">Sí, entregado</button></div>`;
+    html=`<div class="confirm-icon green"><i class="fa-solid fa-check"></i></div><h3>¿Confirmar entrega?</h3><p>Se guardará en historial</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-green" id="btnYes">Sí, entregado</button></div>`;
   }
   card.innerHTML=html; overlay.classList.add('show');
   document.getElementById('btnYes').onclick=()=>{ cerrarConfirm(); onConfirm(); };
@@ -216,14 +210,13 @@ function mostrarToast(tipo){
   const overlay=document.getElementById('overlayToast');
   const card=document.getElementById('cardToast');
   let html='';
-  if(tipo==='en_camino'){ html=`<i class="fa-solid fa-motorcycle" style="color:#ffc300"></i><b>¡En camino!</b><span>Cliente notificado</span>`; }
+  if(tipo==='en_camino'){ html=`<i class="fa-solid fa-motorcycle" style="color:#ffc300"></i><b>¡En camino!</b><span>Notificado</span>`; }
   else if(tipo==='entregado'){ html=`<i class="fa-solid fa-circle-check"></i><b>¡Entregado!</b><span>Guardado en historial</span>`; }
   else if(tipo==='cancelado'){ html=`<i class="fa-solid fa-ban" style="color:#ef4444"></i><b>Cancelado</b><span>Guardado con motivo</span>`; }
   card.innerHTML=html; overlay.classList.add('show');
   setTimeout(()=>{ overlay.classList.remove('show'); },2400);
 }
 
-/* MOTIVOS CANCELACION */
 window.abrirMotivos=function(id){
   cancelIdActual=id; motivoSeleccionado='';
   document.querySelectorAll('.motivo-btn').forEach(b=>b.classList.remove('active'));
@@ -242,51 +235,57 @@ document.addEventListener('click', (e)=>{
 });
 
 window.confirmarCancelacionConMotivo=async function(){
-  if(!motivoSeleccionado){ alert('Selecciona un motivo'); return; }
+  if(!motivoSeleccionado){ alert('Selecciona motivo'); return; }
   let motivoFinal=motivoSeleccionado;
   if(motivoSeleccionado==='Otro'){
     let txt=document.getElementById('inputOtroMotivo').value.trim();
-    if(!txt){ alert('Escribe el motivo'); return; }
+    if(!txt){ alert('Escribe motivo'); return; }
     motivoFinal=txt;
   }
   let id=cancelIdActual;
   let pedido=cache.find(x=>x.firebaseId===id);
   if(!pedido) return;
   cerrarMotivos();
-  // quitar al instante
   cache=cache.filter(x=>x.firebaseId!==id); expandidos.delete(id); nuevos.delete(id); render();
-
-  let ip = ipCliente || pedido.ip || '';
+  let ip = ipCliente || pedido.ip || 'sin-ip';
   try{ ip = await obtenerIP() || ip; }catch(e){}
-
   let dataHistorial={
-    ...pedido,
+    firebaseId: id,
+    numero: pedido.numero||'',
+    correlativo: pedido.correlativo||0,
+    total: pedido.total||0,
+    productos: pedido.productos||{},
+    cliente: pedido.cliente||{},
+    direccion: pedido.direccion||pedido.cliente?.direccion||'',
     estado:'cancelado',
     motivoCancelacion: motivoFinal,
     fechaCancelacion: Date.now(),
+    timestamp: Date.now(),
     ipCliente: ip,
     telefono: pedido.cliente?.telefono || pedido.telefono || '',
     nombreCliente: pedido.cliente?.nombre || '',
     repartidor: localStorage.getItem('santillos_rep_user')||'repa',
-    bloqueado:false,
-    vecesCanceladas:1
+    bloqueado:false
   };
-
   try{
+    console.log('Guardando cancelado en historial...', dataHistorial);
     await dbHistorial.ref('historial_cancelados/'+id).set(dataHistorial);
-    await dbHistorial.ref('ips_registro/'+(pedido.cliente?.telefono||id)).set({
+    await dbHistorial.ref('historial_general/'+id).set({...dataHistorial, tipo:'cancelado'});
+    await dbHistorial.ref('ips_registro/'+(dataHistorial.telefono||id)).set({
       ip: ip,
       telefono: dataHistorial.telefono,
       ultimoMotivo: motivoFinal,
       fecha: Date.now(),
       estado:'cancelado',
       pedidoId: id,
-      bloqueado:false
+      bloqueado:false,
+      nombreCliente: dataHistorial.nombreCliente
     });
     await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
-    await dbPedidos.ref('pedidos/'+id).update({estado:'cancelado', motivoCancelacion:motivoFinal, actualizadoEn:Date.now()});
+    await dbPedidos.ref('pedidos/'+id).update({estado:'cancelado', motivoCancelacion:motivoFinal});
     mostrarToast('cancelado');
-  }catch(e){ console.log(e); alert('Error guardando en historial: '+e.message); }
+    console.log('CANCELADO GUARDADO OK');
+  }catch(e){ console.error(e); alert('Error historial: '+e.message); }
 }
 
 window.cerrarSesion=function(){
@@ -323,7 +322,6 @@ function render(){
     const hace = timeAgo(p.timestamp || p.creadoEn || p.listoEn);
     const esNuevo = nuevos.has(p.firebaseId);
     const expandido = expandidos.has(p.firebaseId);
-
     if(!expandido){
       return `<div class="card ${esNuevo?'nuevo':''}"><div class="card-head"><div class="pedido-badge">Pedido #${idShort}</div><div class="meta-head"><span><i class="fa-regular fa-clock"></i> ${hace}</span><div class="sep"></div><span><i class="fa-solid fa-location-dot"></i> ${distancia}</span></div></div><div class="client-box"><div class="client-icon"><i class="fa-solid fa-user"></i></div><div class="client-info"><small>Cliente</small><b>${nombre}</b><span><i class="fa-solid fa-phone"></i> ${tel}</span></div><button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i></button></div><div class="actions"><button class="btn btn-outline" onclick="verDetalles('${p.firebaseId}')"><i class="fa-solid fa-eye"></i> Detalles</button><button class="btn btn-green" onclick="toggleExpand('${p.firebaseId}')"><i class="fa-solid fa-hand"></i> Lo tengo</button></div></div>`;
     }
@@ -335,41 +333,53 @@ function render(){
 window.abrirMapa=function(dir, lat, lng){ if(lat && lng) window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank'); else window.open(`https://www.google.com/maps/search/${encodeURIComponent(dir)}`,'_blank'); }
 
 window.cambiarEstado=function(id, estado){
-  if(estado==='cancelado'){
-    abrirMotivos(id); return;
-  }
+  if(estado==='cancelado'){ abrirMotivos(id); return; }
   mostrarConfirm(estado, async ()=>{
     let pedido=cache.find(x=>x.firebaseId===id);
+    if(!pedido){ alert('Pedido no encontrado'); return; }
     if(estado==='entregado'){
-      cache=cache.filter(x=>x.firebaseId!==id); expandidos.delete(id); nuevos.delete(id); render();
-      let ip = ipCliente || pedido?.ip || '';
+      let cacheBackup=[...cache];
+      cache=cache.filter(x=>x.firebaseId!==id); expandidos.delete(id); render();
+      let ip = ipCliente;
       try{ ip = await obtenerIP() || ip; }catch(e){}
       let dataHistorial={
-        ...pedido,
+        firebaseId: id,
+        numero: pedido.numero||`ST-${pedido.correlativo||0}`,
+        correlativo: pedido.correlativo||0,
+        total: pedido.total||0,
+        productos: pedido.productos||{},
+        cliente: pedido.cliente||{},
+        direccion: pedido.direccion||pedido.cliente?.direccion||'',
         estado:'entregado',
         fechaEntrega: Date.now(),
+        timestamp: Date.now(),
         ipCliente: ip,
-        repartidor: localStorage.getItem('santillos_rep_user')||'repa',
-        telefono: pedido?.cliente?.telefono || pedido?.telefono || '',
-        nombreCliente: pedido?.cliente?.nombre || ''
+        telefono: pedido.cliente?.telefono||pedido.telefono||'',
+        nombreCliente: pedido.cliente?.nombre||'',
+        repartidor: localStorage.getItem('santillos_rep_user')||'repa'
       };
       try{
+        console.log('Guardando entregado...', dataHistorial);
         await dbHistorial.ref('historial_entregados/'+id).set(dataHistorial);
         await dbHistorial.ref('historial_general/'+id).set({...dataHistorial, tipo:'entregado'});
         await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
-        await dbPedidos.ref('pedidos/'+id).update({estado:'entregado', fechaEntrega:Date.now()});
+        await dbPedidos.ref('pedidos/'+id).set(null);
         mostrarToast('entregado');
-      }catch(e){ console.log(e); }
+        console.log('ENTREGADO OK');
+      }catch(e){
+        console.error(e);
+        cache=cacheBackup; render();
+        alert('Error guardando en historial: '+e.message+'\nVerifica reglas de santillos-historial');
+      }
     }else if(estado==='en_camino'){
       try{
         await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado, actualizadoEn: Date.now()});
-        await dbPedidos.ref('pedidos/'+id).update({estado, actualizadoEn: Date.now()});
+        await dbPedidos.ref('pedidos/'+id).update({estado});
         mostrarToast('en_camino');
-      }catch(e){}
+      }catch(e){ alert(e.message); }
     }
   });
 }
-document.addEventListener('click',()=>{ if(ctx && ctx.state==='suspended') ctx.resume(); });
 </script>
 </body>
 </html>

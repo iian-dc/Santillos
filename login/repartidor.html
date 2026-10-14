@@ -9,82 +9,108 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:#f7f3f6;color:#222;max-width:480px;margin:0 auto;min-height:100vh}
-.topbar{background:#5c0f2a;height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;position:sticky;top:0;z-index:50}
+body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
+.topbar{background:#5c0f2a;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;position:sticky;top:0;z-index:50}
 .topbar-left{display:flex;align-items:center;gap:10px}
-.menu-icon{color:#fff;font-size:22px}
 .logo-area{line-height:1}
-.logo-area h1{color:#fff;font-size:32px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center}
+.logo-area h1{color:#fff;font-size:28px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center}
 .logo-area h1 span{position:relative}
-.logo-area h1 span::after{content:'';width:12px;height:12px;background:#ffc300;border-radius:50%;position:absolute;top:-4px;right:-14px}
-.logo-area p{color:#fff;font-size:11px;font-weight:400;margin-top:-2px;margin-left:2px;letter-spacing:0.2px}
-.online-pill{border:1.5px solid rgba(255,255,255,0.4);border-radius:30px;padding:7px 14px;display:flex;align-items:center;gap:8px;color:#fff;font-size:13px;font-weight:600}
-.online-pill .dot{width:18px;height:18px;background:#22c55e;border-radius:50%;display:inline-block;box-shadow:0 0 0 4px rgba(34,197,94,0.2)}
+.logo-area h1 span::after{content:'';width:10px;height:10px;background:#ffc300;border-radius:50%;position:absolute;top:-2px;right:-12px}
+.logo-area p{color:#fff;font-size:10px;font-weight:400;margin-top:0px;margin-left:2px;letter-spacing:0.2px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.online-pill{border:1.5px solid rgba(255,255,255,0.4);border-radius:30px;padding:6px 12px;display:flex;align-items:center;gap:6px;color:#fff;font-size:12px;font-weight:600}
+.online-pill .dot{width:14px;height:14px;background:#22c55e;border-radius:50%;display:inline-block;box-shadow:0 0 0 3px rgba(34,197,94,0.2)}
+.btn-logout{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:7px 14px;border-radius:30px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
 
-.wrap{padding:12px}
-.card{background:#fff;border-radius:22px;padding:14px 12px;box-shadow:0 4px 20px rgba(0,0,0,0.06);margin-bottom:16px;border:1px solid #f0e6ec}
-.card.nuevo{border:2px solid #00ff88;box-shadow:0 0 0 5px rgba(0,255,136,0.15),0 8px 24px rgba(0,0,0,0.08);animation:neon 1.2s infinite}
-@keyframes neon{0%,100%{box-shadow:0 0 0 5px rgba(0,255,136,0.15)}50%{box-shadow:0 0 0 8px rgba(0,255,136,0.25)}}
-.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.pedido-badge{background:#5c0f2a;color:#fff;border-radius:30px;padding:8px 16px;font-weight:700;font-size:14px}
-.meta-head{display:flex;align-items:center;gap:10px;color:#5c0f2a;font-size:12px;font-weight:600}
-.meta-head i{font-size:18px}
-.sep{width:1px;height:16px;background:#ddd}
+.wrap{padding:12px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:768px){ .wrap{grid-template-columns:1fr 1fr; padding:18px} }
+@media(min-width:1100px){ .wrap{grid-template-columns:1fr 1fr 1fr} }
 
-.client-box{background:#faf6f8;border-radius:16px;padding:10px 12px;display:flex;align-items:center;gap:12px}
-.client-icon{width:48px;height:48px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
-.client-info small{color:#5c0f2a;font-size:12px;font-weight:600}
-.client-info b{font-size:15px;color:#111;display:block;margin-top:1px}
-.client-info span{font-size:12px;color:#555;display:flex;align-items:center;gap:6px;margin-top:2px}
+.card{background:#fff;border-radius:18px;padding:10px 12px;box-shadow:0 3px 14px rgba(0,0,0,0.06);border:1px solid #f0e6ec;transition:all 0.3s;height:fit-content}
+.card.nuevo{border:2px solid #00ff88;box-shadow:0 0 0 4px rgba(0,255,136,0.15),0 6px 18px rgba(0,0,0,0.08);animation:neon 1.2s infinite}
+@keyframes neon{0%,100%{box-shadow:0 0 0 4px rgba(0,255,136,0.15)}50%{box-shadow:0 0 0 7px rgba(0,255,136,0.25)}}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.pedido-badge{background:#5c0f2a;color:#fff;border-radius:30px;padding:6px 12px;font-weight:700;font-size:12px}
+.meta-head{display:flex;align-items:center;gap:8px;color:#5c0f2a;font-size:11px;font-weight:600}
+.sep{width:1px;height:14px;background:#ddd}
 
-.section-title{display:flex;justify-content:space-between;align-items:center;margin:16px 2px 10px}
-.section-title h3{color:#5c0f2a;font-size:15px;font-weight:800}
-.count-pill{background:#faf6f8;border-radius:20px;padding:6px 12px;font-size:12px;color:#5c0f2a;font-weight:600;display:flex;align-items:center;gap:6px}
+.client-box{background:#faf6f8;border-radius:14px;padding:8px 10px;display:flex;align-items:center;gap:10px;position:relative}
+.client-icon{width:40px;height:40px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0}
+.client-info{flex:1;min-width:0}
+.client-info small{color:#5c0f2a;font-size:10px;font-weight:600}
+.client-info b{font-size:13px;color:#111;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-info span{font-size:11px;color:#555;display:flex;align-items:center;gap:4px;margin-top:1px}
+.btn-call{width:38px;height:38px;border-radius:50%;background:#22c55e;color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(34,197,94,0.3)}
+
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:12px 2px 6px}
+.section-title h3{color:#5c0f2a;font-size:13px;font-weight:800}
+.count-pill{background:#faf6f8;border-radius:20px;padding:4px 10px;font-size:10px;color:#5c0f2a;font-weight:600;display:flex;align-items:center;gap:4px}
 
 .prod-list{display:flex;flex-direction:column}
-.prod-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1e8ef}
+.prod-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1e8ef}
 .prod-item:last-child{border:none}
-.prod-img{width:54px;height:48px;border-radius:12px;object-fit:cover;background:#eee}
-.prod-name{flex:1;font-size:13px;font-weight:500;color:#1e2a4a}
-.prod-qty{font-size:12px;color:#666}
+.prod-img{width:44px;height:38px;border-radius:10px;object-fit:cover;background:#eee}
+.prod-name{flex:1;font-size:12px;font-weight:500;color:#1e2a4a}
+.prod-qty{font-size:11px;color:#666}
 
-.info-grid{background:#faf6f8;border-radius:16px;display:grid;grid-template-columns:1fr 1fr 1fr;padding:10px 6px;margin:12px 0}
-.info-col{display:flex;flex-direction:column;gap:2px;padding:0 8px;border-right:1px solid #ece0e8}
+.info-grid{background:#faf6f8;border-radius:14px;display:grid;grid-template-columns:1fr 1fr 1fr;padding:8px 4px;margin:10px 0}
+.info-col{display:flex;flex-direction:column;gap:1px;padding:0 6px;border-right:1px solid #ece0e8}
 .info-col:last-child{border:none}
-.info-col .icon{width:30px;height:30px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;margin-bottom:4px}
-.info-col small{font-size:10px;color:#333;font-weight:500}
-.info-col b{font-size:14px;font-weight:800;color:#5c0f2a;line-height:1.1}
+.info-col .icon{width:24px;height:24px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;margin-bottom:3px}
+.info-col small{font-size:9px;color:#333;font-weight:500;line-height:1.1}
+.info-col b{font-size:12px;font-weight:800;color:#5c0f2a;line-height:1.1}
 
-.addr-box{display:flex;gap:10px;margin-top:12px;align-items:flex-start}
-.addr-icon{color:#5c0f2a;font-size:22px;margin-top:2px}
+.addr-box{display:flex;gap:8px;margin-top:8px;align-items:flex-start}
+.addr-icon{color:#5c0f2a;font-size:18px;margin-top:2px}
 .addr-text{flex:1}
-.addr-text b{color:#5c0f2a;font-size:13px}
-.addr-text p{font-size:11px;color:#6b7280;line-height:1.3;margin-top:2px}
-.map-link{color:#5c0f2a;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;margin-top:8px}
-.map-link i{font-size:16px}
+.addr-text b{color:#5c0f2a;font-size:11px}
+.addr-text p{font-size:10.5px;color:#6b7280;line-height:1.3;margin-top:1px}
+.map-link{color:#5c0f2a;font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;margin-top:6px}
 
-.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px}
-.btn{border:none;border-radius:14px;padding:12px 6px;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;line-height:1.1;text-align:left}
-.btn i{font-size:18px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.actions.full{grid-template-columns:1fr 1fr 1fr}
+.btn{border:none;border-radius:12px;padding:10px 6px;font-weight:800;font-size:10.5px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;line-height:1.1;text-align:center}
+.btn i{font-size:14px}
+.btn-green{background:#22c55e;color:#fff;box-shadow:0 3px 10px rgba(34,197,94,0.3)}
 .btn-yellow{background:#ffc300;color:#111}
 .btn-vino{background:#5c0f2a;color:#fff}
 .btn-outline{background:#fff;border:1.5px solid #5c0f2a;color:#5c0f2a}
 .btn:disabled{opacity:0.5}
 
-.empty{background:#fff;border-radius:22px;padding:40px 20px;text-align:center;color:#999;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.04)}
+.collapsed-hint{font-size:10px;color:#888;text-align:center;margin-top:6px}
+
+.empty{background:#fff;border-radius:18px;padding:30px 18px;text-align:center;color:#999;font-size:12px;grid-column:1/-1;box-shadow:0 3px 14px rgba(0,0,0,0.04)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:14px}
+.modal-overlay.show{display:flex}
+.modal-card{background:#fff;border-radius:18px;width:100%;max-width:380px;max-height:80vh;overflow-y:auto}
+.modal-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff}
+.modal-head h3{font-size:13px;font-weight:800;color:#5c0f2a}
+.btn-close{width:26px;height:26px;border-radius:50%;background:#f3f4f6;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.modal-body{padding:12px 14px}
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="topbar-left">
-    <i class="fa-solid fa-bars menu-icon"></i>
     <div class="logo-area"><h1><span>Santillos</span></h1><p>Panel del repartidor</p></div>
   </div>
-  <div class="online-pill"><span class="dot"></span> En línea</div>
+  <div class="topbar-right">
+    <div class="online-pill"><span class="dot"></span> En línea</div>
+    <button class="btn-logout" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar</button>
+  </div>
 </div>
 
 <div class="wrap" id="lista"></div>
+
+<div class="modal-overlay" id="modalDetalles" onclick="if(event.target===this)cerrarModal()">
+  <div class="modal-card">
+    <div class="modal-head"><h3><i class="fa-solid fa-utensils"></i> Detalles del pedido</h3><button class="btn-close" onclick="cerrarModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="modal-body" id="bodyDetalles"></div>
+  </div>
+</div>
 
 <script>
 const configPedidos={
@@ -105,6 +131,7 @@ const dbPedidos = appPedidos.database();
 const dbRepartidor = appRepartidor.database();
 
 let cache=[]; let idsVistos=new Set(); let primer=true; let nuevos=new Set();
+let expandidos=new Set();
 
 function init(){
   dbRepartidor.ref('pedidos_en_camino').on('value', snap=>{
@@ -119,7 +146,7 @@ function init(){
   });
   dbPedidos.ref('pedidos').on('value', snap=>{
     if(cache.length>0) return;
-    let data=snap.val()||{}; let lista=Object.entries(data).map(([k,v])=>({firebaseId:k, id:k, ...v})).filter(x=>x.estado==='en_camino');
+    let data=snap.val()||{}; let lista=Object.entries(data).map(([k,v])=>({firebaseId:k, id:k, ...v})).filter(x=>x.estado==='listo' || x.estado==='en_camino');
     if(lista.length>0){ cache=lista; render(); }
   });
 }
@@ -133,22 +160,71 @@ function timeAgo(ts){
   if(diff<1) return 'Ahora'; if(diff<60) return `Hace ${diff} min`; return `Hace ${Math.floor(diff/60)} h`;
 }
 
+window.cerrarSesion=function(){
+  if(!confirm('¿Cerrar sesión?')) return;
+  localStorage.removeItem('santillos_rep_login');
+  localStorage.removeItem('santillos_rep_user');
+  window.location.href='./repartidor-login.html';
+}
+window.cerrarModal=function(){ document.getElementById('modalDetalles').classList.remove('show'); }
+
+window.verDetalles=function(id){
+  const p=cache.find(x=>x.firebaseId===id); if(!p) return;
+  const productos = p.productos ? (Array.isArray(p.productos)?p.productos:Object.values(p.productos)) : [];
+  let html = productos.map(pr=>{
+    const nombre = pr.nombre||'Producto';
+    const cant = pr.cant||pr.cantidad||1;
+    const precio = pr.precio||0;
+    return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px"><span>${cant}x ${nombre}</span><b>$${Number(precio)*Number(cant)}</b></div>`;
+  }).join('') || '<div style="font-size:12px;color:#888">Sin productos</div>';
+  html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-weight:800;font-size:13px"><span>Total</span><span>$${p.total||0}</span></div>
+  <div style="margin-top:12px;font-size:11px;color:#666"><b>Cliente:</b> ${p.cliente?.nombre||''}<br><b>Dir:</b> ${p.cliente?.direccion||p.direccion||''}<br><b>Ref:</b> ${p.cliente?.referencia||''}</div>`;
+  document.getElementById('bodyDetalles').innerHTML=html;
+  document.getElementById('modalDetalles').classList.add('show');
+}
+
+window.toggleExpand=function(id){
+  if(expandidos.has(id)) expandidos.delete(id); else expandidos.add(id);
+  render();
+}
+
 function render(){
   const c=document.getElementById('lista');
-  if(cache.length===0){ c.innerHTML=`<div class="empty"><i class="fa-solid fa-motorcycle" style="font-size:30px;margin-bottom:10px;display:block;color:#5c0f2a"></i>No tienes pedidos en camino<br><small>Cuando admin ponga En camino te llega aquí</small></div>`; return; }
+  if(cache.length===0){ c.innerHTML=`<div class="empty"><i class="fa-solid fa-motorcycle" style="font-size:28px;margin-bottom:8px;display:block;color:#5c0f2a"></i>No tienes pedidos en camino<br><small>Cuando admin ponga Está listo te llega aquí</small></div>`; return; }
   c.innerHTML=cache.map(p=>{
     const numero = p.numero || `ST-${String(p.correlativo||0).padStart(4,'0')}`;
     const idShort = numero.replace('ST-','');
     const cliente = p.cliente || {};
-    const nombre = cliente.nombre || p.nombre || 'Juan Pérez';
-    const tel = cliente.telefono || p.telefono || '418 123 4567';
-    const dir = cliente.direccion || p.direccion || 'Calle Hidalgo #145, Col. Centro, Dolores Hidalgo, Gto.';
-    const productos = p.productos ? (Array.isArray(p.productos)?p.productos:Object.values(p.productos)) : [{nombre:'Hamburguesa Clásica', cant:1, img:'https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=200'},{nombre:'Papas a la Francesa', cant:1, img:'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=200'},{nombre:'Refresco 600 ml', cant:1, img:'https://images.unsplash.com/photo-1624553307583-6d06d05b9df2?w=200'}];
+    const nombre = cliente.nombre || p.nombre || 'Cliente';
+    const tel = cliente.telefono || p.telefono || '';
+    const dir = cliente.direccion || p.direccion || '';
+    const productos = p.productos ? (Array.isArray(p.productos)?p.productos:Object.values(p.productos)) : [];
     const valorServicio = p.valorServicio || 45;
     const distancia = p.distancia || '2.8 km';
     const tiempo = p.tiempoLlegada || '9 min';
-    const hace = timeAgo(p.timestamp || p.creadoEn);
+    const hace = timeAgo(p.timestamp || p.creadoEn || p.listoEn);
     const esNuevo = nuevos.has(p.firebaseId);
+    const expandido = expandidos.has(p.firebaseId);
+
+    if(!expandido){
+      return `
+      <div class="card ${esNuevo?'nuevo':''}">
+        <div class="card-head">
+          <div class="pedido-badge">Pedido #${idShort}</div>
+          <div class="meta-head"><span><i class="fa-regular fa-clock"></i> ${hace}</span><div class="sep"></div><span><i class="fa-solid fa-location-dot"></i> ${distancia}</span></div>
+        </div>
+        <div class="client-box">
+          <div class="client-icon"><i class="fa-solid fa-user"></i></div>
+          <div class="client-info"><small>Cliente</small><b>${nombre}</b><span><i class="fa-solid fa-phone"></i> ${tel}</span></div>
+          <button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i></button>
+        </div>
+        <div class="actions">
+          <button class="btn btn-outline" onclick="verDetalles('${p.firebaseId}')"><i class="fa-solid fa-eye"></i> Detalles</button>
+          <button class="btn btn-green" onclick="toggleExpand('${p.firebaseId}')"><i class="fa-solid fa-hand"></i> Lo tengo</button>
+        </div>
+        <div class="collapsed-hint">Toca "Lo tengo" para ver ruta y entregar</div>
+      </div>`;
+    }
 
     let prodHtml = productos.map(pr=>{
       const img = pr.img || pr.imagen || 'https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=200';
@@ -164,23 +240,24 @@ function render(){
       <div class="client-box">
         <div class="client-icon"><i class="fa-solid fa-user"></i></div>
         <div class="client-info"><small>Cliente</small><b>${nombre}</b><span><i class="fa-solid fa-phone"></i> ${tel}</span></div>
+        <button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i></button>
       </div>
-      <div class="section-title"><h3>Productos del pedido</h3><div class="count-pill"><i class="fa-solid fa-utensils"></i> ${productos.length} productos</div></div>
+      <div class="section-title"><h3>Productos del pedido</h3><div class="count-pill"><i class="fa-solid fa-utensils"></i> ${productos.length} prod</div></div>
       <div class="prod-list">${prodHtml}</div>
       <div class="info-grid">
-        <div class="info-col"><div class="icon"><i class="fa-solid fa-dollar-sign"></i></div><small>Valor del servicio</small><b>$${valorServicio} MXN</b></div>
-        <div class="info-col"><div class="icon"><i class="fa-regular fa-clock"></i></div><small>Tiempo de llegada</small><b>${tiempo}</b></div>
-        <div class="info-col"><div class="icon"><i class="fa-solid fa-route"></i></div><small>Distancia al cliente</small><b>${distancia}</b></div>
+        <div class="info-col"><div class="icon"><i class="fa-solid fa-dollar-sign"></i></div><small>Valor servicio</small><b>$${valorServicio}</b></div>
+        <div class="info-col"><div class="icon"><i class="fa-regular fa-clock"></i></div><small>Llegada</small><b>${tiempo}</b></div>
+        <div class="info-col"><div class="icon"><i class="fa-solid fa-route"></i></div><small>Distancia</small><b>${distancia}</b></div>
       </div>
       <div class="addr-box">
         <i class="fa-solid fa-location-dot addr-icon"></i>
-        <div class="addr-text"><b>Dirección de entrega</b><p>${dir}</p></div>
-        <div class="map-link" onclick="abrirMapa('${dir}', ${cliente.lat||''}, ${cliente.lng||''})"><i class="fa-solid fa-map"></i> Ver en mapa <i class="fa-solid fa-chevron-right"></i></div>
+        <div class="addr-text"><b>Dirección</b><p>${dir}</p></div>
+        <div class="map-link" onclick="abrirMapa('${dir}', ${cliente.lat||''}, ${cliente.lng||''})"><i class="fa-solid fa-map"></i> Mapa <i class="fa-solid fa-chevron-right"></i></div>
       </div>
-      <div class="actions">
+      <div class="actions full">
         <button class="btn btn-yellow" onclick="cambiarEstado('${p.firebaseId}','en_camino')"><i class="fa-solid fa-motorcycle"></i> En camino</button>
         <button class="btn btn-vino" onclick="cambiarEstado('${p.firebaseId}','entregado')"><i class="fa-solid fa-check"></i> Entregado</button>
-        <button class="btn btn-outline" onclick="cambiarEstado('${p.firebaseId}','cancelado')"><i class="fa-solid fa-ban"></i> Rechazado / Cancelado</button>
+        <button class="btn btn-outline" onclick="cambiarEstado('${p.firebaseId}','cancelado')"><i class="fa-solid fa-ban"></i> Cancelar</button>
       </div>
     </div>`;
   }).join('');
@@ -192,17 +269,27 @@ window.abrirMapa=function(dir, lat, lng){
 }
 
 window.cambiarEstado=async function(id, estado){
+  if(estado==='en_camino' && !expandidos.has(id)) expandidos.add(id);
+  
   let msg = estado==='entregado' ? '¿Confirmas entrega?' : estado==='cancelado' ? '¿Cancelar pedido?' : '¿Marcar en camino?';
   if(!confirm(msg)) return;
+
+  // QUITAR AL INSTANTE SI ES ENTREGADO/CANCELADO
+  if(estado==='entregado' || estado==='cancelado'){
+    cache = cache.filter(x=>x.firebaseId!==id);
+    expandidos.delete(id);
+    nuevos.delete(id);
+    render();
+  }
+
   try{
     await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado, actualizadoEn: Date.now()});
     await dbPedidos.ref('pedidos/'+id).update({estado, actualizadoEn: Date.now(), repartidor: localStorage.getItem('santillos_rep_user')||'repa'});
     if(estado==='entregado' || estado==='cancelado'){
       setTimeout(async()=>{
         await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
-      },1500);
+      },800);
     }
-    if(estado==='entregado') alert('¡Entregado! Cliente ya lo ve en confirmación.');
   }catch(e){ alert(e.message); }
 }
 document.addEventListener('click',()=>{ if(ctx && ctx.state==='suspended') ctx.resume(); });

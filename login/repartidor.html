@@ -21,11 +21,9 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 .online-pill{border:1.5px solid rgba(255,255,255,0.4);border-radius:30px;padding:6px 12px;display:flex;align-items:center;gap:6px;color:#fff;font-size:12px;font-weight:600}
 .online-pill .dot{width:14px;height:14px;background:#22c55e;border-radius:50%;display:inline-block;box-shadow:0 0 0 3px rgba(34,197,94,0.2)}
 .btn-logout{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:7px 14px;border-radius:30px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px}
-
 .wrap{padding:12px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:768px){ .wrap{grid-template-columns:1fr 1fr; padding:18px} }
 @media(min-width:1100px){ .wrap{grid-template-columns:1fr 1fr 1fr} }
-
 .card{background:#fff;border-radius:18px;padding:10px 12px;box-shadow:0 3px 14px rgba(0,0,0,0.06);border:1px solid #f0e6ec;transition:all 0.3s;height:fit-content}
 .card.nuevo{border:2px solid #00ff88;box-shadow:0 0 0 4px rgba(0,255,136,0.15),0 6px 18px rgba(0,0,0,0.08);animation:neon 1.2s infinite}
 @keyframes neon{0%,100%{box-shadow:0 0 0 4px rgba(0,255,136,0.15)}50%{box-shadow:0 0 0 7px rgba(0,255,136,0.25)}}
@@ -33,7 +31,6 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 .pedido-badge{background:#5c0f2a;color:#fff;border-radius:30px;padding:6px 12px;font-weight:700;font-size:12px}
 .meta-head{display:flex;align-items:center;gap:8px;color:#5c0f2a;font-size:11px;font-weight:600}
 .sep{width:1px;height:14px;background:#ddd}
-
 .client-box{background:#faf6f8;border-radius:14px;padding:8px 10px;display:flex;align-items:center;gap:10px;position:relative}
 .client-icon{width:40px;height:40px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0}
 .client-info{flex:1;min-width:0}
@@ -41,32 +38,27 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 .client-info b{font-size:13px;color:#111;display:block;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .client-info span{font-size:11px;color:#555;display:flex;align-items:center;gap:4px;margin-top:1px}
 .btn-call{width:38px;height:38px;border-radius:50%;background:#22c55e;color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex-shrink:0;box-shadow:0 2px 8px rgba(34,197,94,0.3)}
-
 .section-title{display:flex;justify-content:space-between;align-items:center;margin:12px 2px 6px}
 .section-title h3{color:#5c0f2a;font-size:13px;font-weight:800}
 .count-pill{background:#faf6f8;border-radius:20px;padding:4px 10px;font-size:10px;color:#5c0f2a;font-weight:600;display:flex;align-items:center;gap:4px}
-
 .prod-list{display:flex;flex-direction:column}
 .prod-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f1e8ef}
 .prod-item:last-child{border:none}
 .prod-img{width:44px;height:38px;border-radius:10px;object-fit:cover;background:#eee}
 .prod-name{flex:1;font-size:12px;font-weight:500;color:#1e2a4a}
 .prod-qty{font-size:11px;color:#666}
-
 .info-grid{background:#faf6f8;border-radius:14px;display:grid;grid-template-columns:1fr 1fr 1fr;padding:8px 4px;margin:10px 0}
 .info-col{display:flex;flex-direction:column;gap:1px;padding:0 6px;border-right:1px solid #ece0e8}
 .info-col:last-child{border:none}
 .info-col .icon{width:24px;height:24px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;margin-bottom:3px}
 .info-col small{font-size:9px;color:#333;font-weight:500;line-height:1.1}
 .info-col b{font-size:12px;font-weight:800;color:#5c0f2a;line-height:1.1}
-
 .addr-box{display:flex;gap:8px;margin-top:8px;align-items:flex-start}
 .addr-icon{color:#5c0f2a;font-size:18px;margin-top:2px}
 .addr-text{flex:1}
 .addr-text b{color:#5c0f2a;font-size:11px}
 .addr-text p{font-size:10.5px;color:#6b7280;line-height:1.3;margin-top:1px}
 .map-link{color:#5c0f2a;font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;margin-top:6px}
-
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .actions.full{grid-template-columns:1fr 1fr 1fr}
 .btn{border:none;border-radius:12px;padding:10px 6px;font-weight:800;font-size:10.5px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;line-height:1.1;text-align:center}
@@ -76,12 +68,9 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 .btn-vino{background:#5c0f2a;color:#fff}
 .btn-outline{background:#fff;border:1.5px solid #5c0f2a;color:#5c0f2a}
 .btn:disabled{opacity:0.5}
-
 .collapsed-hint{font-size:10px;color:#888;text-align:center;margin-top:6px}
-
 .empty{background:#fff;border-radius:18px;padding:30px 18px;text-align:center;color:#999;font-size:12px;grid-column:1/-1;box-shadow:0 3px 14px rgba(0,0,0,0.04)}
-
-/* MODAL */
+/* MODAL DETALLES */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:14px}
 .modal-overlay.show{display:flex}
 .modal-card{background:#fff;border-radius:18px;width:100%;max-width:380px;max-height:80vh;overflow-y:auto}
@@ -89,6 +78,32 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 .modal-head h3{font-size:13px;font-weight:800;color:#5c0f2a}
 .btn-close{width:26px;height:26px;border-radius:50%;background:#f3f4f6;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .modal-body{padding:12px 14px}
+
+/* NOTIFICACIONES CENTRALES */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(5px);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
+.confirm-overlay.show{display:flex}
+.confirm-card{background:#fff;border-radius:20px;width:100%;max-width:320px;padding:20px 18px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:pop 0.3s ease}
+@keyframes pop{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.confirm-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:26px}
+.confirm-icon.yellow{background:#fef3c7;color:#d97706}
+.confirm-icon.green{background:#dcfce7;color:#16a34a}
+.confirm-icon.vino{background:#fce7f3;color:#5c0f2a}
+.confirm-card h3{font-size:15px;font-weight:800;color:#111;margin-bottom:4px}
+.confirm-card p{font-size:12px;color:#666;margin-bottom:16px;line-height:1.4}
+.confirm-actions{display:flex;gap:8px}
+.btn-confirm{flex:1;padding:12px;border-radius:12px;border:none;font-weight:800;font-size:12px;cursor:pointer}
+.btn-confirm.cancel{background:#f3f4f6;color:#333}
+.btn-confirm.yes-yellow{background:#ffc300;color:#111}
+.btn-confirm.yes-green{background:#22c55e;color:#fff}
+.btn-confirm.yes-vino{background:#5c0f2a;color:#fff}
+
+/* TOAST CENTRO */
+.toast-overlay{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;pointer-events:none}
+.toast-overlay.show{display:flex}
+.toast-card{background:#1e1e1e;color:#fff;border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:220px;box-shadow:0 20px 60px rgba(0,0,0,0.4);animation:pop 0.3s ease;border:1px solid #2a2a2a}
+.toast-card i{font-size:28px;color:#22c55e}
+.toast-card b{font-size:14px;font-weight:800}
+.toast-card span{font-size:11px;color:#aaa}
 </style>
 </head>
 <body>
@@ -110,6 +125,15 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
     <div class="modal-head"><h3><i class="fa-solid fa-utensils"></i> Detalles del pedido</h3><button class="btn-close" onclick="cerrarModal()"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="modal-body" id="bodyDetalles"></div>
   </div>
+</div>
+
+<!-- CONFIRMACIONES CENTRALES -->
+<div class="confirm-overlay" id="overlayConfirm">
+  <div class="confirm-card" id="cardConfirm"></div>
+</div>
+
+<div class="toast-overlay" id="overlayToast">
+  <div class="toast-card" id="cardToast"></div>
 </div>
 
 <script>
@@ -160,11 +184,55 @@ function timeAgo(ts){
   if(diff<1) return 'Ahora'; if(diff<60) return `Hace ${diff} min`; return `Hace ${Math.floor(diff/60)} h`;
 }
 
+/* FUNCIONES DE NOTIFICACION CENTRAL */
+function mostrarConfirm(tipo, onConfirm){
+  const overlay=document.getElementById('overlayConfirm');
+  const card=document.getElementById('cardConfirm');
+  let html='';
+  if(tipo==='en_camino'){
+    html=`<div class="confirm-icon yellow"><i class="fa-solid fa-motorcycle"></i></div><h3>¿Marcar en camino?</h3><p>El cliente verá que su pedido va en camino</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-yellow" id="btnYes">Sí, en camino</button></div>`;
+  }else if(tipo==='entregado'){
+    html=`<div class="confirm-icon green"><i class="fa-solid fa-check"></i></div><h3>¿Confirmar entrega?</h3><p>Se marcará como entregado y el cliente verá ¡Disfruta tu pedido!</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-green" id="btnYes">Sí, entregado</button></div>`;
+  }else if(tipo==='cancelado'){
+    html=`<div class="confirm-icon vino"><i class="fa-solid fa-ban"></i></div><h3>¿Cancelar pedido?</h3><p>Esta acción no se puede deshacer</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">No</button><button class="btn-confirm yes-vino" id="btnYes">Sí, cancelar</button></div>`;
+  }
+  card.innerHTML=html;
+  overlay.classList.add('show');
+  document.getElementById('btnYes').onclick=()=>{ cerrarConfirm(); onConfirm(); };
+}
+window.cerrarConfirm=function(){ document.getElementById('overlayConfirm').classList.remove('show'); }
+
+function mostrarToast(tipo){
+  const overlay=document.getElementById('overlayToast');
+  const card=document.getElementById('cardToast');
+  let html='';
+  if(tipo==='en_camino'){
+    html=`<i class="fa-solid fa-motorcycle" style="color:#ffc300"></i><b>¡En camino!</b><span>Cliente notificado</span>`;
+  }else if(tipo==='entregado'){
+    html=`<i class="fa-solid fa-circle-check"></i><b>¡Entregado!</b><span>¡Disfruta tu pedido!</span>`;
+  }else if(tipo==='cancelado'){
+    html=`<i class="fa-solid fa-ban" style="color:#ef4444"></i><b>Pedido cancelado</b><span>Se notificó al sistema</span>`;
+  }
+  card.innerHTML=html;
+  overlay.classList.add('show');
+  setTimeout(()=>{ overlay.classList.remove('show'); },2200);
+}
+
 window.cerrarSesion=function(){
-  if(!confirm('¿Cerrar sesión?')) return;
-  localStorage.removeItem('santillos_rep_login');
-  localStorage.removeItem('santillos_rep_user');
-  window.location.href='./repartidor-login.html';
+  mostrarConfirm('cancelado', ()=>{
+    localStorage.removeItem('santillos_rep_login');
+    localStorage.removeItem('santillos_rep_user');
+    window.location.href='login';
+  });
+  // cambiar texto del confirm para cerrar sesion
+  setTimeout(()=>{
+    document.getElementById('cardConfirm').innerHTML=`<div class="confirm-icon vino"><i class="fa-solid fa-right-from-bracket"></i></div><h3>¿Cerrar sesión?</h3><p>Volverás al login</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-vino" id="btnYes2">Sí, cerrar</button></div>`;
+    document.getElementById('btnYes2').onclick=()=>{
+      localStorage.removeItem('santillos_rep_login');
+      localStorage.removeItem('santillos_rep_user');
+      window.location.href='login';
+    }
+  },50);
 }
 window.cerrarModal=function(){ document.getElementById('modalDetalles').classList.remove('show'); }
 
@@ -268,29 +336,27 @@ window.abrirMapa=function(dir, lat, lng){
   else window.open(`https://www.google.com/maps/search/${encodeURIComponent(dir)}`,'_blank');
 }
 
-window.cambiarEstado=async function(id, estado){
+window.cambiarEstado=function(id, estado){
   if(estado==='en_camino' && !expandidos.has(id)) expandidos.add(id);
   
-  let msg = estado==='entregado' ? '¿Confirmas entrega?' : estado==='cancelado' ? '¿Cancelar pedido?' : '¿Marcar en camino?';
-  if(!confirm(msg)) return;
-
-  // QUITAR AL INSTANTE SI ES ENTREGADO/CANCELADO
-  if(estado==='entregado' || estado==='cancelado'){
-    cache = cache.filter(x=>x.firebaseId!==id);
-    expandidos.delete(id);
-    nuevos.delete(id);
-    render();
-  }
-
-  try{
-    await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado, actualizadoEn: Date.now()});
-    await dbPedidos.ref('pedidos/'+id).update({estado, actualizadoEn: Date.now(), repartidor: localStorage.getItem('santillos_rep_user')||'repa'});
+  mostrarConfirm(estado, async ()=>{
     if(estado==='entregado' || estado==='cancelado'){
-      setTimeout(async()=>{
-        await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
-      },800);
+      cache = cache.filter(x=>x.firebaseId!==id);
+      expandidos.delete(id);
+      nuevos.delete(id);
+      render();
     }
-  }catch(e){ alert(e.message); }
+    try{
+      await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado, actualizadoEn: Date.now()});
+      await dbPedidos.ref('pedidos/'+id).update({estado, actualizadoEn: Date.now(), repartidor: localStorage.getItem('santillos_rep_user')||'repa'});
+      mostrarToast(estado);
+      if(estado==='entregado' || estado==='cancelado'){
+        setTimeout(async()=>{ await dbRepartidor.ref('pedidos_en_camino/'+id).remove(); },800);
+      }
+    }catch(e){ 
+      console.log(e);
+    }
+  });
 }
 document.addEventListener('click',()=>{ if(ctx && ctx.state==='suspended') ctx.resume(); });
 </script>

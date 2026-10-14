@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historial - Santillos</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:#f7f3f6;color:#222;min-height:100vh}
+.topbar{background:#5c0f2a;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:50}
+.logo-area{line-height:1}
+.logo-area h1{color:#fff;font-size:30px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center}
+.logo-area h1 span{position:relative}
+.logo-area h1 span::after{content:'';width:10px;height:10px;background:#ffc300;border-radius:50%;position:absolute;top:-2px;right:-12px}
+.logo-area p{color:#fff;font-size:11px;margin-left:2px}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.tab{padding:8px 16px;border-radius:30px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.tab.active{background:#fff;color:#5c0f2a}
+.btn-logout{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:7px 14px;border-radius:30px;font-size:11px;font-weight:700;cursor:pointer}
+.wrap{max-width:1200px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:900px){ .wrap{grid-template-columns:1fr 1fr} }
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;grid-column:1/-1}
+.stat-card{background:#fff;border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 3px 14px rgba(0,0,0,0.05);border:1px solid #f0e6ec}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+.stat-icon.green{background:#22c55e} .stat-icon.red{background:#ef4444} .stat-icon.yellow{background:#ffc300;color:#111}
+.stat-info b{font-size:20px;font-weight:900;display:block;line-height:1}
+.stat-info small{font-size:11px;color:#666}
+.section{grid-column:1/-1}
+.section-title{font-size:16px;font-weight:800;color:#5c0f2a;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.search{padding:8px 14px;border-radius:30px;border:1px solid #e5e7eb;width:200px;font-size:12px}
+.card{background:#fff;border-radius:18px;padding:12px;box-shadow:0 3px 14px rgba(0,0,0,0.06);border:1px solid #f0e6ec;margin-bottom:12px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.badge{padding:6px 12px;border-radius:30px;font-size:11px;font-weight:800}
+.badge.entregado{background:#dcfce7;color:#16a34a;border:1px solid #22c55e}
+.badge.cancelado{background:#fee2e2;color:#dc2626;border:1px solid #ef4444}
+.badge.bloqueado{background:#1e1e1e;color:#fff}
+.client-box{background:#faf6f8;border-radius:14px;padding:8px 10px;display:flex;align-items:center;gap:10px}
+.client-icon{width:38px;height:38px;background:#5c0f2a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.client-info{flex:1;min-width:0}
+.client-info b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-info span{font-size:11px;color:#666;display:flex;gap:4px;align-items:center}
+.info-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.info-chip{background:#f3f4f6;border-radius:20px;padding:5px 10px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px}
+.actions{display:flex;gap:8px;margin-top:10px}
+.btn{border:none;border-radius:12px;padding:9px 12px;font-weight:800;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.btn-vino{background:#5c0f2a;color:#fff}
+.btn-green{background:#22c55e;color:#fff}
+.btn-red{background:#ef4444;color:#fff}
+.btn-outline{background:#fff;border:1.5px solid #5c0f2a;color:#5c0f2a}
+.btn-gray{background:#f3f4f6;color:#333}
+.empty{background:#fff;border-radius:18px;padding:30px;text-align:center;color:#999;font-size:12px;border:1px dashed #e5e7eb}
+/* MODALES CENTRALES */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(5px);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
+.confirm-overlay.show{display:flex}
+.confirm-card{background:#fff;border-radius:20px;width:100%;max-width:380px;padding:20px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:pop 0.3s ease;max-height:85vh;overflow-y:auto}
+@keyframes pop{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.confirm-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:24px}
+.confirm-icon.green{background:#dcfce7;color:#16a34a}
+.confirm-icon.red{background:#fee2e2;color:#dc2626}
+.confirm-icon.vino{background:#fce7f3;color:#5c0f2a}
+.confirm-actions{display:flex;gap:8px;margin-top:14px}
+.btn-confirm{flex:1;padding:12px;border-radius:12px;border:none;font-weight:800;font-size:12px;cursor:pointer}
+.btn-confirm.cancel{background:#f3f4f6}
+.btn-confirm.yes-vino{background:#5c0f2a;color:#fff}
+.btn-confirm.yes-red{background:#ef4444;color:#fff}
+.toast-overlay{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;pointer-events:none}
+.toast-overlay.show{display:flex}
+.toast-card{background:#1e1e1e;color:#fff;border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:220px;box-shadow:0 20px 60px rgba(0,0,0,0.4);animation:pop 0.3s ease;border:1px solid #2a2a2a}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-area"><h1><span>Santillos</span></h1><p>Historial de pedidos</p></div>
+  <div class="topbar-right">
+    <button class="tab active" id="tabEntregados" onclick="cambiarTab('entregados')"><i class="fa-solid fa-check"></i> Entregados</button>
+    <button class="tab" id="tabCancelados" onclick="cambiarTab('cancelados')"><i class="fa-solid fa-ban"></i> Cancelados</button>
+    <button class="tab" id="tabIps" onclick="cambiarTab('ips')"><i class="fa-solid fa-shield"></i> IPs</button>
+    <button class="btn-logout" onclick="window.location.href='login'"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat-card"><div class="stat-icon green"><i class="fa-solid fa-check"></i></div><div class="stat-info"><b id="countEnt">0</b><small>Entregados</small></div></div>
+    <div class="stat-card"><div class="stat-icon red"><i class="fa-solid fa-ban"></i></div><div class="stat-info"><b id="countCan">0</b><small>Cancelados</small></div></div>
+    <div class="stat-card"><div class="stat-icon yellow"><i class="fa-solid fa-shield-halved"></i></div><div class="stat-info"><b id="countBloq">0</b><small>IPs Bloqueadas</small></div></div>
+  </div>
+
+  <div class="section" id="sectionContent">
+    <div class="section-title"><span id="tituloSeccion">Pedidos Entregados</span><input type="text" id="search" class="search" placeholder="Buscar..." oninput="filtrar()"></div>
+    <div id="listaHistorial"></div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="overlayDetalles"><div class="confirm-card" id="cardDetalles"></div></div>
+<div class="confirm-overlay" id="overlayConfirm"><div class="confirm-card" id="cardConfirm"></div></div>
+<div class="toast-overlay" id="overlayToast"><div class="toast-card" id="cardToast"></div></div>
+
+<script>
+const configHistorial={
+  apiKey: "AIzaSyAXXnmGShWhXPKYDgL3RC-zu5ZU9SQzl_Q",
+  authDomain: "santillos-historial.firebaseapp.com",
+  databaseURL: "https://santillos-historial-default-rtdb.firebaseio.com",
+  projectId: "santillos-historial",
+  storageBucket: "santillos-historial.firebasestorage.app",
+  messagingSenderId: "339742337344",
+  appId: "1:339742337344:web:0bd3676108866ef505f2a5"
+};
+firebase.initializeApp(configHistorial);
+const db= firebase.database();
+
+let tabActual='entregados';
+let dataEnt=[]; let dataCan=[]; let dataIps=[];
+
+function init(){
+  db.ref('historial_entregados').on('value', snap=>{
+    let v=snap.val()||{}; dataEnt=Object.entries(v).map(([k,val])=>({id:k,...val})).sort((a,b)=> (b.fechaEntrega||0)-(a.fechaEntrega||0));
+    document.getElementById('countEnt').innerText=dataEnt.length;
+    if(tabActual==='entregados') render();
+  });
+  db.ref('historial_cancelados').on('value', snap=>{
+    let v=snap.val()||{}; dataCan=Object.entries(v).map(([k,val])=>({id:k,...val})).sort((a,b)=> (b.fechaCancelacion||0)-(a.fechaCancelacion||0));
+    document.getElementById('countCan').innerText=dataCan.length;
+    if(tabActual==='cancelados') render();
+  });
+  db.ref('ips_registro').on('value', snap=>{
+    let v=snap.val()||{}; dataIps=Object.entries(v).map(([k,val])=>({id:k,...val})).sort((a,b)=> (b.fecha||0)-(a.fecha||0));
+    let bloq=dataIps.filter(x=>x.bloqueado).length;
+    document.getElementById('countBloq').innerText=bloq;
+    if(tabActual==='ips') render();
+  });
+}
+init();
+
+window.cambiarTab=function(tab){
+  tabActual=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tabEntregados').classList.remove('active');
+  document.getElementById('tabCancelados').classList.remove('active');
+  document.getElementById('tabIps').classList.remove('active');
+  if(tab==='entregados'){ document.getElementById('tabEntregados').classList.add('active'); document.getElementById('tituloSeccion').innerText='Pedidos Entregados'; }
+  if(tab==='cancelados'){ document.getElementById('tabCancelados').classList.add('active'); document.getElementById('tituloSeccion').innerText='Pedidos Cancelados'; }
+  if(tab==='ips'){ document.getElementById('tabIps').classList.add('active'); document.getElementById('tituloSeccion').innerText='Registro de IPs y Bloqueos'; }
+  document.getElementById('search').value='';
+  render();
+}
+
+function filtrar(){ render(); }
+
+function render(){
+  let lista=[];
+  let q=document.getElementById('search').value.toLowerCase();
+  if(tabActual==='entregados') lista=dataEnt;
+  if(tabActual==='cancelados') lista=dataCan;
+  if(tabActual==='ips') lista=dataIps;
+
+  if(q){
+    lista=lista.filter(p=>{
+      let txt=(p.numero||'')+' '+(p.nombreCliente||p.cliente?.nombre||'')+' '+(p.telefono||'')+' '+(p.motivoCancelacion||'')+' '+(p.ipCliente||p.ip||'')+' '+(p.id||'');
+      return txt.toLowerCase().includes(q);
+    });
+  }
+
+  const cont=document.getElementById('listaHistorial');
+  if(lista.length===0){ cont.innerHTML=`<div class="empty">No hay registros<br><small>${tabActual}</small></div>`; return; }
+
+  if(tabActual==='entregados'){
+    cont.innerHTML=lista.map(p=>{
+      let numero=p.numero||`ST-${p.correlativo||''}`;
+      let fecha=p.fechaEntrega?new Date(p.fechaEntrega).toLocaleString():'';
+      return `<div class="card"><div class="card-head"><span class="badge entregado">ENTREGADO</span><span style="font-size:11px;font-weight:700;color:#5c0f2a">${numero}</span></div>
+      <div class="client-box"><div class="client-icon"><i class="fa-solid fa-user"></i></div><div class="client-info"><b>${p.nombreCliente||p.cliente?.nombre||'Cliente'}</b><span><i class="fa-solid fa-phone"></i> ${p.telefono||''} • <i class="fa-solid fa-clock"></i> ${fecha}</span></div></div>
+      <div class="info-row"><div class="info-chip"><i class="fa-solid fa-motorcycle"></i> ${p.repartidor||'Repa'}</div><div class="info-chip"><i class="fa-solid fa-location-dot"></i> ${p.ipCliente||p.ip||'Sin IP'}</div><div class="info-chip"><i class="fa-solid fa-dollar-sign"></i> $${p.total||0}</div></div>
+      <div class="actions"><button class="btn btn-vino" onclick="verDetalles('${p.id}','entregados')"><i class="fa-solid fa-eye"></i> Ver detalles</button><button class="btn btn-gray" onclick="copiar('${p.telefono||''}')"><i class="fa-solid fa-copy"></i> Tel</button></div></div>`;
+    }).join('');
+  }
+  if(tabActual==='cancelados'){
+    cont.innerHTML=lista.map(p=>{
+      let numero=p.numero||`ST-${p.correlativo||''}`;
+      let fecha=p.fechaCancelacion?new Date(p.fechaCancelacion).toLocaleString():'';
+      return `<div class="card"><div class="card-head"><span class="badge cancelado">CANCELADO</span><span style="font-size:11px;font-weight:700;color:#5c0f2a">${numero}</span></div>
+      <div class="client-box"><div class="client-icon" style="background:#ef4444"><i class="fa-solid fa-ban"></i></div><div class="client-info"><b>${p.nombreCliente||'Cliente'} - ${p.motivoCancelacion||'Sin motivo'}</b><span><i class="fa-solid fa-phone"></i> ${p.telefono||''} • ${fecha}</span></div></div>
+      <div class="info-row"><div class="info-chip" style="background:#fee2e2;color:#dc2626"><i class="fa-solid fa-triangle-exclamation"></i> ${p.motivoCancelacion||''}</div><div class="info-chip"><i class="fa-solid fa-location-dot"></i> ${p.ipCliente||p.ip||''}</div><div class="info-chip"><i class="fa-solid fa-motorcycle"></i> ${p.repartidor||''}</div></div>
+      <div class="actions"><button class="btn btn-vino" onclick="verDetalles('${p.id}','cancelados')"><i class="fa-solid fa-eye"></i> Detalles</button><button class="btn ${p.bloqueado?'btn-gray':'btn-red'}" onclick="bloquearIp('${p.id}','${p.telefono||p.id}')">${p.bloqueado?'<i class=\"fa-solid fa-lock\"></i> Bloqueado':'<i class=\"fa-solid fa-shield\"></i> Bloquear IP'}</button></div></div>`;
+    }).join('');
+  }
+  if(tabActual==='ips'){
+    cont.innerHTML=lista.map(p=>{
+      let fecha=p.fecha?new Date(p.fecha).toLocaleString():'';
+      return `<div class="card"><div class="card-head"><span class="badge ${p.bloqueado?'bloqueado':'cancelado'}">${p.bloqueado?'BLOQUEADO':'REGISTRADO'}</span><span style="font-size:11px">${fecha}</span></div>
+      <div class="client-box"><div class="client-icon" style="background:${p.bloqueado?'#111':'#f59e0b'}"><i class="fa-solid ${p.bloqueado?'fa-lock':'fa-shield-halved'}"></i></div><div class="client-info"><b>${p.ip||p.ipCliente||''} - ${p.telefono||''}</b><span>${p.ultimoMotivo||p.motivo||''}</span></div></div>
+      <div class="info-row"><div class="info-chip"><i class="fa-solid fa-ban"></i> ${p.estado||''}</div><div class="info-chip"><i class="fa-solid fa-hashtag"></i> ${p.pedidoId||''}</div></div>
+      <div class="actions"><button class="btn ${p.bloqueado?'btn-green':'btn-red'}" onclick="toggleBloqueoIp('${p.id}')">${p.bloqueado?'<i class=\"fa-solid fa-unlock\"></i> Desbloquear':'<i class=\"fa-solid fa-lock\"></i> Bloquear'}</button><button class="btn btn-outline" onclick="verDetalles('${p.id}','ips')"><i class="fa-solid fa-eye"></i> Ver</button></div></div>`;
+    }).join('');
+  }
+}
+
+window.verDetalles=function(id, tipo){
+  let p=null;
+  if(tipo==='entregados') p=dataEnt.find(x=>x.id===id);
+  if(tipo==='cancelados') p=dataCan.find(x=>x.id===id);
+  if(tipo==='ips') p=dataIps.find(x=>x.id===id);
+  if(!p) return;
+  let productos=p.productos? (Array.isArray(p.productos)?p.productos:Object.values(p.productos)) : [];
+  let prodHtml=productos.map(pr=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:12px"><span>${pr.cant||pr.cantidad||1}x ${pr.nombre}</span><b>$${(pr.precio||0)*(pr.cant||pr.cantidad||1)}</b></div>`).join('');
+  let html=`<div style="text-align:left"><div style="text-align:center"><div class="confirm-icon ${tipo==='entregados'?'green':'red'}"><i class="fa-solid ${tipo==='entregados'?'fa-check':'fa-ban'}"></i></div><h3 style="font-size:15px;font-weight:800">${p.numero||p.id}</h3><p style="font-size:12px;color:#666">${tipo.toUpperCase()}</p></div>
+  <div style="margin-top:12px;background:#faf6f8;border-radius:12px;padding:10px;font-size:11px;line-height:1.5"><b>Cliente:</b> ${p.nombreCliente||p.cliente?.nombre||''}<br><b>Tel:</b> ${p.telefono||''}<br><b>Dirección:</b> ${p.cliente?.direccion||p.direccion||''}<br><b>IP:</b> ${p.ipCliente||p.ip||''}<br><b>Repartidor:</b> ${p.repartidor||''}<br><b>Total:</b> $${p.total||0}<br>${p.motivoCancelacion?`<b>Motivo:</b> ${p.motivoCancelacion}<br>`:''}${p.fechaEntrega?`<b>Entregado:</b> ${new Date(p.fechaEntrega).toLocaleString()}<br>`:''}${p.fechaCancelacion?`<b>Cancelado:</b> ${new Date(p.fechaCancelacion).toLocaleString()}<br>`:''}</div>
+  <div style="margin-top:12px"><b style="font-size:12px">Productos:</b><div style="margin-top:6px;max-height:150px;overflow-y:auto">${prodHtml||'Sin productos'}</div></div>
+  <div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarDetalles()">Cerrar</button></div></div>`;
+  document.getElementById('cardDetalles').innerHTML=html;
+  document.getElementById('overlayDetalles').classList.add('show');
+}
+window.cerrarDetalles=function(){ document.getElementById('overlayDetalles').classList.remove('show'); }
+window.cerrarConfirm=function(){ document.getElementById('overlayConfirm').classList.remove('show'); }
+
+function mostrarToast(msg){
+  document.getElementById('cardToast').innerHTML=`<i class="fa-solid fa-circle-check"></i><b>${msg}</b><span>Historial actualizado</span>`;
+  document.getElementById('overlayToast').classList.add('show');
+  setTimeout(()=>document.getElementById('overlayToast').classList.remove('show'),2200);
+}
+
+window.bloquearIp=function(id, telefonoKey){
+  const overlay=document.getElementById('overlayConfirm');
+  const card=document.getElementById('cardConfirm');
+  card.innerHTML=`<div class="confirm-icon red"><i class="fa-solid fa-shield-halved"></i></div><h3>¿Bloquear IP / Tel?</h3><p>Se bloqueará ${telefonoKey} y no podrá pedir</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-red" id="btnBloq">Sí, bloquear</button></div>`;
+  overlay.classList.add('show');
+  document.getElementById('btnBloq').onclick=async()=>{
+    cerrarConfirm();
+    try{
+      await db.ref('ips_registro/'+telefonoKey).update({bloqueado:true, fechaBloqueo:Date.now()});
+      await db.ref('historial_cancelados/'+id).update({bloqueado:true});
+      mostrarToast('IP Bloqueada');
+    }catch(e){}
+  };
+}
+window.toggleBloqueoIp=async function(id){
+  let ip=dataIps.find(x=>x.id===id);
+  if(!ip) return;
+  let nuevo=!ip.bloqueado;
+  try{
+    await db.ref('ips_registro/'+id).update({bloqueado:nuevo, fechaBloqueo:nuevo?Date.now():null});
+    if(nuevo) mostrarToast('IP Bloqueada'); else mostrarToast('IP Desbloqueada');
+  }catch(e){}
+}
+window.copiar=function(txt){ navigator.clipboard.writeText(txt); mostrarToast('Copiado'); }
+</script>
+</body>
+</html>

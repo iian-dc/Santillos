@@ -16,7 +16,7 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 .logo-area h1{color:#fff;font-size:28px;font-weight:900;letter-spacing:-1px;display:flex;align-items:center}
 .logo-area h1 span{position:relative}
 .logo-area h1 span::after{content:'';width:10px;height:10px;background:#ffc300;border-radius:50%;position:absolute;top:-2px;right:-12px}
-.logo-area p{color:#fff;font-size:10px;font-weight:400;margin-top:0px;margin-left:2px;letter-spacing:0.2px}
+.logo-area p{color:#fff;font-size:10px;font-weight:400;margin-top:0px;margin-left:2px}
 .topbar-right{display:flex;align-items:center;gap:10px}
 .online-pill{border:1.5px solid rgba(255,255,255,0.4);border-radius:30px;padding:6px 12px;display:flex;align-items:center;gap:6px;color:#fff;font-size:12px;font-weight:600}
 .online-pill .dot{width:14px;height:14px;background:#22c55e;border-radius:50%;display:inline-block;box-shadow:0 0 0 3px rgba(34,197,94,0.2)}
@@ -67,73 +67,75 @@ body{background:#f7f3f6;color:#222;min-height:100vh;margin:0 auto}
 .btn-yellow{background:#ffc300;color:#111}
 .btn-vino{background:#5c0f2a;color:#fff}
 .btn-outline{background:#fff;border:1.5px solid #5c0f2a;color:#5c0f2a}
-.btn:disabled{opacity:0.5}
 .collapsed-hint{font-size:10px;color:#888;text-align:center;margin-top:6px}
-.empty{background:#fff;border-radius:18px;padding:30px 18px;text-align:center;color:#999;font-size:12px;grid-column:1/-1;box-shadow:0 3px 14px rgba(0,0,0,0.04)}
-/* MODAL DETALLES */
+.empty{background:#fff;border-radius:18px;padding:30px 18px;text-align:center;color:#999;font-size:12px;grid-column:1/-1}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center;padding:14px}
 .modal-overlay.show{display:flex}
-.modal-card{background:#fff;border-radius:18px;width:100%;max-width:380px;max-height:80vh;overflow-y:auto}
-.modal-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff}
+.modal-card{background:#fff;border-radius:18px;width:100%;max-width:380px;max-height:85vh;overflow-y:auto}
+.modal-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:1}
 .modal-head h3{font-size:13px;font-weight:800;color:#5c0f2a}
 .btn-close{width:26px;height:26px;border-radius:50%;background:#f3f4f6;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .modal-body{padding:12px 14px}
-
-/* NOTIFICACIONES CENTRALES */
 .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(5px);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
 .confirm-overlay.show{display:flex}
-.confirm-card{background:#fff;border-radius:20px;width:100%;max-width:320px;padding:20px 18px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:pop 0.3s ease}
+.confirm-card{background:#fff;border-radius:20px;width:100%;max-width:340px;padding:20px 18px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:pop 0.3s ease}
 @keyframes pop{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
 .confirm-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:26px}
 .confirm-icon.yellow{background:#fef3c7;color:#d97706}
 .confirm-icon.green{background:#dcfce7;color:#16a34a}
 .confirm-icon.vino{background:#fce7f3;color:#5c0f2a}
 .confirm-card h3{font-size:15px;font-weight:800;color:#111;margin-bottom:4px}
-.confirm-card p{font-size:12px;color:#666;margin-bottom:16px;line-height:1.4}
+.confirm-card p{font-size:12px;color:#666;margin-bottom:14px;line-height:1.4}
 .confirm-actions{display:flex;gap:8px}
 .btn-confirm{flex:1;padding:12px;border-radius:12px;border:none;font-weight:800;font-size:12px;cursor:pointer}
 .btn-confirm.cancel{background:#f3f4f6;color:#333}
 .btn-confirm.yes-yellow{background:#ffc300;color:#111}
 .btn-confirm.yes-green{background:#22c55e;color:#fff}
 .btn-confirm.yes-vino{background:#5c0f2a;color:#fff}
-
-/* TOAST CENTRO */
 .toast-overlay{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;pointer-events:none}
 .toast-overlay.show{display:flex}
 .toast-card{background:#1e1e1e;color:#fff;border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:220px;box-shadow:0 20px 60px rgba(0,0,0,0.4);animation:pop 0.3s ease;border:1px solid #2a2a2a}
 .toast-card i{font-size:28px;color:#22c55e}
 .toast-card b{font-size:14px;font-weight:800}
 .toast-card span{font-size:11px;color:#aaa}
+/* MOTIVOS CANCELACION */
+.motivo-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.motivo-btn{width:100%;text-align:left;padding:12px 12px;border-radius:12px;border:1.5px solid #f0e6ec;background:#faf6f8;font-size:12px;font-weight:600;color:#333;cursor:pointer;display:flex;align-items:center;gap:10px}
+.motivo-btn.active{border-color:#5c0f2a;background:#5c0f2a;color:#fff}
+.motivo-btn i{font-size:14px}
+.input-otro{width:100%;margin-top:8px;padding:10px 12px;border-radius:12px;border:1.5px solid #ddd;font-size:12px;display:none}
+.input-otro.show{display:block}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-left">
-    <div class="logo-area"><h1><span>Santillos</span></h1><p>Panel del repartidor</p></div>
-  </div>
-  <div class="topbar-right">
-    <div class="online-pill"><span class="dot"></span> En línea</div>
-    <button class="btn-logout" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar</button>
-  </div>
+  <div class="topbar-left"><div class="logo-area"><h1><span>Santillos</span></h1><p>Panel del repartidor</p></div></div>
+  <div class="topbar-right"><div class="online-pill"><span class="dot"></span> En línea</div><button class="btn-logout" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i> Cerrar</button></div>
 </div>
 
 <div class="wrap" id="lista"></div>
 
-<div class="modal-overlay" id="modalDetalles" onclick="if(event.target===this)cerrarModal()">
-  <div class="modal-card">
-    <div class="modal-head"><h3><i class="fa-solid fa-utensils"></i> Detalles del pedido</h3><button class="btn-close" onclick="cerrarModal()"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="modal-body" id="bodyDetalles"></div>
+<div class="modal-overlay" id="modalDetalles" onclick="if(event.target===this)cerrarModal()"><div class="modal-card"><div class="modal-head"><h3><i class="fa-solid fa-utensils"></i> Detalles</h3><button class="btn-close" onclick="cerrarModal()"><i class="fa-solid fa-xmark"></i></button></div><div class="modal-body" id="bodyDetalles"></div></div></div>
+
+<div class="confirm-overlay" id="overlayConfirm"><div class="confirm-card" id="cardConfirm"></div></div>
+<div class="toast-overlay" id="overlayToast"><div class="toast-card" id="cardToast"></div></div>
+
+<div class="confirm-overlay" id="overlayMotivos">
+  <div class="confirm-card" style="max-width:360px;text-align:left">
+    <div style="text-align:center"><div class="confirm-icon vino"><i class="fa-solid fa-ban"></i></div><h3>¿Por qué se cancela?</h3><p>Selecciona el motivo para guardar en historial</p></div>
+    <div class="motivo-list" id="listaMotivos">
+      <button class="motivo-btn" data-motivo="Cliente no salió"><i class="fa-solid fa-person-walking"></i> Cliente no salió</button>
+      <button class="motivo-btn" data-motivo="No respondió / Tel apagado"><i class="fa-solid fa-phone-slash"></i> No respondió / Tel apagado</button>
+      <button class="motivo-btn" data-motivo="Dirección incorrecta / No encontrada"><i class="fa-solid fa-location-dot"></i> Dirección incorrecta</button>
+      <button class="motivo-btn" data-motivo="Cliente canceló en sitio"><i class="fa-solid fa-hand"></i> Cliente canceló en sitio</button>
+      <button class="motivo-btn" data-motivo="Producto dañado"><i class="fa-solid fa-box-open"></i> Producto dañado / Derrame</button>
+      <button class="motivo-btn" data-motivo="Ubicación no segura"><i class="fa-solid fa-triangle-exclamation"></i> Ubicación no segura</button>
+      <button class="motivo-btn" data-motivo="Otro"><i class="fa-solid fa-pen"></i> Otro motivo</button>
+    </div>
+    <input type="text" id="inputOtroMotivo" class="input-otro" placeholder="Escribe el motivo...">
+    <div class="confirm-actions" style="margin-top:14px"><button class="btn-confirm cancel" onclick="cerrarMotivos()">Cancelar</button><button class="btn-confirm yes-vino" onclick="confirmarCancelacionConMotivo()">Guardar en historial</button></div>
   </div>
-</div>
-
-<!-- CONFIRMACIONES CENTRALES -->
-<div class="confirm-overlay" id="overlayConfirm">
-  <div class="confirm-card" id="cardConfirm"></div>
-</div>
-
-<div class="toast-overlay" id="overlayToast">
-  <div class="toast-card" id="cardToast"></div>
 </div>
 
 <script>
@@ -149,13 +151,30 @@ const configRepartidor={
   databaseURL: "https://santillos-repartidor-default-rtdb.firebaseio.com",
   projectId: "santillos-repartidor"
 };
+const configHistorial={
+  apiKey: "AIzaSyAXXnmGShWhXPKYDgL3RC-zu5ZU9SQzl_Q",
+  authDomain: "santillos-historial.firebaseapp.com",
+  databaseURL: "https://santillos-historial-default-rtdb.firebaseio.com",
+  projectId: "santillos-historial",
+  storageBucket: "santillos-historial.firebasestorage.app",
+  messagingSenderId: "339742337344",
+  appId: "1:339742337344:web:0bd3676108866ef505f2a5"
+};
+
 const appPedidos = firebase.initializeApp(configPedidos, "pedidos");
 const appRepartidor = firebase.initializeApp(configRepartidor, "repartidor");
+const appHistorial = firebase.initializeApp(configHistorial, "historial");
 const dbPedidos = appPedidos.database();
 const dbRepartidor = appRepartidor.database();
+const dbHistorial = appHistorial.database();
 
-let cache=[]; let idsVistos=new Set(); let primer=true; let nuevos=new Set();
-let expandidos=new Set();
+let cache=[]; let idsVistos=new Set(); let primer=true; let nuevos=new Set(); let expandidos=new Set();
+let cancelIdActual=null; let motivoSeleccionado=''; let ipCliente='';
+
+async function obtenerIP(){
+  try{ let r=await fetch('https://api.ipify.org?format=json'); let d=await r.json(); return d.ip||''; }catch(e){ return ''; }
+}
+obtenerIP().then(ip=>ipCliente=ip);
 
 function init(){
   dbRepartidor.ref('pedidos_en_camino').on('value', snap=>{
@@ -177,14 +196,9 @@ function init(){
 init();
 
 let ctx=null; function sonar(){ try{ if(!ctx) ctx=new (window.AudioContext||window.webkitAudioContext)(); const t=ctx.currentTime; [0,0.3].forEach((d,i)=>{ const o=ctx.createOscillator(); const g=ctx.createGain(); o.frequency.setValueAtTime(i?1200:900, t+d); o.frequency.exponentialRampToValueAtTime(i?900:700, t+d+0.3); g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(0.9,t+d+0.02); g.gain.exponentialRampToValueAtTime(0.01,t+d+0.5); o.connect(g); g.connect(ctx.destination); o.start(t+d); o.stop(t+d+0.6); }); if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){} }
+function timeAgo(ts){ if(!ts) return 'Ahora'; let diff=Math.floor((Date.now()-ts)/60000); if(diff<1) return 'Ahora'; if(diff<60) return `Hace ${diff} min`; return `Hace ${Math.floor(diff/60)} h`; }
 
-function timeAgo(ts){
-  if(!ts) return 'Ahora';
-  let diff=Math.floor((Date.now()-ts)/60000);
-  if(diff<1) return 'Ahora'; if(diff<60) return `Hace ${diff} min`; return `Hace ${Math.floor(diff/60)} h`;
-}
-
-/* FUNCIONES DE NOTIFICACION CENTRAL */
+/* CONFIRMACIONES */
 function mostrarConfirm(tipo, onConfirm){
   const overlay=document.getElementById('overlayConfirm');
   const card=document.getElementById('cardConfirm');
@@ -192,73 +206,109 @@ function mostrarConfirm(tipo, onConfirm){
   if(tipo==='en_camino'){
     html=`<div class="confirm-icon yellow"><i class="fa-solid fa-motorcycle"></i></div><h3>¿Marcar en camino?</h3><p>El cliente verá que su pedido va en camino</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-yellow" id="btnYes">Sí, en camino</button></div>`;
   }else if(tipo==='entregado'){
-    html=`<div class="confirm-icon green"><i class="fa-solid fa-check"></i></div><h3>¿Confirmar entrega?</h3><p>Se marcará como entregado y el cliente verá ¡Disfruta tu pedido!</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-green" id="btnYes">Sí, entregado</button></div>`;
-  }else if(tipo==='cancelado'){
-    html=`<div class="confirm-icon vino"><i class="fa-solid fa-ban"></i></div><h3>¿Cancelar pedido?</h3><p>Esta acción no se puede deshacer</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">No</button><button class="btn-confirm yes-vino" id="btnYes">Sí, cancelar</button></div>`;
+    html=`<div class="confirm-icon green"><i class="fa-solid fa-check"></i></div><h3>¿Confirmar entrega?</h3><p>Se guardará en historial de entregados</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-green" id="btnYes">Sí, entregado</button></div>`;
   }
-  card.innerHTML=html;
-  overlay.classList.add('show');
+  card.innerHTML=html; overlay.classList.add('show');
   document.getElementById('btnYes').onclick=()=>{ cerrarConfirm(); onConfirm(); };
 }
 window.cerrarConfirm=function(){ document.getElementById('overlayConfirm').classList.remove('show'); }
-
 function mostrarToast(tipo){
   const overlay=document.getElementById('overlayToast');
   const card=document.getElementById('cardToast');
   let html='';
-  if(tipo==='en_camino'){
-    html=`<i class="fa-solid fa-motorcycle" style="color:#ffc300"></i><b>¡En camino!</b><span>Cliente notificado</span>`;
-  }else if(tipo==='entregado'){
-    html=`<i class="fa-solid fa-circle-check"></i><b>¡Entregado!</b><span>¡Disfruta tu pedido!</span>`;
-  }else if(tipo==='cancelado'){
-    html=`<i class="fa-solid fa-ban" style="color:#ef4444"></i><b>Pedido cancelado</b><span>Se notificó al sistema</span>`;
+  if(tipo==='en_camino'){ html=`<i class="fa-solid fa-motorcycle" style="color:#ffc300"></i><b>¡En camino!</b><span>Cliente notificado</span>`; }
+  else if(tipo==='entregado'){ html=`<i class="fa-solid fa-circle-check"></i><b>¡Entregado!</b><span>Guardado en historial</span>`; }
+  else if(tipo==='cancelado'){ html=`<i class="fa-solid fa-ban" style="color:#ef4444"></i><b>Cancelado</b><span>Guardado con motivo</span>`; }
+  card.innerHTML=html; overlay.classList.add('show');
+  setTimeout(()=>{ overlay.classList.remove('show'); },2400);
+}
+
+/* MOTIVOS CANCELACION */
+window.abrirMotivos=function(id){
+  cancelIdActual=id; motivoSeleccionado='';
+  document.querySelectorAll('.motivo-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('inputOtroMotivo').classList.remove('show'); document.getElementById('inputOtroMotivo').value='';
+  document.getElementById('overlayMotivos').classList.add('show');
+}
+window.cerrarMotivos=function(){ document.getElementById('overlayMotivos').classList.remove('show'); cancelIdActual=null; }
+document.addEventListener('click', (e)=>{
+  if(e.target.closest('.motivo-btn')){
+    document.querySelectorAll('.motivo-btn').forEach(b=>b.classList.remove('active'));
+    e.target.closest('.motivo-btn').classList.add('active');
+    motivoSeleccionado=e.target.closest('.motivo-btn').dataset.motivo;
+    if(motivoSeleccionado==='Otro'){ document.getElementById('inputOtroMotivo').classList.add('show'); }
+    else{ document.getElementById('inputOtroMotivo').classList.remove('show'); }
   }
-  card.innerHTML=html;
-  overlay.classList.add('show');
-  setTimeout(()=>{ overlay.classList.remove('show'); },2200);
+});
+
+window.confirmarCancelacionConMotivo=async function(){
+  if(!motivoSeleccionado){ alert('Selecciona un motivo'); return; }
+  let motivoFinal=motivoSeleccionado;
+  if(motivoSeleccionado==='Otro'){
+    let txt=document.getElementById('inputOtroMotivo').value.trim();
+    if(!txt){ alert('Escribe el motivo'); return; }
+    motivoFinal=txt;
+  }
+  let id=cancelIdActual;
+  let pedido=cache.find(x=>x.firebaseId===id);
+  if(!pedido) return;
+  cerrarMotivos();
+  // quitar al instante
+  cache=cache.filter(x=>x.firebaseId!==id); expandidos.delete(id); nuevos.delete(id); render();
+
+  let ip = ipCliente || pedido.ip || '';
+  try{ ip = await obtenerIP() || ip; }catch(e){}
+
+  let dataHistorial={
+    ...pedido,
+    estado:'cancelado',
+    motivoCancelacion: motivoFinal,
+    fechaCancelacion: Date.now(),
+    ipCliente: ip,
+    telefono: pedido.cliente?.telefono || pedido.telefono || '',
+    nombreCliente: pedido.cliente?.nombre || '',
+    repartidor: localStorage.getItem('santillos_rep_user')||'repa',
+    bloqueado:false,
+    vecesCanceladas:1
+  };
+
+  try{
+    await dbHistorial.ref('historial_cancelados/'+id).set(dataHistorial);
+    await dbHistorial.ref('ips_registro/'+(pedido.cliente?.telefono||id)).set({
+      ip: ip,
+      telefono: dataHistorial.telefono,
+      ultimoMotivo: motivoFinal,
+      fecha: Date.now(),
+      estado:'cancelado',
+      pedidoId: id,
+      bloqueado:false
+    });
+    await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
+    await dbPedidos.ref('pedidos/'+id).update({estado:'cancelado', motivoCancelacion:motivoFinal, actualizadoEn:Date.now()});
+    mostrarToast('cancelado');
+  }catch(e){ console.log(e); alert('Error guardando en historial: '+e.message); }
 }
 
 window.cerrarSesion=function(){
-  mostrarConfirm('cancelado', ()=>{
-    localStorage.removeItem('santillos_rep_login');
-    localStorage.removeItem('santillos_rep_user');
-    window.location.href='login';
-  });
-  // cambiar texto del confirm para cerrar sesion
-  setTimeout(()=>{
-    document.getElementById('cardConfirm').innerHTML=`<div class="confirm-icon vino"><i class="fa-solid fa-right-from-bracket"></i></div><h3>¿Cerrar sesión?</h3><p>Volverás al login</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-vino" id="btnYes2">Sí, cerrar</button></div>`;
-    document.getElementById('btnYes2').onclick=()=>{
-      localStorage.removeItem('santillos_rep_login');
-      localStorage.removeItem('santillos_rep_user');
-      window.location.href='login';
-    }
-  },50);
+  const overlay=document.getElementById('overlayConfirm');
+  const card=document.getElementById('cardConfirm');
+  card.innerHTML=`<div class="confirm-icon vino"><i class="fa-solid fa-right-from-bracket"></i></div><h3>¿Cerrar sesión?</h3><p>Volverás al login</p><div class="confirm-actions"><button class="btn-confirm cancel" onclick="cerrarConfirm()">Cancelar</button><button class="btn-confirm yes-vino" id="btnYes2">Sí, cerrar</button></div>`;
+  overlay.classList.add('show');
+  document.getElementById('btnYes2').onclick=()=>{ localStorage.clear(); window.location.href='login'; };
 }
 window.cerrarModal=function(){ document.getElementById('modalDetalles').classList.remove('show'); }
-
 window.verDetalles=function(id){
   const p=cache.find(x=>x.firebaseId===id); if(!p) return;
   const productos = p.productos ? (Array.isArray(p.productos)?p.productos:Object.values(p.productos)) : [];
-  let html = productos.map(pr=>{
-    const nombre = pr.nombre||'Producto';
-    const cant = pr.cant||pr.cantidad||1;
-    const precio = pr.precio||0;
-    return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px"><span>${cant}x ${nombre}</span><b>$${Number(precio)*Number(cant)}</b></div>`;
-  }).join('') || '<div style="font-size:12px;color:#888">Sin productos</div>';
-  html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-weight:800;font-size:13px"><span>Total</span><span>$${p.total||0}</span></div>
-  <div style="margin-top:12px;font-size:11px;color:#666"><b>Cliente:</b> ${p.cliente?.nombre||''}<br><b>Dir:</b> ${p.cliente?.direccion||p.direccion||''}<br><b>Ref:</b> ${p.cliente?.referencia||''}</div>`;
-  document.getElementById('bodyDetalles').innerHTML=html;
-  document.getElementById('modalDetalles').classList.add('show');
+  let html = productos.map(pr=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:12px"><span>${pr.cant||pr.cantidad||1}x ${pr.nombre}</span><b>$${Number(pr.precio||0)*Number(pr.cant||pr.cantidad||1)}</b></div>`).join('') || '<div style="font-size:12px;color:#888">Sin productos</div>';
+  html+=`<div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-weight:800;font-size:13px"><span>Total</span><span>$${p.total||0}</span></div><div style="margin-top:12px;font-size:11px;color:#666"><b>Cliente:</b> ${p.cliente?.nombre||''}<br><b>Dir:</b> ${p.cliente?.direccion||p.direccion||''}</div>`;
+  document.getElementById('bodyDetalles').innerHTML=html; document.getElementById('modalDetalles').classList.add('show');
 }
-
-window.toggleExpand=function(id){
-  if(expandidos.has(id)) expandidos.delete(id); else expandidos.add(id);
-  render();
-}
+window.toggleExpand=function(id){ if(expandidos.has(id)) expandidos.delete(id); else expandidos.add(id); render(); }
 
 function render(){
   const c=document.getElementById('lista');
-  if(cache.length===0){ c.innerHTML=`<div class="empty"><i class="fa-solid fa-motorcycle" style="font-size:28px;margin-bottom:8px;display:block;color:#5c0f2a"></i>No tienes pedidos en camino<br><small>Cuando admin ponga Está listo te llega aquí</small></div>`; return; }
+  if(cache.length===0){ c.innerHTML=`<div class="empty"><i class="fa-solid fa-motorcycle" style="font-size:28px;margin-bottom:8px;display:block;color:#5c0f2a"></i>No tienes pedidos<br><small>Cuando admin ponga Está listo te llega aquí</small></div>`; return; }
   c.innerHTML=cache.map(p=>{
     const numero = p.numero || `ST-${String(p.correlativo||0).padStart(4,'0')}`;
     const idShort = numero.replace('ST-','');
@@ -275,86 +325,47 @@ function render(){
     const expandido = expandidos.has(p.firebaseId);
 
     if(!expandido){
-      return `
-      <div class="card ${esNuevo?'nuevo':''}">
-        <div class="card-head">
-          <div class="pedido-badge">Pedido #${idShort}</div>
-          <div class="meta-head"><span><i class="fa-regular fa-clock"></i> ${hace}</span><div class="sep"></div><span><i class="fa-solid fa-location-dot"></i> ${distancia}</span></div>
-        </div>
-        <div class="client-box">
-          <div class="client-icon"><i class="fa-solid fa-user"></i></div>
-          <div class="client-info"><small>Cliente</small><b>${nombre}</b><span><i class="fa-solid fa-phone"></i> ${tel}</span></div>
-          <button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i></button>
-        </div>
-        <div class="actions">
-          <button class="btn btn-outline" onclick="verDetalles('${p.firebaseId}')"><i class="fa-solid fa-eye"></i> Detalles</button>
-          <button class="btn btn-green" onclick="toggleExpand('${p.firebaseId}')"><i class="fa-solid fa-hand"></i> Lo tengo</button>
-        </div>
-        <div class="collapsed-hint">Toca "Lo tengo" para ver ruta y entregar</div>
-      </div>`;
+      return `<div class="card ${esNuevo?'nuevo':''}"><div class="card-head"><div class="pedido-badge">Pedido #${idShort}</div><div class="meta-head"><span><i class="fa-regular fa-clock"></i> ${hace}</span><div class="sep"></div><span><i class="fa-solid fa-location-dot"></i> ${distancia}</span></div></div><div class="client-box"><div class="client-icon"><i class="fa-solid fa-user"></i></div><div class="client-info"><small>Cliente</small><b>${nombre}</b><span><i class="fa-solid fa-phone"></i> ${tel}</span></div><button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i></button></div><div class="actions"><button class="btn btn-outline" onclick="verDetalles('${p.firebaseId}')"><i class="fa-solid fa-eye"></i> Detalles</button><button class="btn btn-green" onclick="toggleExpand('${p.firebaseId}')"><i class="fa-solid fa-hand"></i> Lo tengo</button></div></div>`;
     }
-
-    let prodHtml = productos.map(pr=>{
-      const img = pr.img || pr.imagen || 'https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=200';
-      return `<div class="prod-item"><img class="prod-img" src="${img}"><div class="prod-name">${pr.nombre}</div><div class="prod-qty">x${pr.cant||pr.cantidad||1}</div></div>`;
-    }).join('');
-
-    return `
-    <div class="card ${esNuevo?'nuevo':''}">
-      <div class="card-head">
-        <div class="pedido-badge">Pedido #${idShort}</div>
-        <div class="meta-head"><span><i class="fa-regular fa-clock"></i> ${hace}</span><div class="sep"></div><span><i class="fa-solid fa-location-dot"></i> ${distancia}</span></div>
-      </div>
-      <div class="client-box">
-        <div class="client-icon"><i class="fa-solid fa-user"></i></div>
-        <div class="client-info"><small>Cliente</small><b>${nombre}</b><span><i class="fa-solid fa-phone"></i> ${tel}</span></div>
-        <button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i></button>
-      </div>
-      <div class="section-title"><h3>Productos del pedido</h3><div class="count-pill"><i class="fa-solid fa-utensils"></i> ${productos.length} prod</div></div>
-      <div class="prod-list">${prodHtml}</div>
-      <div class="info-grid">
-        <div class="info-col"><div class="icon"><i class="fa-solid fa-dollar-sign"></i></div><small>Valor servicio</small><b>$${valorServicio}</b></div>
-        <div class="info-col"><div class="icon"><i class="fa-regular fa-clock"></i></div><small>Llegada</small><b>${tiempo}</b></div>
-        <div class="info-col"><div class="icon"><i class="fa-solid fa-route"></i></div><small>Distancia</small><b>${distancia}</b></div>
-      </div>
-      <div class="addr-box">
-        <i class="fa-solid fa-location-dot addr-icon"></i>
-        <div class="addr-text"><b>Dirección</b><p>${dir}</p></div>
-        <div class="map-link" onclick="abrirMapa('${dir}', ${cliente.lat||''}, ${cliente.lng||''})"><i class="fa-solid fa-map"></i> Mapa <i class="fa-solid fa-chevron-right"></i></div>
-      </div>
-      <div class="actions full">
-        <button class="btn btn-yellow" onclick="cambiarEstado('${p.firebaseId}','en_camino')"><i class="fa-solid fa-motorcycle"></i> En camino</button>
-        <button class="btn btn-vino" onclick="cambiarEstado('${p.firebaseId}','entregado')"><i class="fa-solid fa-check"></i> Entregado</button>
-        <button class="btn btn-outline" onclick="cambiarEstado('${p.firebaseId}','cancelado')"><i class="fa-solid fa-ban"></i> Cancelar</button>
-      </div>
-    </div>`;
+    let prodHtml = productos.map(pr=>`<div class="prod-item"><img class="prod-img" src="${pr.img||pr.imagen||'https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=200'}"><div class="prod-name">${pr.nombre}</div><div class="prod-qty">x${pr.cant||pr.cantidad||1}</div></div>`).join('');
+    return `<div class="card ${esNuevo?'nuevo':''}"><div class="card-head"><div class="pedido-badge">Pedido #${idShort}</div><div class="meta-head"><span><i class="fa-regular fa-clock"></i> ${hace}</span><div class="sep"></div><span><i class="fa-solid fa-location-dot"></i> ${distancia}</span></div></div><div class="client-box"><div class="client-icon"><i class="fa-solid fa-user"></i></div><div class="client-info"><small>Cliente</small><b>${nombre}</b><span><i class="fa-solid fa-phone"></i> ${tel}</span></div><button class="btn-call" onclick="window.open('tel:${tel}')"><i class="fa-solid fa-phone"></i></button></div><div class="section-title"><h3>Productos</h3><div class="count-pill"><i class="fa-solid fa-utensils"></i> ${productos.length} prod</div></div><div class="prod-list">${prodHtml}</div><div class="info-grid"><div class="info-col"><div class="icon"><i class="fa-solid fa-dollar-sign"></i></div><small>Valor servicio</small><b>$${valorServicio}</b></div><div class="info-col"><div class="icon"><i class="fa-regular fa-clock"></i></div><small>Llegada</small><b>${tiempo}</b></div><div class="info-col"><div class="icon"><i class="fa-solid fa-route"></i></div><small>Distancia</small><b>${distancia}</b></div></div><div class="addr-box"><i class="fa-solid fa-location-dot addr-icon"></i><div class="addr-text"><b>Dirección</b><p>${dir}</p></div><div class="map-link" onclick="abrirMapa('${dir}', ${cliente.lat||''}, ${cliente.lng||''})"><i class="fa-solid fa-map"></i> Mapa</div></div><div class="actions full"><button class="btn btn-yellow" onclick="cambiarEstado('${p.firebaseId}','en_camino')"><i class="fa-solid fa-motorcycle"></i> En camino</button><button class="btn btn-vino" onclick="cambiarEstado('${p.firebaseId}','entregado')"><i class="fa-solid fa-check"></i> Entregado</button><button class="btn btn-outline" onclick="cambiarEstado('${p.firebaseId}','cancelado')"><i class="fa-solid fa-ban"></i> Cancelar</button></div></div>`;
   }).join('');
 }
 
-window.abrirMapa=function(dir, lat, lng){
-  if(lat && lng) window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank');
-  else window.open(`https://www.google.com/maps/search/${encodeURIComponent(dir)}`,'_blank');
-}
+window.abrirMapa=function(dir, lat, lng){ if(lat && lng) window.open(`https://www.google.com/maps?q=${lat},${lng}`,'_blank'); else window.open(`https://www.google.com/maps/search/${encodeURIComponent(dir)}`,'_blank'); }
 
 window.cambiarEstado=function(id, estado){
-  if(estado==='en_camino' && !expandidos.has(id)) expandidos.add(id);
-  
+  if(estado==='cancelado'){
+    abrirMotivos(id); return;
+  }
   mostrarConfirm(estado, async ()=>{
-    if(estado==='entregado' || estado==='cancelado'){
-      cache = cache.filter(x=>x.firebaseId!==id);
-      expandidos.delete(id);
-      nuevos.delete(id);
-      render();
-    }
-    try{
-      await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado, actualizadoEn: Date.now()});
-      await dbPedidos.ref('pedidos/'+id).update({estado, actualizadoEn: Date.now(), repartidor: localStorage.getItem('santillos_rep_user')||'repa'});
-      mostrarToast(estado);
-      if(estado==='entregado' || estado==='cancelado'){
-        setTimeout(async()=>{ await dbRepartidor.ref('pedidos_en_camino/'+id).remove(); },800);
-      }
-    }catch(e){ 
-      console.log(e);
+    let pedido=cache.find(x=>x.firebaseId===id);
+    if(estado==='entregado'){
+      cache=cache.filter(x=>x.firebaseId!==id); expandidos.delete(id); nuevos.delete(id); render();
+      let ip = ipCliente || pedido?.ip || '';
+      try{ ip = await obtenerIP() || ip; }catch(e){}
+      let dataHistorial={
+        ...pedido,
+        estado:'entregado',
+        fechaEntrega: Date.now(),
+        ipCliente: ip,
+        repartidor: localStorage.getItem('santillos_rep_user')||'repa',
+        telefono: pedido?.cliente?.telefono || pedido?.telefono || '',
+        nombreCliente: pedido?.cliente?.nombre || ''
+      };
+      try{
+        await dbHistorial.ref('historial_entregados/'+id).set(dataHistorial);
+        await dbHistorial.ref('historial_general/'+id).set({...dataHistorial, tipo:'entregado'});
+        await dbRepartidor.ref('pedidos_en_camino/'+id).remove();
+        await dbPedidos.ref('pedidos/'+id).update({estado:'entregado', fechaEntrega:Date.now()});
+        mostrarToast('entregado');
+      }catch(e){ console.log(e); }
+    }else if(estado==='en_camino'){
+      try{
+        await dbRepartidor.ref('pedidos_en_camino/'+id).update({estado, actualizadoEn: Date.now()});
+        await dbPedidos.ref('pedidos/'+id).update({estado, actualizadoEn: Date.now()});
+        mostrarToast('en_camino');
+      }catch(e){}
     }
   });
 }
